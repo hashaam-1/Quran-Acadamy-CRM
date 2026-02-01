@@ -146,6 +146,7 @@ exports.createTeacher = async (req, res) => {
       email,
       phone,
       password: hashedPassword,
+      plainPassword: temporaryPassword,
       userId,
       title: title || 'Ustaz',
       specialization: specialization || ['Qaida'],
