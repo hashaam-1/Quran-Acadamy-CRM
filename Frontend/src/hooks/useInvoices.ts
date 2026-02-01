@@ -6,14 +6,20 @@ import { toast } from 'sonner';
 export const useInvoices = () => {
   return useQuery({
     queryKey: ['invoices'],
-    queryFn: invoicesApi.getAll,
+    queryFn: async () => {
+      const data = await invoicesApi.getAll();
+      return Array.isArray(data) ? data : [];
+    },
   });
 };
 
 export const useInvoicesByStudent = (studentId: string) => {
   return useQuery({
     queryKey: ['invoices', 'student', studentId],
-    queryFn: () => invoicesApi.getByStudent(studentId),
+    queryFn: async () => {
+      const data = await invoicesApi.getByStudent(studentId);
+      return Array.isArray(data) ? data : [];
+    },
     enabled: !!studentId,
   });
 };

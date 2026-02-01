@@ -6,14 +6,20 @@ import { toast } from 'sonner';
 export const useSchedules = () => {
   return useQuery({
     queryKey: ['schedules'],
-    queryFn: schedulesApi.getAll,
+    queryFn: async () => {
+      const data = await schedulesApi.getAll();
+      return Array.isArray(data) ? data : [];
+    },
   });
 };
 
 export const useSchedulesByDay = (day: string) => {
   return useQuery({
     queryKey: ['schedules', 'day', day],
-    queryFn: () => schedulesApi.getByDay(day),
+    queryFn: async () => {
+      const data = await schedulesApi.getByDay(day);
+      return Array.isArray(data) ? data : [];
+    },
     enabled: !!day,
   });
 };
@@ -21,7 +27,10 @@ export const useSchedulesByDay = (day: string) => {
 export const useSchedulesByTeacher = (teacherId: string) => {
   return useQuery({
     queryKey: ['schedules', 'teacher', teacherId],
-    queryFn: () => schedulesApi.getByTeacher(teacherId),
+    queryFn: async () => {
+      const data = await schedulesApi.getByTeacher(teacherId);
+      return Array.isArray(data) ? data : [];
+    },
     enabled: !!teacherId,
   });
 };

@@ -9,9 +9,11 @@ export const useLeads = () => {
     queryFn: async () => {
       console.log('Fetching leads from API...');
       const data = await leadsApi.getAll();
-      console.log('Leads fetched:', data?.length || 0, 'leads');
-      console.log('First lead sample:', data?.[0]);
-      return data;
+      // Ensure data is always an array
+      const leads = Array.isArray(data) ? data : [];
+      console.log('Leads fetched:', leads.length, 'leads');
+      console.log('First lead sample:', leads[0]);
+      return leads;
     },
   });
 };

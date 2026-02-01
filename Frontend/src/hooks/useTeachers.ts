@@ -6,7 +6,10 @@ import { toast } from 'sonner';
 export const useTeachers = () => {
   return useQuery({
     queryKey: ['teachers'],
-    queryFn: teachersApi.getAll,
+    queryFn: async () => {
+      const data = await teachersApi.getAll();
+      return Array.isArray(data) ? data : [];
+    },
   });
 };
 

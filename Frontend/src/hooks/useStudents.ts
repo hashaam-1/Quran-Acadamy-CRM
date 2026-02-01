@@ -6,7 +6,10 @@ import { toast } from 'sonner';
 export const useStudents = () => {
   return useQuery({
     queryKey: ['students'],
-    queryFn: studentsApi.getAll,
+    queryFn: async () => {
+      const data = await studentsApi.getAll();
+      return Array.isArray(data) ? data : [];
+    },
   });
 };
 
@@ -21,7 +24,10 @@ export const useStudentById = (id: string) => {
 export const useStudentsByTeacher = (teacherId: string) => {
   return useQuery({
     queryKey: ['students', 'teacher', teacherId],
-    queryFn: () => studentsApi.getByTeacher(teacherId),
+    queryFn: async () => {
+      const data = await studentsApi.getByTeacher(teacherId);
+      return Array.isArray(data) ? data : [];
+    },
     enabled: !!teacherId,
   });
 };
