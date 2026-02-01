@@ -3,13 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   UserPlus, 
   Mail, 
@@ -44,6 +39,7 @@ interface UserFormData {
   email: string;
   phone: string;
   userType: UserType | "";
+  title?: string;
 }
 
 interface GeneratedCredentials {
@@ -113,6 +109,7 @@ export function CreateUserDialog() {
     email: "",
     phone: "",
     userType: "",
+    title: "Ustaz",
   });
   const [credentials, setCredentials] = useState<GeneratedCredentials | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -205,7 +202,7 @@ export function CreateUserDialog() {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        title: 'Ustaz',
+        title: formData.title || 'Ustaz',
         specialization: ['Qaida'],
         students: 0,
         rating: 4.5,
@@ -494,6 +491,31 @@ export function CreateUserDialog() {
                   onChange={(e) => handleInputChange("phone", e.target.value)}
                 />
               </div>
+
+              {/* Title field for teachers */}
+              {formData.userType === 'teacher' && (
+                <div className="space-y-2">
+                  <Label htmlFor="title" className="flex items-center gap-2">
+                    <Award className="h-4 w-4 text-muted-foreground" />
+                    Title
+                  </Label>
+                  <Select value={formData.title} onValueChange={(v) => handleInputChange("title", v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select title" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Ustaz">Ustaz (Male)</SelectItem>
+                      <SelectItem value="Ustaza">Ustaza (Female)</SelectItem>
+                      <SelectItem value="Hafiz">Hafiz (Male)</SelectItem>
+                      <SelectItem value="Hafiza">Hafiza (Female)</SelectItem>
+                      <SelectItem value="Qari">Qari (Male)</SelectItem>
+                      <SelectItem value="Qaria">Qaria (Female)</SelectItem>
+                      <SelectItem value="Sheikh">Sheikh (Male)</SelectItem>
+                      <SelectItem value="Sheikha">Sheikha (Female)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             <Button 
