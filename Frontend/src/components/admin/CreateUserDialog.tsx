@@ -221,14 +221,15 @@ export function CreateUserDialog() {
           // Invalidate teachers cache to refresh the list
           queryClient.invalidateQueries({ queryKey: ['teachers'] });
           
-          const generatedPassword = response.plainPassword || generatePassword();
-          console.log('Setting credentials for teacher:', { userId: formData.email, password: generatedPassword });
+          const generatedPassword = response.plainPassword;
+          console.log('Setting credentials for teacher (backend only):', { userId: formData.email, password: generatedPassword });
           setCredentials({ 
             userId: formData.email, 
             password: generatedPassword 
           });
           console.log('Setting step to credentials for teacher');
           setStep("credentials");
+          console.log('Current state after setting step:', { step: 'credentials', credentials: { userId: formData.email, password: generatedPassword } });
           if (response.emailSent) {
             setSentStatus({ email: true, sms: false });
           }
@@ -253,8 +254,9 @@ export function CreateUserDialog() {
           
           // Close dialog after showing credentials
           setTimeout(() => {
+            console.log('Auto-closing teacher credentials dialog after 10 seconds');
             handleClose();
-          }, 3000);
+          }, 10000);
         }
       });
     }
