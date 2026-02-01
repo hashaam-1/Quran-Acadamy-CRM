@@ -81,7 +81,9 @@ exports.teacherLogin = async (req, res) => {
 // Get all teachers
 exports.getTeachers = async (req, res) => {
   try {
-    const teachers = await Teacher.find().sort({ createdAt: -1 });
+    const teachers = await Teacher.find()
+      .select('-password +plainPassword')
+      .sort({ createdAt: -1 });
     
     // Map _id to id for frontend compatibility
     const mappedTeachers = teachers.map(teacher => ({
@@ -99,7 +101,8 @@ exports.getTeachers = async (req, res) => {
 // Get single teacher
 exports.getTeacherById = async (req, res) => {
   try {
-    const teacher = await Teacher.findById(req.params.id);
+    const teacher = await Teacher.findById(req.params.id)
+      .select('-password +plainPassword');
     if (!teacher) {
       return res.status(404).json({ message: 'Teacher not found' });
     }
