@@ -41,7 +41,8 @@ export const useAttendance = (params?: { date?: string; studentId?: string; teac
       if (params?.userType) queryParams.append('userType', params.userType);
       
       const response = await api.get(`/attendance?${queryParams.toString()}`);
-      return response.data;
+      const data = response.data;
+      return Array.isArray(data) ? data : [];
     },
   });
 };
@@ -56,7 +57,8 @@ export const useStudentsForAttendance = (teacherId: string, date?: string) => {
       if (date) queryParams.append('date', date);
       
       const response = await api.get(`/attendance/students?${queryParams.toString()}`);
-      return response.data;
+      const data = response.data;
+      return Array.isArray(data) ? data : [];
     },
     enabled: !!teacherId,
   });
@@ -68,7 +70,8 @@ export const useScheduledClasses = (teacherId: string) => {
     queryKey: ['attendance', 'scheduled', teacherId],
     queryFn: async () => {
       const response = await api.get(`/attendance/scheduled/${teacherId}`);
-      return response.data;
+      const data = response.data;
+      return Array.isArray(data) ? data : [];
     },
     enabled: !!teacherId,
   });
@@ -83,7 +86,8 @@ export const useScheduleAttendanceSummary = (teacherId: string, date?: string) =
       if (date) queryParams.append('date', date);
       
       const response = await api.get(`/attendance/schedule-summary/${teacherId}?${queryParams.toString()}`);
-      return response.data;
+      const data = response.data;
+      return Array.isArray(data) ? data : [];
     },
     enabled: !!teacherId,
   });

@@ -6,7 +6,10 @@ import { toast } from 'sonner';
 export const useTeamMembers = () => {
   return useQuery({
     queryKey: ['teamMembers'],
-    queryFn: teamMembersApi.getAll,
+    queryFn: async () => {
+      const data = await teamMembersApi.getAll();
+      return Array.isArray(data) ? data : [];
+    },
   });
 };
 

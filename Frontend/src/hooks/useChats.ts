@@ -43,7 +43,8 @@ export const useChats = (userId: string, role: string) => {
     queryKey: ['chats', userId, role],
     queryFn: async () => {
       const response = await api.get(`/chats?userId=${userId}&role=${role}`);
-      return response.data as Chat[];
+      const data = response.data;
+      return Array.isArray(data) ? data : [];
     },
     enabled: !!userId && !!role,
   });
