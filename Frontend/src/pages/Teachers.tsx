@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Search, Star, Users, Clock, Calendar, Phone, MessageSquare, Award, CheckCircle, Pencil, Trash2 } from "lucide-react";
+import { Search, Star, Users, Clock, Calendar, Phone, MessageSquare, Award, CheckCircle, Pencil, Trash2, Key, Eye, EyeOff, Mail } from "lucide-react";
 import { Teacher } from "@/lib/store";
 import { useTeachers, useUpdateTeacher, useDeleteTeacher } from "@/hooks/useTeachers";
 import { toast } from "sonner";
@@ -35,8 +35,21 @@ export default function Teachers() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [current, setCurrent] = useState<Teacher | null>(null);
   const [formData, setFormData] = useState(emptyTeacher);
+  const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
 
   const filtered = teachers.filter((t) => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  const togglePasswordVisibility = (teacherId: string) => {
+    setVisiblePasswords(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(teacherId)) {
+        newSet.delete(teacherId);
+      } else {
+        newSet.add(teacherId);
+      }
+      return newSet;
+    });
+  };
 
   if (isLoading) {
     return (
@@ -111,6 +124,36 @@ export default function Teachers() {
                     </div>
                   </div>
                   <div className="p-4 space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Mail className="h-4 w-4" />
+                        <span className="truncate">{teacher.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Phone className="h-4 w-4" />
+                        <span>{teacher.phone}</span>
+                      </div>
+                      {(teacher as any).plainPassword && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Key className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-mono text-xs">
+                            {visiblePasswords.has(teacher.id) ? (teacher as any).plainPassword : '••••••••'}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 ml-auto"
+                            onClick={() => togglePasswordVisibility(teacher.id)}
+                          >
+                            {visiblePasswords.has(teacher.id) ? (
+                              <EyeOff className="h-3 w-3" />
+                            ) : (
+                              <Eye className="h-3 w-3" />
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex flex-wrap gap-2">{teacher.specialization.map((spec) => (<Badge key={spec} variant="outline" className="text-xs">{spec}</Badge>))}</div>
                     <div className="grid grid-cols-3 gap-3 text-center">
                       <div className="p-2 rounded-lg bg-muted/50"><p className="text-lg font-bold">{teacher.students}</p><p className="text-xs text-muted-foreground">Students</p></div>
