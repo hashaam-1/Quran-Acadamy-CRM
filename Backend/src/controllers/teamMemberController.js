@@ -14,7 +14,7 @@ exports.getTeamMembers = async (req, res) => {
 };
 
 // Get single team member
-module.exports. getTeamMemberById = async (req, res) => {
+exports.getTeamMemberById = async (req, res) => {
   try {
     const member = await TeamMember.findById(req.params.id);
     if (!member) {
@@ -27,7 +27,7 @@ module.exports. getTeamMemberById = async (req, res) => {
 };
 
 // Create team member with email notification
-module.exports. createTeamMember = async (req, res) => {
+exports.createTeamMember = async (req, res) => {
   try {
     const { name, email, phone, role, password } = req.body;
     
@@ -101,7 +101,7 @@ module.exports. createTeamMember = async (req, res) => {
 };
 
 // Update team member
-module.exports. updateTeamMember = async (req, res) => {
+exports.updateTeamMember = async (req, res) => {
   try {
     const member = await TeamMember.findByIdAndUpdate(
       req.params.id,
@@ -118,7 +118,7 @@ module.exports. updateTeamMember = async (req, res) => {
 };
 
 // Delete team member
-module.exports. deleteTeamMember = async (req, res) => {
+exports.deleteTeamMember = async (req, res) => {
   try {
     const member = await TeamMember.findByIdAndDelete(req.params.id);
     if (!member) {
@@ -131,7 +131,7 @@ module.exports. deleteTeamMember = async (req, res) => {
 };
 
 // Resend credentials to team member
-module.exports. resendCredentials = async (req, res) => {
+exports.resendCredentials = async (req, res) => {
   try {
     const member = await TeamMember.findById(req.params.id);
     if (!member) {
@@ -167,7 +167,7 @@ module.exports. resendCredentials = async (req, res) => {
 };
 
 // Team member login
-module.exports. teamMemberLogin = async (req, res) => {
+exports.teamMemberLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     
@@ -224,7 +224,7 @@ module.exports. teamMemberLogin = async (req, res) => {
 };
 
 // Get team statistics
-module.exports. getTeamStats = async (req, res) => {
+exports.getTeamStats = async (req, res) => {
   try {
     const total = await TeamMember.countDocuments();
     const active = await TeamMember.countDocuments({ status: 'active' });
