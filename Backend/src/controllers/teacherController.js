@@ -119,7 +119,18 @@ exports.getTeacherById = async (req, res) => {
 // Create teacher with email notification
 exports.createTeacher = async (req, res) => {
   try {
-    const { name, email, phone, password } = req.body;
+    const { 
+      name, 
+      email, 
+      phone, 
+      password, 
+      title, 
+      specialization, 
+      status, 
+      performance, 
+      rating,
+      joinedAt 
+    } = req.body;
     
     const userId = email;
     const temporaryPassword = password || generatePassword(12);
@@ -132,12 +143,15 @@ exports.createTeacher = async (req, res) => {
       phone,
       password: hashedPassword,
       userId,
-      status: 'available',
-      performance: 95,
-      rating: 4.8,
+      title: title || 'Ustaz',
+      specialization: specialization || ['Qaida'],
+      status: status || 'available',
+      performance: performance || 95,
+      rating: rating || 4.8,
       students: 0,
       classesCompleted: 0,
       classesToday: 0,
+      joinedAt: joinedAt || new Date().toISOString().split('T')[0],
       availability: ['morning', 'afternoon'],
       schedule: [],
     });
