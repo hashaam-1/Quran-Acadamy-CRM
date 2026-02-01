@@ -2,7 +2,7 @@ const Teacher = require('../models/Teacher.js');
 const Student = require('../models/Student.js');
 const Attendance = require('../models/Attendance.js');
 const bcrypt = require('bcryptjs');
-const { emailTemplates } = require('../config/email.js');
+const { sendEmail, emailTemplates } = require('../config/email.js');
 const { generatePassword } = require('../utils/passwordGenerator.js');
 
 // Teacher login
