@@ -35,6 +35,7 @@ import { useCreateTeamMember } from "@/hooks/useTeamMembers";
 import { useCreateTeacher } from "@/hooks/useTeachers";
 import { useCreateChat, useSendMessage } from "@/hooks/useChats";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 type UserType = "sales_team" | "team_leader" | "teacher";
 
@@ -106,6 +107,7 @@ export function CreateUserDialog() {
   const sendMessageMutation = useSendMessage();
   const { currentUser } = useAuthStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState<UserFormData>({
     name: "",
     email: "",
@@ -216,11 +218,16 @@ export function CreateUserDialog() {
       console.log('Creating teacher with data:', teacherData);
       createTeacher.mutate(teacherData as any, {
         onSuccess: (response: any) => {
+          // Invalidate teachers cache to refresh the list
+          queryClient.invalidateQueries({ queryKey: ['teachers'] });
+          
           const generatedPassword = response.plainPassword || generatePassword();
+          console.log('Setting credentials for teacher:', { userId: formData.email, password: generatedPassword });
           setCredentials({ 
             userId: formData.email, 
             password: generatedPassword 
           });
+          console.log('Setting step to credentials for teacher');
           setStep("credentials");
           if (response.emailSent) {
             setSentStatus({ email: true, sms: false });
