@@ -92,6 +92,7 @@ exports.getTeachers = async (req, res) => {
     }));
     
     console.log(`Fetching teachers: Found ${mappedTeachers.length} teachers`);
+    console.log('Teacher data sample:', mappedTeachers[0]);
     res.json(mappedTeachers);
   } catch (error) {
     res.status(500).json({ message: error.message });

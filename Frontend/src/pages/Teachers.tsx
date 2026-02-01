@@ -37,6 +37,7 @@ export default function Teachers() {
   const [formData, setFormData] = useState(emptyTeacher);
   const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
 
+  console.log('Teachers data from API:', teachers);
   const filtered = teachers.filter((t) => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const togglePasswordVisibility = (teacherId: string) => {
@@ -133,6 +134,10 @@ export default function Teachers() {
                         <Phone className="h-4 w-4" />
                         <span>{teacher.phone}</span>
                       </div>
+                      {(() => {
+                        console.log('Teacher password check:', { teacherId: teacher.id, hasPlainPassword: !!(teacher as any).plainPassword, plainPassword: (teacher as any).plainPassword });
+                        return null;
+                      })()}
                       {(teacher as any).plainPassword && (
                         <div className="flex items-center gap-2 text-sm">
                           <Key className="h-4 w-4 text-muted-foreground" />
