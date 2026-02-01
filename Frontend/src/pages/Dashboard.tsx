@@ -47,17 +47,26 @@ import {
 
 export default function Dashboard() {
   const { currentUser } = useAuthStore();
-  const { data: leads = [], isLoading: leadsLoading } = useLeads();
-  const { data: students = [], isLoading: studentsLoading } = useStudents();
-  const { data: teachers = [], isLoading: teachersLoading } = useTeachers();
-  const { data: invoices = [], isLoading: invoicesLoading } = useInvoices();
-  const { data: schedules = [], isLoading: schedulesLoading } = useSchedules();
+  const { data: leadsData = [], isLoading: leadsLoading } = useLeads();
+  const { data: studentsData = [], isLoading: studentsLoading } = useStudents();
+  const { data: teachersData = [], isLoading: teachersLoading } = useTeachers();
+  const { data: invoicesData = [], isLoading: invoicesLoading } = useInvoices();
+  const { data: schedulesData = [], isLoading: schedulesLoading } = useSchedules();
+  
+  // Ensure all data is an array (safety check for API errors)
+  const leads = Array.isArray(leadsData) ? leadsData : [];
+  const students = Array.isArray(studentsData) ? studentsData : [];
+  const teachers = Array.isArray(teachersData) ? teachersData : [];
+  const invoices = Array.isArray(invoicesData) ? invoicesData : [];
+  const schedules = Array.isArray(schedulesData) ? schedulesData : [];
   
   // Student-specific hooks - must be called unconditionally at top level
   const studentId = currentUser?.id || (currentUser as any)?._id || (currentUser as any)?.studentId || '';
-  const { data: progressRecords = [] } = useProgressByStudent(studentId || '');
-  const { data: homeworkList = [] } = useHomeworkByStudent(studentId || '');
+  const { data: progressRecordsData = [] } = useProgressByStudent(studentId || '');
+  const { data: homeworkListData = [] } = useHomeworkByStudent(studentId || '');
 
+  const progressRecords = Array.isArray(progressRecordsData) ? progressRecordsData : [];
+  const homeworkList = Array.isArray(homeworkListData) ? homeworkListData : [];
   const studentProgressData = progressRecords;
 
   const isLoading = leadsLoading || studentsLoading || teachersLoading || invoicesLoading || schedulesLoading;
