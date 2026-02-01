@@ -199,7 +199,7 @@ export function CreateUserDialog() {
         }
       });
     } else if (formData.userType === 'teacher') {
-      createTeacher.mutate({
+      const teacherData = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
@@ -212,7 +212,9 @@ export function CreateUserDialog() {
         status: 'available',
         joinedAt: new Date().toISOString().split('T')[0],
         performance: 85,
-      } as any, {
+      };
+      console.log('Creating teacher with data:', teacherData);
+      createTeacher.mutate(teacherData as any, {
         onSuccess: (response: any) => {
           const generatedPassword = response.plainPassword || generatePassword();
           setCredentials({ 
