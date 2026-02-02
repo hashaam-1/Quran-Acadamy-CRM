@@ -21,7 +21,8 @@ import {
   Key,
   MessageSquare,
   Eye,
-  EyeOff
+  EyeOff,
+  Award
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
