@@ -247,6 +247,7 @@ exports.resendStudentCredentials = async (req, res) => {
     const emailTemplate = emailTemplates.studentCredentials({
       name: student.name,
       email: student.email,
+      password: student.plainPassword || '(Use password reset if forgotten)',
       loginUrl,
     });
     

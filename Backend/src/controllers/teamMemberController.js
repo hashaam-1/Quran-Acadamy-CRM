@@ -144,7 +144,7 @@ exports.resendCredentials = async (req, res) => {
     const emailTemplate = emailTemplates.teamMemberCredentials({
       name: member.name,
       email: member.email,
-      password: '(Use password reset if forgotten)',
+      password: member.plainPassword || '(Use password reset if forgotten)',
       role: member.role.replace('_', ' ').toUpperCase(),
       loginUrl,
     });

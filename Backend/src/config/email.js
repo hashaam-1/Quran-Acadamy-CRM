@@ -37,7 +37,7 @@ const sendEmail = async ({ to, subject, html }) => {
 // Email templates
 const emailTemplates = {
   // Welcome email for new team members
-  teamMemberCredentials: ({ name, email, role, loginUrl }) => ({
+  teamMemberCredentials: ({ name, email, role, loginUrl, password }) => ({
     subject: 'Welcome to Quran Academy CRM - Your Account Details',
     html: `
       <!DOCTYPE html>
@@ -74,7 +74,7 @@ const emailTemplates = {
               </div>
               <div class="credential-item">
                 <span class="credential-label">Password:</span>
-                <span class="credential-value">(Use password reset if forgotten)</span>
+                <span class="credential-value">${password}</span>
               </div>
               <div class="credential-item">
                 <span class="credential-label">Role:</span>
@@ -114,7 +114,7 @@ const emailTemplates = {
   }),
 
   // Welcome email for new teachers
-  teacherCredentials: ({ name, email, loginUrl }) => ({
+  teacherCredentials: ({ name, email, loginUrl, password }) => ({
     subject: 'Welcome to Quran Academy - Your Teacher Account',
     html: `
       <!DOCTYPE html>
@@ -150,7 +150,7 @@ const emailTemplates = {
               </div>
               <div class="credential-item">
                 <span class="credential-label">Password:</span>
-                <span class="credential-value">(Use password reset if forgotten)</span>
+                <span class="credential-value">${password}</span>
               </div>
             </div>
 
@@ -186,7 +186,7 @@ const emailTemplates = {
     `,
   }),
 
-  studentCredentials: ({ name, email, loginUrl }) => ({
+  studentCredentials: ({ name, email, loginUrl, password }) => ({
     subject: 'Welcome to Quran Academy CRM - Your Account Details',
     html: `
       <!DOCTYPE html>
@@ -223,7 +223,7 @@ const emailTemplates = {
               </div>
               <div class="credential-item">
                 <span class="credential-label">Password:</span>
-                <span class="credential-value">(Use password reset if forgotten)</span>
+                <span class="credential-value">${password}</span>
               </div>
               <div class="credential-item">
                 <span class="credential-label">Role:</span>
