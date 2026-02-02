@@ -7,6 +7,7 @@ const {
   deleteAttendance,
   getAttendanceStats,
   markAttendance,
+  markTeacherAttendance,
   getStudentsForAttendance,
   getAttendanceByStudent,
 } = require('../controllers/attendanceController.js');
@@ -27,6 +28,7 @@ router.get('/schedule-summary/:teacherId', getScheduleAttendanceSummary);
 router.get('/:id', getAttendanceById);
 router.post('/', createAttendance);
 router.post('/mark', markAttendance);
+router.post('/mark-teacher', markTeacherAttendance);
 router.post('/mark-scheduled', markScheduledAttendance);
 router.put('/:id', updateAttendance);
 router.delete('/:id', deleteAttendance);
