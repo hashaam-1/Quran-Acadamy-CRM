@@ -27,11 +27,44 @@ exports.teacherLogin = async (req, res) => {
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
 
-    const existingAttendance = await Attendance.findOne({
+    // First, check for and merge any separate records for today
+    const allTodayRecords = await Attendance.find({
       teacherId: teacher._id,
       userType: 'teacher',
       date: { $gte: today, $lte: endOfDay }
-    });
+    }).sort({ createdAt: 1 });
+
+    let existingAttendance = null;
+
+    if (allTodayRecords.length > 1) {
+      // Merge multiple records into one
+      const mergedRecord = allTodayRecords.reduce((merged, record) => {
+        if (!merged.checkInTime && record.checkInTime) {
+          merged.checkInTime = record.checkInTime;
+        }
+        if (!merged.checkOutTime && record.checkOutTime) {
+          merged.checkOutTime = record.checkOutTime;
+        }
+        return merged;
+      }, allTodayRecords[0]);
+
+      // Delete the extra records
+      for (let i = 1; i < allTodayRecords.length; i++) {
+        await Attendance.findByIdAndDelete(allTodayRecords[i]._id);
+      }
+
+      // Update the merged record
+      await Attendance.findByIdAndUpdate(mergedRecord._id, {
+        checkInTime: mergedRecord.checkInTime,
+        checkOutTime: mergedRecord.checkOutTime,
+        status: 'present'
+      });
+
+      existingAttendance = mergedRecord;
+      console.log(`Merged ${allTodayRecords.length} records for teacher ${teacher.name}`);
+    } else if (allTodayRecords.length === 1) {
+      existingAttendance = allTodayRecords[0];
+    }
 
     const now = new Date();
     const actualTime = now.toLocaleTimeString('en-US', { 
