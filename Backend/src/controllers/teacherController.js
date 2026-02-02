@@ -21,7 +21,7 @@ exports.teacherLogin = async (req, res) => {
       return res.status(401).json({ message: 'Invalid password' });
     }
 
-    // Auto-mark teacher attendance on first login of the day
+    // Auto-mark teacher attendance on login (check-in or check-out)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const endOfDay = new Date();
@@ -33,24 +33,42 @@ exports.teacherLogin = async (req, res) => {
       date: { $gte: today, $lte: endOfDay }
     });
 
-    if (!existingAttendance) {
-      const now = new Date();
+    const now = new Date();
+    const actualTime = now.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit', 
+      hour12: true 
+    });
+
+    if (existingAttendance) {
+      // If attendance already exists, update check-out time if check-in is already set
+      if (existingAttendance.checkInTime && !existingAttendance.checkOutTime) {
+        existingAttendance.checkOutTime = actualTime;
+        existingAttendance.status = 'present';
+        await existingAttendance.save();
+        console.log(`Teacher ${teacher.name} checked out at ${actualTime}`);
+      } 
+      // If no check-in time exists, set it
+      else if (!existingAttendance.checkInTime) {
+        existingAttendance.checkInTime = actualTime;
+        existingAttendance.status = 'present';
+        await existingAttendance.save();
+        console.log(`Teacher ${teacher.name} checked in at ${actualTime}`);
+      }
+      // If both times exist, don't update (already complete)
+    } else {
+      // Create new attendance record for check-in
       const attendance = new Attendance({
         userType: 'teacher',
         teacherId: teacher._id,
         teacherName: teacher.name,
-        date: now,
+        date: today,
         status: 'present',
-        checkInTime: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }),
+        checkInTime: actualTime,
       });
       await attendance.save();
-      console.log(`Teacher ${teacher.name} checked in at ${attendance.checkInTime}`);
-    } else if (!existingAttendance.checkInTime) {
-      // Update check-in time if not set
-      const now = new Date();
-      existingAttendance.checkInTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-      await existingAttendance.save();
-      console.log(`Teacher ${teacher.name} check-in time updated to ${existingAttendance.checkInTime}`);
+      console.log(`Teacher ${teacher.name} new attendance record created, checked in at ${actualTime}`);
     }
 
     const teacherData = {
