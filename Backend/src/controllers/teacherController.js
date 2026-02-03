@@ -28,28 +28,42 @@ exports.teacherLogin = async (req, res) => {
     endOfDay.setHours(23, 59, 59, 999);
 
     // First, check for and merge any separate records for today
+    console.log(`Teacher ${teacher.name} login - searching for attendance records between ${today.toISOString()} and ${endOfDay.toISOString()}`);
+    
     const allTodayRecords = await Attendance.find({
       teacherId: teacher._id,
       userType: 'teacher',
       date: { $gte: today, $lte: endOfDay }
     }).sort({ createdAt: 1 });
 
+    console.log(`Found ${allTodayRecords.length} attendance records for teacher ${teacher.name} today:`);
+    allTodayRecords.forEach((record, index) => {
+      console.log(`Record ${index + 1}: ID=${record._id}, checkIn=${record.checkInTime}, checkOut=${record.checkOutTime}, date=${record.date}`);
+    });
+
     let existingAttendance = null;
 
     if (allTodayRecords.length > 1) {
+      console.log(`Merging ${allTodayRecords.length} records for teacher ${teacher.name}`);
+      
       // Merge multiple records into one
       const mergedRecord = allTodayRecords.reduce((merged, record) => {
         if (!merged.checkInTime && record.checkInTime) {
           merged.checkInTime = record.checkInTime;
+          console.log(`Added checkInTime: ${record.checkInTime}`);
         }
         if (!merged.checkOutTime && record.checkOutTime) {
           merged.checkOutTime = record.checkOutTime;
+          console.log(`Added checkOutTime: ${record.checkOutTime}`);
         }
         return merged;
       }, allTodayRecords[0]);
 
+      console.log(`Final merged record: checkIn=${mergedRecord.checkInTime}, checkOut=${mergedRecord.checkOutTime}`);
+
       // Delete the extra records
       for (let i = 1; i < allTodayRecords.length; i++) {
+        console.log(`Deleting record ${i + 1}: ${allTodayRecords[i]._id}`);
         await Attendance.findByIdAndDelete(allTodayRecords[i]._id);
       }
 
@@ -61,9 +75,12 @@ exports.teacherLogin = async (req, res) => {
       });
 
       existingAttendance = mergedRecord;
-      console.log(`Merged ${allTodayRecords.length} records for teacher ${teacher.name}`);
+      console.log(`Successfully merged ${allTodayRecords.length} records for teacher ${teacher.name}`);
     } else if (allTodayRecords.length === 1) {
       existingAttendance = allTodayRecords[0];
+      console.log(`Using existing single record for teacher ${teacher.name}`);
+    } else {
+      console.log(`No existing records found for teacher ${teacher.name} today`);
     }
 
     const now = new Date();
@@ -75,23 +92,29 @@ exports.teacherLogin = async (req, res) => {
     });
 
     if (existingAttendance) {
+      console.log(`Existing attendance found: checkIn=${existingAttendance.checkInTime}, checkOut=${existingAttendance.checkOutTime}`);
+      
       // If attendance already exists, update check-out time if check-in is already set
       if (existingAttendance.checkInTime && !existingAttendance.checkOutTime) {
         existingAttendance.checkOutTime = actualTime;
         existingAttendance.status = 'present';
         await existingAttendance.save();
-        console.log(`Teacher ${teacher.name} checked out at ${actualTime}`);
+        console.log(`Teacher ${teacher.name} checked out at ${actualTime} (updated existing record)`);
       } 
       // If no check-in time exists, set it
       else if (!existingAttendance.checkInTime) {
         existingAttendance.checkInTime = actualTime;
         existingAttendance.status = 'present';
         await existingAttendance.save();
-        console.log(`Teacher ${teacher.name} checked in at ${actualTime}`);
+        console.log(`Teacher ${teacher.name} checked in at ${actualTime} (updated existing record)`);
       }
       // If both times exist, don't update (already complete)
+      else {
+        console.log(`Teacher ${teacher.name} already has complete attendance (checkIn=${existingAttendance.checkInTime}, checkOut=${existingAttendance.checkOutTime}) - no update needed`);
+      }
     } else {
       // Create new attendance record for check-in
+      console.log(`Creating new attendance record for teacher ${teacher.name}`);
       const attendance = new Attendance({
         userType: 'teacher',
         teacherId: teacher._id,
@@ -101,7 +124,7 @@ exports.teacherLogin = async (req, res) => {
         checkInTime: actualTime,
       });
       await attendance.save();
-      console.log(`Teacher ${teacher.name} new attendance record created, checked in at ${actualTime}`);
+      console.log(`Teacher ${teacher.name} new attendance record created, checked in at ${actualTime}, record ID: ${attendance._id}`);
     }
 
     const teacherData = {

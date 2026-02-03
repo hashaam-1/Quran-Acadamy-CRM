@@ -367,6 +367,86 @@ exports.markTeacherAttendance = async (req, res) => {
   }
 };
 
+// Clean up duplicate teacher attendance records
+exports.cleanupTeacherAttendance = async (req, res) => {
+  try {
+    const { teacherId, date } = req.query;
+    
+    let filter = { userType: 'teacher' };
+    if (teacherId) filter.teacherId = teacherId;
+    
+    if (date) {
+      const startDate = new Date(date);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(date);
+      endDate.setHours(23, 59, 59, 999);
+      filter.date = { $gte: startDate, $lte: endDate };
+    }
+
+    // Get all teacher attendance records
+    const allRecords = await Attendance.find(filter).sort({ teacherId: 1, date: 1, createdAt: 1 });
+    
+    // Group by teacher and date
+    const grouped = {};
+    allRecords.forEach(record => {
+      const key = `${record.teacherId}_${record.date.toDateString()}`;
+      if (!grouped[key]) {
+        grouped[key] = [];
+      }
+      grouped[key].push(record);
+    });
+
+    let totalMerged = 0;
+    let totalDeleted = 0;
+
+    // Process each group
+    for (const [key, records] of Object.entries(grouped)) {
+      if (records.length > 1) {
+        console.log(`Processing group ${key}: ${records.length} records`);
+        
+        // Merge records
+        const merged = records.reduce((acc, record) => {
+          if (!acc.checkInTime && record.checkInTime) {
+            acc.checkInTime = record.checkInTime;
+          }
+          if (!acc.checkOutTime && record.checkOutTime) {
+            acc.checkOutTime = record.checkOutTime;
+          }
+          if (!acc.date) acc.date = record.date;
+          if (!acc.teacherId) acc.teacherId = record.teacherId;
+          if (!acc.teacherName) acc.teacherName = record.teacherName;
+          return acc;
+        }, {});
+
+        // Update the first record
+        await Attendance.findByIdAndUpdate(records[0]._id, {
+          checkInTime: merged.checkInTime,
+          checkOutTime: merged.checkOutTime,
+          status: 'present'
+        });
+
+        // Delete the rest
+        for (let i = 1; i < records.length; i++) {
+          await Attendance.findByIdAndDelete(records[i]._id);
+          totalDeleted++;
+        }
+
+        totalMerged++;
+      }
+    }
+
+    res.json({
+      message: 'Cleanup completed',
+      totalGroups: Object.keys(grouped).length,
+      groupsMerged: totalMerged,
+      recordsDeleted: totalDeleted
+    });
+  } catch (error) {
+    console.error('Error cleaning up teacher attendance:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get attendance by student
 exports.getAttendanceByStudent = async (req, res) => {
   try {

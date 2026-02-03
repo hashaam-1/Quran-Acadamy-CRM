@@ -8,6 +8,7 @@ const {
   getAttendanceStats,
   markAttendance,
   markTeacherAttendance,
+  cleanupTeacherAttendance,
   getStudentsForAttendance,
   getAttendanceByStudent,
 } = require('../controllers/attendanceController.js');
@@ -30,6 +31,7 @@ router.post('/', createAttendance);
 router.post('/mark', markAttendance);
 router.post('/mark-teacher', markTeacherAttendance);
 router.post('/mark-scheduled', markScheduledAttendance);
+router.post('/cleanup-teacher', cleanupTeacherAttendance);
 router.put('/:id', updateAttendance);
 router.delete('/:id', deleteAttendance);
 
