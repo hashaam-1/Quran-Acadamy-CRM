@@ -16,6 +16,15 @@ const createTransporter = () => {
 // Send email function
 const sendEmail = async ({ to, subject, html }) => {
   try {
+    // Validate email configuration
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+      console.error('❌ Email configuration missing! EMAIL_USER or EMAIL_PASSWORD not set.');
+      console.error('Please set these environment variables in Railway dashboard:');
+      console.error('- EMAIL_USER');
+      console.error('- EMAIL_PASSWORD');
+      return { success: false, error: 'Email configuration missing' };
+    }
+
     const transporter = createTransporter();
     
     const mailOptions = {
@@ -25,11 +34,16 @@ const sendEmail = async ({ to, subject, html }) => {
       html,
     };
 
+    console.log(`📧 Sending email to: ${to}`);
+    console.log(`📧 From: ${process.env.EMAIL_USER}`);
+    console.log(`📧 Subject: ${subject}`);
+
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent: %s', info.messageId);
+    console.log('✅ Email sent successfully: %s', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('❌ Error sending email:', error.message);
+    console.error('Full error:', error);
     return { success: false, error: error.message };
   }
 };
