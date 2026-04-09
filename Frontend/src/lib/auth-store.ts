@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 export type UserRole = 'admin' | 'sales_team' | 'team_leader' | 'teacher' | 'student';
 
 export interface User {
@@ -86,7 +88,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     // Auto-checkout teacher on logout
     if (currentUser && currentUser.role === 'teacher') {
       try {
-        const response = await fetch('http://localhost:5000/api/teachers/checkout', {
+        const response = await fetch(`${API_BASE_URL}/teachers/checkout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -105,7 +107,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     // Auto-checkout student on logout
     if (currentUser && currentUser.role === 'student') {
       try {
-        const response = await fetch('http://localhost:5000/api/students/checkout', {
+        const response = await fetch(`${API_BASE_URL}/students/checkout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -162,7 +164,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       // Try student login (404 is expected if not a student)
       try {
-        const studentResponse = await silentFetch(`http://localhost:5000/api/students/login`, {
+        const studentResponse = await silentFetch(`${API_BASE_URL}/students/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -189,7 +191,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           
           // Auto check-in student on login
           try {
-            await fetch('http://localhost:5000/api/attendance/mark', {
+            await fetch(`${API_BASE_URL}/attendance/mark`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
@@ -218,7 +220,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       // Try teacher login (404 is expected if not a teacher)
       try {
-        const teacherResponse = await silentFetch(`http://localhost:5000/api/teachers/login`, {
+        const teacherResponse = await silentFetch(`${API_BASE_URL}/teachers/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -245,7 +247,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           
           // Auto check-in teacher on login
           try {
-            await fetch('http://localhost:5000/api/attendance', {
+            await fetch(`${API_BASE_URL}/attendance`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
@@ -276,7 +278,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       // Try team member login (sales_team, team_leader)
       try {
-        const teamResponse = await fetch(`http://localhost:5000/api/team/login`, {
+        const teamResponse = await fetch(`${API_BASE_URL}/team/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })

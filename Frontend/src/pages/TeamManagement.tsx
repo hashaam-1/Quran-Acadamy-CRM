@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 import {
   Dialog,
   DialogContent,
@@ -150,7 +152,7 @@ export default function TeamManagement() {
     
     try {
       // Call backend API to resend credentials
-      const response = await fetch(`http://localhost:5000/api/team-members/${selectedMember._id || selectedMember.id}/resend-credentials`, {
+      const response = await fetch(`${API_BASE_URL}/team-members/${selectedMember._id || selectedMember.id}/resend-credentials`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });

@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 import {
   Select,
   SelectContent,
@@ -253,7 +255,7 @@ export default function Students() {
     
     try {
       // Call backend API to resend credentials
-      const response = await fetch(`http://localhost:5000/api/students/${(selectedStudent as any)._id || selectedStudent.id}/resend-credentials`, {
+      const response = await fetch(`${API_BASE_URL}/students/${(selectedStudent as any)._id || selectedStudent.id}/resend-credentials`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
