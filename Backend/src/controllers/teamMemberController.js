@@ -168,8 +168,7 @@ exports.resendCredentials = async (req, res) => {
       return res.status(404).json({ message: 'Team member not found' });
     }
     
-    // Send email with credentials (password is hashed, so we can't retrieve it)
-    // In production, you'd generate a reset link instead
+    // Send email with credentials asynchronously (non-blocking)
     const loginUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
     const emailTemplate = emailTemplates.teamMemberCredentials({
       name: member.name,
@@ -179,17 +178,24 @@ exports.resendCredentials = async (req, res) => {
       loginUrl,
     });
     
-    const emailResult = await sendEmail({
+    // Send email asynchronously without blocking the response
+    sendEmail({
       to: member.email,
       subject: 'Your Login Credentials - Quran Academy CRM',
       html: emailTemplate.html,
+    }).then(emailResult => {
+      console.log('Email resent to team member:', emailResult.success ? 'Success' : 'Failed');
+      if (!emailResult.success) {
+        console.error('Email error:', emailResult.error);
+      }
+    }).catch(error => {
+      console.error('Email sending failed:', error);
     });
     
     res.json({
-      success: emailResult.success,
-      message: emailResult.success 
-        ? 'Credentials sent successfully' 
-        : 'Failed to send credentials',
+      success: true,
+      message: 'Credentials will be sent to team member email',
+      email: member.email
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

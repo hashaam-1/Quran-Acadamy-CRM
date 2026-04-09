@@ -1,6 +1,6 @@
 const Student = require('../models/Student.js');
 const bcrypt = require('bcryptjs');
-const { emailTemplates } = require('../config/email.js');
+const { sendEmail, emailTemplates } = require('../config/email.js');
 const { generatePassword } = require('../utils/passwordGenerator.js');
 
 // Student login
@@ -131,7 +131,7 @@ exports.createStudent = async (req, res) => {
     
     const newStudent = await student.save();
     
-    // Send credentials email
+    // Send credentials email asynchronously (non-blocking)
     const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:8080'}/login`;
     const emailTemplate = emailTemplates.studentCredentials({
       name,
@@ -140,13 +140,19 @@ exports.createStudent = async (req, res) => {
       loginUrl,
     });
     
-    try {
-      // Here you would integrate with your email service
-      console.log('Student credentials email:', emailTemplate);
-      // await sendEmail(email, emailTemplate.subject, emailTemplate.html);
-    } catch (emailError) {
-      console.error('Failed to send student credentials email:', emailError);
-    }
+    // Send email asynchronously without blocking the response
+    sendEmail({
+      to: email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+    }).then(emailResult => {
+      console.log('Email sent to student:', emailResult.success ? 'Success' : 'Failed');
+      if (!emailResult.success) {
+        console.error('Email error:', emailResult.error);
+      }
+    }).catch(error => {
+      console.error('Email sending failed:', error);
+    });
     
     // Return the student with auto-generated password for admin display
     res.status(201).json({
@@ -242,7 +248,7 @@ exports.resendStudentCredentials = async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    // Send credentials email
+    // Send credentials email asynchronously (non-blocking)
     const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:8080'}/login`;
     const emailTemplate = emailTemplates.studentCredentials({
       name: student.name,
@@ -251,15 +257,25 @@ exports.resendStudentCredentials = async (req, res) => {
       loginUrl,
     });
     
-    try {
-      // Here you would integrate with your email service
-      console.log('Student credentials email:', emailTemplate);
-      // await sendEmail(student.email, emailTemplate.subject, emailTemplate.html);
-    } catch (emailError) {
-      console.error('Failed to send student credentials email:', emailError);
-    }
+    // Send email asynchronously without blocking the response
+    sendEmail({
+      to: student.email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+    }).then(emailResult => {
+      console.log('Email resent to student:', emailResult.success ? 'Success' : 'Failed');
+      if (!emailResult.success) {
+        console.error('Email error:', emailResult.error);
+      }
+    }).catch(error => {
+      console.error('Email sending failed:', error);
+    });
 
-    res.json({ message: 'Credentials resent successfully' });
+    res.json({ 
+      success: true,
+      message: 'Credentials will be sent to student email',
+      email: student.email
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
