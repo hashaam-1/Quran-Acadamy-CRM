@@ -237,6 +237,7 @@ exports.createTeacher = async (req, res) => {
 
     const newTeacher = await teacher.save();
     
+    // Send email asynchronously without blocking the response
     const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:8080'}/login`;
     const emailTemplate = emailTemplates.teamMemberCredentials({
       name,
@@ -246,16 +247,16 @@ exports.createTeacher = async (req, res) => {
       password: temporaryPassword,
     });
 
-    let emailResult = { success: false };
-    try {
-      emailResult = await sendEmail({
-        to: email,
-        subject: emailTemplate.subject,
-        html: emailTemplate.html,
-      });
-    } catch (emailError) {
-      console.error('Failed to send teacher credentials email:', emailError);
-    }
+    // Send email asynchronously
+    sendEmail({
+      to: email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+    }).then(emailResult => {
+      console.log('Email sent to teacher:', emailResult.success ? 'Success' : 'Failed');
+    }).catch(error => {
+      console.error('Email sending failed:', error);
+    });
 
     const teacherResponse = newTeacher.toObject();
     delete teacherResponse.password;
@@ -263,13 +264,38 @@ exports.createTeacher = async (req, res) => {
     res.status(201).json({
       ...teacherResponse,
       plainPassword: temporaryPassword,
-      emailSent: emailResult.success,
-      message: emailResult.success 
-        ? 'Teacher created and credentials sent via email' 
-        : 'Teacher created but email failed to send',
+      emailSent: true, // Will be sent asynchronously
+      message: 'Teacher created successfully. Credentials will be sent via email.',
     });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Teacher creation error:', error);
+    
+    // Handle specific errors with professional messages
+    if (error.code === 11000) {
+      // Duplicate key error (email already exists)
+      const field = Object.keys(error.keyValue)[0];
+      if (field === 'email') {
+        return res.status(409).json({ 
+          message: 'A teacher with this email address already exists.',
+          code: 'DUPLICATE_EMAIL',
+          field: 'email'
+        });
+      }
+    }
+    
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ 
+        message: 'Validation failed. Please check all required fields.',
+        details: validationErrors,
+        code: 'VALIDATION_ERROR'
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Failed to create teacher. Please try again.',
+      code: 'SERVER_ERROR'
+    });
   }
 };
 

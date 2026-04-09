@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   UserPlus, 
@@ -196,6 +196,24 @@ export function CreateUserDialog() {
           setTimeout(() => {
             handleClose();
           }, 3000);
+        },
+        onError: (error: any) => {
+          console.error('Team member creation error:', error);
+          
+          // Handle specific error codes
+          if (error.response?.data?.code === 'DUPLICATE_EMAIL') {
+            toast.error('Email Already Exists', {
+              description: 'A team member with this email address already exists. Please use a different email.',
+            });
+          } else if (error.response?.data?.code === 'VALIDATION_ERROR') {
+            toast.error('Validation Error', {
+              description: 'Please check all required fields and try again.',
+            });
+          } else {
+            toast.error('Creation Failed', {
+              description: error.response?.data?.message || 'Failed to create team member. Please try again.',
+            });
+          }
         }
       });
     } else if (formData.userType === 'teacher') {
@@ -255,6 +273,24 @@ export function CreateUserDialog() {
             console.log('Auto-closing teacher credentials dialog after 10 seconds');
             handleClose();
           }, 10000);
+        },
+        onError: (error: any) => {
+          console.error('Teacher creation error:', error);
+          
+          // Handle specific error codes
+          if (error.response?.data?.code === 'DUPLICATE_EMAIL') {
+            toast.error('Email Already Exists', {
+              description: 'A teacher with this email address already exists. Please use a different email.',
+            });
+          } else if (error.response?.data?.code === 'VALIDATION_ERROR') {
+            toast.error('Validation Error', {
+              description: 'Please check all required fields and try again.',
+            });
+          } else {
+            toast.error('Creation Failed', {
+              description: error.response?.data?.message || 'Failed to create teacher. Please try again.',
+            });
+          }
         }
       });
     }
@@ -409,6 +445,14 @@ export function CreateUserDialog() {
               </p>
             </div>
           </DialogTitle>
+          <DialogDescription>
+            {step === "form" 
+              ? "Fill in the details below to create a new user account."
+              : step === "credentials"
+                ? "Login credentials have been generated. Share them securely with the user."
+                : "Sending login credentials to the user via email and chat."
+            }
+          </DialogDescription>
         </DialogHeader>
 
         {step === "form" ? (

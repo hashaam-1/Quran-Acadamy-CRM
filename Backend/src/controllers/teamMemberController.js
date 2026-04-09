@@ -65,7 +65,7 @@ exports.createTeamMember = async (req, res) => {
       hasHashedPassword: !!newMember.password 
     });
     
-    // Send welcome email with credentials
+    // Send welcome email with credentials (async, non-blocking)
     const loginUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
     const emailTemplate = emailTemplates.teamMemberCredentials({
       name,
@@ -75,10 +75,15 @@ exports.createTeamMember = async (req, res) => {
       loginUrl,
     });
     
-    const emailResult = await sendEmail({
+    // Send email asynchronously without blocking the response
+    sendEmail({
       to: email,
       subject: emailTemplate.subject,
       html: emailTemplate.html,
+    }).then(emailResult => {
+      console.log('Email sent to team member:', emailResult.success ? 'Success' : 'Failed');
+    }).catch(error => {
+      console.error('Email sending failed:', error);
     });
     
     // Return response with plain password for frontend to display
@@ -90,13 +95,38 @@ exports.createTeamMember = async (req, res) => {
     res.status(201).json({
       ...memberResponse,
       plainPassword: autoPassword, // Send plain password for display
-      emailSent: emailResult.success,
-      message: emailResult.success 
-        ? 'Team member created and credentials sent via email' 
-        : 'Team member created but email failed to send',
+      emailSent: true, // Will be sent asynchronously
+      message: 'Team member created successfully. Credentials will be sent via email.',
     });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Team member creation error:', error);
+    
+    // Handle specific errors with professional messages
+    if (error.code === 11000) {
+      // Duplicate key error (email already exists)
+      const field = Object.keys(error.keyValue)[0];
+      if (field === 'email') {
+        return res.status(409).json({ 
+          message: 'A team member with this email address already exists.',
+          code: 'DUPLICATE_EMAIL',
+          field: 'email'
+        });
+      }
+    }
+    
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ 
+        message: 'Validation failed. Please check all required fields.',
+        details: validationErrors,
+        code: 'VALIDATION_ERROR'
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Failed to create team member. Please try again.',
+      code: 'SERVER_ERROR'
+    });
   }
 };
 
