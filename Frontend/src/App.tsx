@@ -12,6 +12,7 @@ import Students from "./pages/Students";
 import Teachers from "./pages/Teachers";
 import TeamManagement from "./pages/TeamManagement";
 import Schedule from "./pages/Schedule";
+import TutorSchedule from "./pages/TutorSchedule";
 import Attendance from "./pages/Attendance";
 import Progress from "./pages/Progress";
 import Invoices from "./pages/Invoices";
@@ -36,6 +37,7 @@ function AppRoutes() {
       <Route path="/teachers" element={<ProtectedRoute><Teachers /></ProtectedRoute>} />
       <Route path="/team-management" element={<ProtectedRoute><TeamManagement /></ProtectedRoute>} />
       <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
+      <Route path="/tutor-schedule" element={<ProtectedRoute><TutorSchedule /></ProtectedRoute>} />
       <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
       <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
       <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
