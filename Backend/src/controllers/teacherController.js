@@ -8,8 +8,8 @@ const { generatePassword } = require('../utils/passwordGenerator.js');
 // Teacher login
 exports.teacherLogin = async (req, res) => {
   try {
-    console.log('Teacher login attempt with email:', email);
     const { email, password } = req.body;
+    console.log('Teacher login attempt with email:', email);
 
     const teacher = await Teacher.findOne({ email });
     if (!teacher) {
