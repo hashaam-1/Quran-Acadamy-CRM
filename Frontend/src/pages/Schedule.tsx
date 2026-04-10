@@ -243,6 +243,31 @@ export default function Schedule() {
   const todayClassCount = schedules.filter(s => s.day === weekDays[new Date().getDay() - 1]).length;
   const completedToday = schedules.filter(s => s.day === weekDays[new Date().getDay() - 1] && s.status === 'completed').length;
 
+  // Filter schedules based on teacher and role
+  const filteredSchedules = schedules.filter(schedule => {
+    const matchesTeacher = teacherFilter === "all" || schedule.teacherId === teacherFilter;
+    
+    // Role-based filtering
+    let matchesRole = true;
+    if (currentUser?.role === 'teacher') {
+      // Teachers can only see their own classes
+      matchesRole = schedule.teacherId?._id === currentUser.id || 
+                    schedule.teacherId === currentUser.id || 
+                    schedule.teacherName === currentUser.name;
+    } else if (currentUser?.role === 'student') {
+      // Students can only see their own classes
+      const currentStudentId = currentUser.id || (currentUser as any)._id || (currentUser as any).studentId;
+      const scheduleStudentId = typeof schedule.studentId === 'object' && schedule.studentId !== null 
+        ? (schedule.studentId as any)._id || (schedule.studentId as any).id
+        : schedule.studentId;
+      
+      matchesRole = scheduleStudentId === currentStudentId || schedule.studentName === currentUser.name;
+    }
+    // Admin and team_leader can see all
+    
+    return matchesTeacher && matchesRole;
+  });
+
   return (
     <MainLayout title="Class Schedule" subtitle="Weekly timetable view">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
@@ -327,167 +352,92 @@ export default function Schedule() {
           </CardContent>
         </Card>
       </div>
-
       <Card className="animate-slide-up overflow-hidden">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <div className="min-w-[1200px]">
-              {/* Header Row - Days */}
-              <div className="grid grid-cols-8 border-b bg-muted/30">
-                <div className="p-4 border-r text-sm font-semibold">Time</div>
-                {weekDates.map((date) => (
-                  <div
-                    key={date.day}
-                    className={cn(
-                      "p-4 text-center border-r last:border-r-0",
-                      date.isToday && "bg-primary/10"
-                    )}
-                  >
-                    <div className="font-semibold text-sm">{date.day}</div>
-                    <div className="flex items-center justify-center gap-2 mt-1">
-                      <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
-                        date.isToday ? "bg-green-500 text-white" : "bg-muted"
-                      )}>
-                        {getClassCountForDay(date.day)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Schedule Class Matrix - Fixed Height and Alignment */}
-              <div className="overflow-x-auto">
-                <div className="min-w-[1400px]">
-                  {/* CSS Grid Matrix - Properly Aligned */}
-                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0 border-t border-l">
-                    {/* Time Labels Column */}
-                    <div className="col-span-1">
-                      {timeSlots.map((slot) => (
-                        <div 
-                          key={slot.hour} 
-                          className="h-[160px] border-r border-b flex items-center justify-center p-3 bg-muted/30"
-                        >
-                          <span className="text-sm text-muted-foreground font-medium">
-                            {slot.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Day Columns */}
-                    {weekDays.map((day) => (
-                      <div key={day} className="col-span-1">
-                        {timeSlots.map((slot) => {
-                          const schedulesInSlot = getSchedulesForSlot(day, slot.hour);
-                          const hasSchedule = schedulesInSlot.length > 0;
-                          const isToday = weekDates.find(d => d.day === day)?.isToday;
-
-                          return (
-                            <div
-                              key={`${day}-${slot.hour}`}
-                              className={cn(
-                                "h-[160px] border-r border-b relative",
-                                isToday && "bg-primary/5"
-                              )}
-                            >
-                              {hasSchedule ? (
-                                <div className="absolute inset-0">
-                                  {schedulesInSlot.map((schedule, idx) => {
-                                    const scheduleHour = parseTimeToHour(schedule.time);
-                                    const isFirstSlot = slot.hour === scheduleHour;
-                                    
-                                    // Only render on the first slot of the schedule
-                                    if (!isFirstSlot) return null;
-
-                                    const duration = parseDuration(schedule.duration);
-                                    const totalHeight = duration * 160; // 160px per hour exactly
-
-                                    return (
-                                      <Card
-                                        key={schedule.id || schedule._id || idx}
-                                        variant="interactive"
-                                        className={cn(
-                                          "absolute inset-0 shadow-soft hover:shadow-medium transition-all duration-300",
-                                          statusConfig[schedule.status].color
-                                        )}
-                                        style={{
-                                          backgroundColor: courseBlockColors[schedule.course as keyof typeof courseBlockColors] ? 
-                                            `${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}20` : 
-                                            'transparent',
-                                          height: `${totalHeight}px`,
-                                          zIndex: 10
-                                        }}
-                                        onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
-                                      >
-                                        <CardContent className="p-3 h-full flex flex-col">
-                                          {/* Header */}
-                                          <div className="flex items-start justify-between gap-2 mb-2">
-                                            <Badge 
-                                              className={cn(
-                                                "text-xs font-semibold shrink-0",
-                                                courseColors[schedule.course as keyof typeof courseColors]
-                                              )}
-                                            >
-                                              {schedule.course}
-                                            </Badge>
-                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                              <Button 
-                                                variant="ghost" 
-                                                size="icon" 
-                                                className="h-6 w-6 p-0 hover:bg-accent/50"
-                                                onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsEditOpen(true); }}
-                                              >
-                                                <Pencil className="h-3 w-3" />
-                                              </Button>
-                                              <Button 
-                                                variant="ghost" 
-                                                size="icon" 
-                                                className="h-6 w-6 p-0 text-destructive hover:bg-destructive/10"
-                                                onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsDeleteOpen(true); }}
-                                              >
-                                                <Trash2 className="h-3 w-3" />
-                                              </Button>
-                                            </div>
-                                          </div>
-
-                                          {/* Content */}
-                                          <div className="flex-1 min-h-0">
-                                            <h3 className="font-semibold text-sm truncate mb-2">{schedule.studentName}</h3>
-                                            <p className="text-xs text-muted-foreground truncate mb-2">{schedule.teacherName}</p>
-                                          </div>
-
-                                          {/* Footer */}
-                                          <div className="flex items-center justify-between mt-auto">
-                                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                              <Clock className="h-3 w-3 shrink-0" />
-                                              <span className="truncate">{schedule.time}</span>
-                                              <span className="shrink-0">â¢</span>
-                                              <span className="shrink-0">{schedule.duration}</span>
-                                            </div>
-                                            
-                                            {schedule.status === "in_progress" && (
-                                              <Button size="sm" variant="success" className="h-6 text-xs bg-green-500 hover:bg-green-600">
-                                                <Video className="h-3 w-3 mr-1" />
-                                                Join
-                                              </Button>
-                                            )}
-                                          </div>
-                                        </CardContent>
-                                      </Card>
-                                    );
-                                  })}
+              {/* Schedule List - Original Design */}
+              <div className="space-y-4">
+                {filteredSchedules.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No classes scheduled</h3>
+                    <p className="text-muted-foreground">
+                      {teacherFilter === "all" 
+                        ? "No classes found for the selected week."
+                        : "No classes found for this teacher in the selected week."
+                      }
+                    </p>
+                  </Card>
+                ) : (
+                  filteredSchedules.map((schedule, idx) => (
+                    <Card
+                      key={schedule.id || schedule._id || idx}
+                      variant="interactive"
+                      className={cn("overflow-hidden", statusConfig[schedule.status].color)}
+                      onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
+                    >
+                      <CardContent className="p-0">
+                        <div className="p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge className={cn("text-xs font-semibold", courseColors[schedule.course as keyof typeof courseColors])}>
+                                  {schedule.course}
+                                </Badge>
+                                <Badge 
+                                  variant={statusConfig[schedule.status].variant === "default" ? "default" : "secondary"}
+                                  className="text-xs"
+                                >
+                                  {statusConfig[schedule.status].label}
+                                </Badge>
+                              </div>
+                              <h3 className="font-semibold text-lg mb-1">{schedule.studentName}</h3>
+                              <p className="text-sm text-muted-foreground mb-2">{schedule.teacherName}</p>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  <span>{schedule.day}</span>
                                 </div>
-                              ) : (
-                                <div className="h-full bg-gray-50 hover:bg-gray-100 transition-colors m-2 rounded"></div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>{schedule.time}</span>
+                                </div>
+                                <span>{schedule.duration}</span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsEditOpen(true); }}
+                                >
+                                  <Pencil className="h-4 w-4 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsDeleteOpen(true); }}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                              {schedule.status === "in_progress" && (
+                                <Button size="sm" variant="success">
+                                  <Video className="h-4 w-4 mr-2" />
+                                  Join Now
+                                </Button>
                               )}
                             </div>
-                          );
-                        })}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
             </div>
           </div>
