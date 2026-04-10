@@ -356,105 +356,146 @@ export default function Schedule() {
                 ))}
               </div>
 
-              {/* Time Slots Grid */}
-              <div className="relative">
-                {timeSlots.map((slot) => (
-                  <div key={slot.hour} className="grid grid-cols-8 border-b hover:bg-muted/20 transition-colors">
-                    {/* Time Label */}
-                    <div className="p-2 border-r text-xs text-muted-foreground font-medium flex items-center justify-center">
-                      {slot.label}
+              {/* Responsive Time Slots Grid */}
+              <div className="overflow-x-auto">
+                <div className="min-w-[800px]">
+                  {/* CSS Grid Matrix */}
+                  <div className="grid grid-cols-[80px_repeat(7,1fr)] gap-0 border-t border-l">
+                    {/* Time Labels Column */}
+                    <div className="col-span-1">
+                      {timeSlots.map((slot) => (
+                        <div 
+                          key={slot.hour} 
+                          className="h-[80px] md:h-[100px] border-r border-b flex items-center justify-center p-2 bg-muted/50"
+                        >
+                          <span className="text-xs md:text-sm text-muted-foreground font-medium">
+                            {slot.label}
+                          </span>
+                        </div>
+                      ))}
                     </div>
 
                     {/* Day Columns */}
-                    {weekDays.map((day) => {
-                      return (
-                        <div
-                          key={`${day}-${slot.hour}`}
-                          className={cn(
-                            "border-r last:border-r-0 h-[100px] relative",
-                            weekDates.find(d => d.day === day)?.isToday && "bg-primary/5"
-                          )}
-                        >
-                          {/* Render schedules for this specific time slot */}
-                          {getSchedulesForSlot(day, slot.hour).map((schedule, idx) => {
-                            const scheduleHour = parseTimeToHour(schedule.time);
-                            const isFirstSlot = slot.hour === scheduleHour;
-                            
-                            // Only render on the first slot of the schedule
-                            if (!isFirstSlot) return null;
+                    {weekDays.map((day) => (
+                      <div key={day} className="col-span-1">
+                        {timeSlots.map((slot) => {
+                          const schedulesInSlot = getSchedulesForSlot(day, slot.hour);
+                          const hasSchedule = schedulesInSlot.length > 0;
+                          const isToday = weekDates.find(d => d.day === day)?.isToday;
 
-                            const duration = parseDuration(schedule.duration);
-                            const totalHeight = duration * 100; // 100px per hour
+                          return (
+                            <div
+                              key={`${day}-${slot.hour}`}
+                              className={cn(
+                                "h-[80px] md:h-[100px] border-r border-b relative overflow-hidden",
+                                isToday && "bg-primary/5"
+                              )}
+                            >
+                              {hasSchedule ? (
+                                <div className="absolute inset-0 p-1">
+                                  {schedulesInSlot.map((schedule, idx) => {
+                                    const scheduleHour = parseTimeToHour(schedule.time);
+                                    const isFirstSlot = slot.hour === scheduleHour;
+                                    
+                                    // Only render on the first slot of the schedule
+                                    if (!isFirstSlot) return null;
 
-                            return (
-                              <div
-                                key={schedule.id || schedule._id || idx}
-                                className={cn(
-                                  "absolute left-1 right-1 rounded-lg border-l-4 shadow-soft hover:shadow-medium transition-all cursor-pointer group overflow-hidden",
-                                  statusConfig[schedule.status].color
-                                )}
-                                style={{
-                                  backgroundColor: courseBlockColors[schedule.course as keyof typeof courseBlockColors] ? 
-                                    `${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}50` : 
-                                    'transparent',
-                                  top: '2px',
-                                  height: `${totalHeight - 4}px`,
-                                  zIndex: 10
-                                }}
-                                onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
-                              >
-                                <div className="p-2 h-full flex flex-col">
-                                  <div className="flex items-start justify-between gap-1 mb-1">
-                                    <Badge className={cn("text-xs", courseColors[schedule.course as keyof typeof courseColors])}>
-                                      {schedule.course}
-                                    </Badge>
-                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        className="h-5 w-5 p-0"
-                                        onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsEditOpen(true); }}
+                                    const duration = parseDuration(schedule.duration);
+                                    const totalHeight = duration * 100; // 100px per hour (responsive via CSS)
+
+                                    return (
+                                      <div
+                                        key={schedule.id || schedule._id || idx}
+                                        className={cn(
+                                          "absolute inset-1 rounded-lg border-l-4 shadow-soft hover:shadow-lg transition-all cursor-pointer group overflow-hidden",
+                                          statusConfig[schedule.status].color
+                                        )}
+                                        style={{
+                                          backgroundColor: courseBlockColors[schedule.course as keyof typeof courseBlockColors] ? 
+                                            `${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}60` : 
+                                            'transparent',
+                                          height: `${totalHeight - 8}px`,
+                                          zIndex: 10
+                                        }}
+                                        onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                       >
-                                        <Pencil className="h-3 w-3" />
-                                      </Button>
-                                      <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        className="h-5 w-5 p-0 text-destructive"
-                                        onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsDeleteOpen(true); }}
-                                      >
-                                        <Trash2 className="h-3 w-3" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                  <p className="font-medium text-sm truncate">{schedule.studentName}</p>
-                                  <p className="text-xs text-muted-foreground truncate">{schedule.teacherName}</p>
-                                  <div className="flex items-center gap-1 mt-auto text-xs text-muted-foreground">
-                                    <Clock className="h-3 w-3" />
-                                    <span>{schedule.time}</span>
-                                    <span>â¢</span>
-                                    <span>{schedule.duration}</span>
-                                  </div>
-                                  {schedule.status === "in_progress" && (
-                                    <Button size="sm" variant="success" className="w-full mt-1 h-6 text-xs">
-                                      <Video className="h-3 w-3 mr-1" />
-                                      Join Now
-                                    </Button>
-                                  )}
+                                        {/* Previous Design Schedule Slot */}
+                                        <div className="p-2 md:p-3 h-full flex flex-col justify-between">
+                                          {/* Header with Badge and Actions */}
+                                          <div className="flex items-start justify-between gap-1 mb-1">
+                                            <Badge 
+                                              className={cn(
+                                                "text-xs font-semibold shrink-0",
+                                                courseColors[schedule.course as keyof typeof courseColors]
+                                              )}
+                                            >
+                                              {schedule.course}
+                                            </Badge>
+                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                              <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="h-5 w-5 p-0 hover:bg-white/20"
+                                                onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsEditOpen(true); }}
+                                              >
+                                                <Pencil className="h-3 w-3 text-white" />
+                                              </Button>
+                                              <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="h-5 w-5 p-0 text-red-200 hover:text-red-400"
+                                                onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsDeleteOpen(true); }}
+                                              >
+                                                <Trash2 className="h-3 w-3" />
+                                              </Button>
+                                            </div>
+                                          </div>
+
+                                          {/* Content */}
+                                          <div className="flex-1 min-h-0">
+                                            <p className="font-semibold text-sm md:text-base text-white truncate mb-1">
+                                              {schedule.studentName}
+                                            </p>
+                                            <p className="text-xs md:text-sm text-white/90 truncate mb-2">
+                                              {schedule.teacherName}
+                                            </p>
+                                          </div>
+
+                                          {/* Footer with Time and Actions */}
+                                          <div className="space-y-1">
+                                            <div className="flex items-center gap-1 text-xs text-white/80">
+                                              <Clock className="h-3 w-3 shrink-0" />
+                                              <span className="truncate">{schedule.time}</span>
+                                              <span className="shrink-0">â¢</span>
+                                              <span className="shrink-0">{schedule.duration}</span>
+                                            </div>
+                                            
+                                            {schedule.status === "in_progress" && (
+                                              <Button 
+                                                size="sm" 
+                                                variant="success" 
+                                                className="w-full h-6 md:h-7 text-xs bg-green-500 hover:bg-green-600 text-white border-0"
+                                              >
+                                                <Video className="h-3 w-3 mr-1" />
+                                                Join Now
+                                              </Button>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
-                              </div>
-                            );
-                          })}
-                          
-                          {/* Show empty slot if no schedule */}
-                          {getSchedulesForSlot(day, slot.hour).length === 0 && (
-                            <div className="h-full bg-gray-50 hover:bg-gray-100 transition-colors"></div>
-                          )}
-                        </div>
-                      );
-                    })}
+                              ) : (
+                                <div className="h-full bg-gray-50/80 hover:bg-gray-100/80 transition-colors"></div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           </div>
