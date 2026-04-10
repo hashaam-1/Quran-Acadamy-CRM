@@ -30,6 +30,8 @@ import {
   Calendar,
   Pencil,
   Trash2,
+  Grid3x3,
+  List,
 } from "lucide-react";
 import { ClassSchedule } from "@/lib/store";
 import { ScheduleForm } from "@/components/forms/ScheduleForm";
@@ -55,6 +57,55 @@ const courseColors = {
   Tajweed: "bg-primary/10 text-primary",
 };
 
+const courseBlockColors: Record<string, string> = {
+  Qaida: "bg-blue-500",
+  Nazra: "bg-red-500",
+  Hifz: "bg-yellow-500",
+  Tajweed: "bg-green-500",
+};
+
+// Generate time slots from 12 AM to 11 PM
+const generateTimeSlots = () => {
+  const slots = [];
+  for (let hour = 0; hour < 24; hour++) {
+    const period = hour < 12 ? 'AM' : 'PM';
+    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    slots.push({
+      hour,
+      label: `${displayHour} ${period}`,
+    });
+  }
+  return slots;
+};
+
+const timeSlots = generateTimeSlots();
+
+// Parse time string to hour (24-hour format)
+const parseTimeToHour = (timeStr: string): number => {
+  const match = timeStr.match(/(\d+):?(\d+)?\s*(AM|PM)/i);
+  if (!match) return 0;
+  
+  let hour = parseInt(match[1]);
+  const period = match[3].toUpperCase();
+  
+  if (period === 'PM' && hour !== 12) {
+    hour += 12;
+  } else if (period === 'AM' && hour === 12) {
+    hour = 0;
+  }
+  
+  return hour;
+};
+
+// Calculate duration in hours
+const parseDuration = (durationStr: string): number => {
+  const match = durationStr.match(/(\d+)\s*min/);
+  if (match) {
+    return parseInt(match[1]) / 60;
+  }
+  return 1;
+};
+
 export default function Schedule() {
   const { data: schedules = [], isLoading: schedulesLoading } = useSchedules();
   const { data: teachers = [], isLoading: teachersLoading } = useTeachers();
@@ -68,6 +119,7 @@ export default function Schedule() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [current, setCurrent] = useState<ClassSchedule | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
 
   const getWeekDates = () => {
     const start = new Date(currentWeek);
@@ -174,6 +226,20 @@ export default function Schedule() {
     }
   };
 
+  // Get schedules for a specific day and time slot (for grid view)
+  const getSchedulesForSlot = (day: string, hour: number) => {
+    return getSchedulesByDay(day).filter(schedule => {
+      const scheduleHour = parseTimeToHour(schedule.time);
+      const duration = parseDuration(schedule.duration);
+      return hour >= scheduleHour && hour < scheduleHour + duration;
+    });
+  };
+
+  // Count classes per day (for grid view)
+  const getClassCountForDay = (day: string) => {
+    return getSchedulesByDay(day).length;
+  };
+
   const todayClassCount = schedules.filter(s => s.day === weekDays[new Date().getDay() - 1]).length;
   const completedToday = schedules.filter(s => s.day === weekDays[new Date().getDay() - 1] && s.status === 'completed').length;
 
@@ -195,6 +261,26 @@ export default function Schedule() {
           </Button>
         </div>
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 border rounded-lg p-1">
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="gap-2"
+            >
+              <List className="h-4 w-4" />
+              List
+            </Button>
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="gap-2"
+            >
+              <Grid3x3 className="h-4 w-4" />
+              Time Grid
+            </Button>
+          </div>
           <Select value={teacherFilter} onValueChange={setTeacherFilter}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="All Teachers" />
@@ -220,92 +306,200 @@ export default function Schedule() {
 
       <Card className="animate-slide-up overflow-hidden">
         <CardContent className="p-0">
-          <div className="grid grid-cols-7 border-b">
-            {weekDates.map((date) => (
-              <div
-                key={date.day}
-                className={cn(
-                  "p-4 text-center border-r last:border-r-0",
-                  date.isToday && "bg-primary/5"
-                )}
-              >
-                <p className="text-sm text-muted-foreground">{date.day}</p>
-                <p className={cn(
-                  "text-2xl font-bold mt-1",
-                  date.isToday && "text-primary"
-                )}>
-                  {date.date}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-7 min-h-[500px]">
-            {weekDays.map((day) => (
-              <div
-                key={day}
-                className={cn(
-                  "border-r last:border-r-0 p-2 space-y-2",
-                  weekDates.find(d => d.day === day)?.isToday && "bg-primary/5"
-                )}
-              >
-                {getSchedulesByDay(day).map((slot, index) => (
+          {viewMode === 'list' ? (
+            <>
+              <div className="grid grid-cols-7 border-b">
+                {weekDates.map((date) => (
                   <div
-                    key={slot.id || slot._id || `schedule-${day}-${index}`}
+                    key={date.day}
                     className={cn(
-                      "p-3 rounded-lg bg-card border-l-4 shadow-soft hover:shadow-medium transition-all cursor-pointer group",
-                      statusConfig[slot.status].color
+                      "p-4 text-center border-r last:border-r-0",
+                      date.isToday && "bg-primary/5"
                     )}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <Badge className={cn("text-xs", courseColors[slot.course as keyof typeof courseColors])}>
-                        {slot.course}
-                      </Badge>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-5 w-5 p-0"
-                          onClick={() => { setCurrent(slot); setIsEditOpen(true); }}
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-5 w-5 p-0 text-destructive"
-                          onClick={() => { setCurrent(slot); setIsDeleteOpen(true); }}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                    <p className="text-sm text-muted-foreground">{date.day}</p>
+                    <p className={cn(
+                      "text-2xl font-bold mt-1",
+                      date.isToday && "text-primary"
+                    )}>
+                      {date.date}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7 min-h-[500px]">
+                {weekDays.map((day) => (
+                  <div
+                    key={day}
+                    className={cn(
+                      "border-r last:border-r-0 p-2 space-y-2",
+                      weekDates.find(d => d.day === day)?.isToday && "bg-primary/5"
+                    )}
+                  >
+                    {getSchedulesByDay(day).map((slot, index) => (
+                      <div
+                        key={slot.id || slot._id || `schedule-${day}-${index}`}
+                        className={cn(
+                          "p-3 rounded-lg bg-card border-l-4 shadow-soft hover:shadow-medium transition-all cursor-pointer group",
+                          statusConfig[slot.status].color
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <Badge className={cn("text-xs", courseColors[slot.course as keyof typeof courseColors])}>
+                            {slot.course}
+                          </Badge>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-5 w-5 p-0"
+                              onClick={() => { setCurrent(slot); setIsEditOpen(true); }}
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-5 w-5 p-0 text-destructive"
+                              onClick={() => { setCurrent(slot); setIsDeleteOpen(true); }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                        <p className="font-medium text-sm truncate">{slot.studentName}</p>
+                        <p className="text-xs text-muted-foreground truncate">{slot.teacherName}</p>
+                        <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>{slot.time}</span>
+                          <span>•</span>
+                          <span>{slot.duration}</span>
+                        </div>
+                        {slot.status === "in_progress" && (
+                          <Button size="sm" variant="success" className="w-full mt-2 h-7 text-xs">
+                            <Video className="h-3 w-3 mr-1" />
+                            Join Now
+                          </Button>
+                        )}
                       </div>
-                    </div>
-                    <p className="font-medium text-sm truncate">{slot.studentName}</p>
-                    <p className="text-xs text-muted-foreground truncate">{slot.teacherName}</p>
-                    <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      <span>{slot.time}</span>
-                      <span>•</span>
-                      <span>{slot.duration}</span>
-                    </div>
-                    {slot.status === "in_progress" && (
-                      <Button size="sm" variant="success" className="w-full mt-2 h-7 text-xs">
-                        <Video className="h-3 w-3 mr-1" />
-                        Join Now
-                      </Button>
+                    ))}
+                    {getSchedulesByDay(day).length === 0 && (
+                      <div className="h-full flex items-center justify-center">
+                        <p className="text-xs text-muted-foreground">No classes</p>
+                      </div>
                     )}
                   </div>
                 ))}
-                {getSchedulesByDay(day).length === 0 && (
-                  <div className="h-full flex items-center justify-center">
-                    <p className="text-xs text-muted-foreground">No classes</p>
-                  </div>
-                )}
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <div className="overflow-x-auto">
+              <div className="min-w-[1200px]">
+                {/* Header Row - Days */}
+                <div className="grid grid-cols-8 border-b bg-muted/30">
+                  <div className="p-4 border-r"></div>
+                  {weekDates.map((date) => (
+                    <div
+                      key={date.day}
+                      className={cn(
+                        "p-4 text-center border-r last:border-r-0",
+                        date.isToday && "bg-primary/10"
+                      )}
+                    >
+                      <div className="font-semibold text-sm">{date.day}</div>
+                      <div className="flex items-center justify-center gap-2 mt-1">
+                        <div className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium",
+                          date.isToday ? "bg-green-500 text-white" : "bg-muted"
+                        )}>
+                          {getClassCountForDay(date.day)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Time Slots Grid */}
+                <div className="relative">
+                  {timeSlots.map((slot) => (
+                    <div key={slot.hour} className="grid grid-cols-8 border-b hover:bg-muted/20 transition-colors">
+                      {/* Time Label */}
+                      <div className="p-2 border-r text-xs text-muted-foreground font-medium flex items-center justify-center">
+                        {slot.label}
+                      </div>
+
+                      {/* Day Columns */}
+                      {weekDays.map((day) => {
+                        const schedulesInSlot = getSchedulesForSlot(day, slot.hour);
+                        const hasSchedule = schedulesInSlot.length > 0;
+
+                        return (
+                          <div
+                            key={`${day}-${slot.hour}`}
+                            className={cn(
+                              "border-r last:border-r-0 min-h-[60px] relative",
+                              weekDates.find(d => d.day === day)?.isToday && "bg-primary/5"
+                            )}
+                          >
+                            {hasSchedule ? (
+                              <div className="absolute inset-0 p-1">
+                                {schedulesInSlot.map((schedule, idx) => {
+                                  const scheduleHour = parseTimeToHour(schedule.time);
+                                  const isFirstSlot = slot.hour === scheduleHour;
+                                  
+                                  if (!isFirstSlot) return null;
+
+                                  const duration = parseDuration(schedule.duration);
+                                  const heightMultiplier = duration;
+
+                                  return (
+                                    <div
+                                      key={schedule.id || schedule._id || idx}
+                                      className={cn(
+                                        "rounded p-2 text-white text-xs overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer",
+                                        courseBlockColors[schedule.course as keyof typeof courseBlockColors] || "bg-gray-500"
+                                      )}
+                                      style={{
+                                        height: `${heightMultiplier * 60}px`,
+                                        minHeight: '60px'
+                                      }}
+                                      title={`${schedule.studentName} - ${schedule.teacherName}\n${schedule.time} (${schedule.duration})`}
+                                    >
+                                      <div className="font-semibold truncate">{schedule.studentName}</div>
+                                      <div className="text-[10px] opacity-90 truncate">{schedule.teacherName}</div>
+                                      <div className="text-[10px] opacity-80 mt-1">{schedule.time}</div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <div className="h-full bg-gray-50 hover:bg-gray-100 transition-colors"></div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Legend for Time Grid View */}
+      {viewMode === 'grid' && (
+        <div className="mt-6 flex items-center gap-6">
+          <div className="text-sm font-semibold">Course Types:</div>
+          {Object.entries(courseBlockColors).map(([course, color]) => (
+            <div key={course} className="flex items-center gap-2">
+              <div className={cn("w-4 h-4 rounded", color)}></div>
+              <span className="text-sm">{course}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         <Card variant="stat" className="animate-slide-up">
