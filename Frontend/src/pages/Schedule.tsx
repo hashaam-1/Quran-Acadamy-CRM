@@ -380,7 +380,7 @@ export default function Schedule() {
                     {timeSlots.map((slot) => (
                       <React.Fragment key={slot.hour}>
                         {/* Time Label */}
-                        <div className="h-[100px] border-r border-b flex items-center justify-center p-3 bg-muted/20">
+                        <div className="min-h-[140px] border-r border-b flex items-center justify-center p-3 bg-muted/20">
                           <span className="text-sm text-muted-foreground font-medium">
                             {slot.label}
                           </span>
@@ -400,24 +400,24 @@ export default function Schedule() {
                             <div
                               key={`${day}-${slot.hour}`}
                               className={cn(
-                                "h-[100px] border-r border-b relative",
+                                "min-h-[140px] border-r border-b relative",
                                 isToday && "bg-primary/5",
                                 slot.hour === 6 && "border-t-2"
                               )}
                             >
                               {schedulesInSlot.length > 0 ? (
-                                <div className="p-2 h-full overflow-y-auto">
+                                <div className="p-2 h-full">
                                   {schedulesInSlot.map((schedule, idx) => (
                                     <div
                                       key={schedule.id || schedule._id || idx}
                                       className={cn(
-                                        "bg-white border rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer",
+                                        "bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer",
                                         courseBlockColors[schedule.course as keyof typeof courseBlockColors] && 
                                         `border-l-4 border-l-[${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}]`
                                       )}
                                       onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                     >
-                                      <div className="flex items-start justify-between gap-2 mb-1">
+                                      <div className="flex items-start justify-between gap-2 mb-2">
                                         <Badge 
                                           className={cn(
                                             "text-xs font-semibold shrink-0",
@@ -445,8 +445,8 @@ export default function Schedule() {
                                           </Button>
                                         </div>
                                       </div>
-                                      <h4 className="font-semibold text-xs truncate mb-1">{schedule.studentName}</h4>
-                                      <p className="text-xs text-muted-foreground truncate mb-1">{schedule.teacherName}</p>
+                                      <h4 className="font-semibold text-sm truncate mb-1">{schedule.studentName}</h4>
+                                      <p className="text-xs text-muted-foreground truncate mb-2">{schedule.teacherName}</p>
                                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                         <Clock className="h-3 w-3 shrink-0" />
                                         <span>{schedule.time}</span>
@@ -454,7 +454,7 @@ export default function Schedule() {
                                         <span className="shrink-0">{schedule.duration}</span>
                                       </div>
                                       {schedule.status === "in_progress" && (
-                                        <Button size="sm" variant="success" className="h-5 text-xs mt-1 w-full">
+                                        <Button size="sm" variant="success" className="h-6 text-xs mt-2 w-full">
                                           <Video className="h-3 w-3 mr-1" />
                                           Join
                                         </Button>
