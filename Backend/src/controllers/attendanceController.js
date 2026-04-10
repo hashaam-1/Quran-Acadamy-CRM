@@ -249,6 +249,79 @@ exports.getAttendanceById = async (req, res) => {
 // Create attendance record
 exports.createAttendance = async (req, res) => {
   try {
+    const { userType, teacherId, studentId, date } = req.body;
+    
+    // Check for duplicate teacher attendance records
+    if (userType === 'teacher' && teacherId) {
+      const today = new Date(date || new Date());
+      today.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date || new Date());
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      const existingAttendance = await Attendance.findOne({
+        teacherId,
+        userType: 'teacher',
+        date: { $gte: today, $lte: endOfDay }
+      });
+      
+      if (existingAttendance) {
+        console.log(`Found existing attendance for teacher ${teacherId}, updating instead of creating new record`);
+        
+        // Update existing record with new data
+        if (req.body.checkInTime && !existingAttendance.checkInTime) {
+          existingAttendance.checkInTime = req.body.checkInTime;
+        }
+        if (req.body.checkOutTime && !existingAttendance.checkOutTime) {
+          existingAttendance.checkOutTime = req.body.checkOutTime;
+        }
+        if (req.body.status) {
+          existingAttendance.status = req.body.status;
+        }
+        if (req.body.teacherName && !existingAttendance.teacherName) {
+          existingAttendance.teacherName = req.body.teacherName;
+        }
+        
+        await existingAttendance.save();
+        return res.status(200).json(existingAttendance);
+      }
+    }
+    
+    // Check for duplicate student attendance records
+    if (userType === 'student' && studentId) {
+      const today = new Date(date || new Date());
+      today.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date || new Date());
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      const existingAttendance = await Attendance.findOne({
+        studentId,
+        userType: 'student',
+        date: { $gte: today, $lte: endOfDay }
+      });
+      
+      if (existingAttendance) {
+        console.log(`Found existing attendance for student ${studentId}, updating instead of creating new record`);
+        
+        // Update existing record with new data
+        if (req.body.checkInTime && !existingAttendance.checkInTime) {
+          existingAttendance.checkInTime = req.body.checkInTime;
+        }
+        if (req.body.checkOutTime && !existingAttendance.checkOutTime) {
+          existingAttendance.checkOutTime = req.body.checkOutTime;
+        }
+        if (req.body.status) {
+          existingAttendance.status = req.body.status;
+        }
+        if (req.body.studentName && !existingAttendance.studentName) {
+          existingAttendance.studentName = req.body.studentName;
+        }
+        
+        await existingAttendance.save();
+        return res.status(200).json(existingAttendance);
+      }
+    }
+    
+    // Create new attendance record only if no duplicate found
     const attendance = new Attendance(req.body);
     const newAttendance = await attendance.save();
     

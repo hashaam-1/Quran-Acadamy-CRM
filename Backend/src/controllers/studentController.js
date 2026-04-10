@@ -6,6 +6,7 @@ const { generatePassword } = require('../utils/passwordGenerator.js');
 // Student login
 exports.studentLogin = async (req, res) => {
   try {
+    console.log('Student login endpoint called with body:', req.body);
     const { email, password } = req.body;
     
     // Find student by email

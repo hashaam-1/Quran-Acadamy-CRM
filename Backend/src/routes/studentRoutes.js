@@ -11,6 +11,8 @@ const {
   studentLogin
 } = require('../controllers/studentController.js');
 
+console.log('Student routes loaded successfully');
+
 const {
   studentCheckout,
   getStudentTodayAttendance,
