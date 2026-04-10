@@ -348,19 +348,53 @@ export default function Schedule() {
                                   <div
                                     key={schedule.id || schedule._id || idx}
                                     className={cn(
-                                      "rounded p-2 text-white text-xs overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer",
-                                      courseBlockColors[schedule.course as keyof typeof courseBlockColors] || "bg-gray-500"
+                                      "p-3 rounded-lg bg-card border-l-4 shadow-soft hover:shadow-medium transition-all cursor-pointer group",
+                                      statusConfig[schedule.status].color
                                     )}
                                     style={{
-                                      height: `${heightMultiplier * 60}px`,
-                                      minHeight: '60px'
+                                      backgroundColor: courseBlockColors[schedule.course as keyof typeof courseBlockColors] ? 
+                                        `${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}20` : 
+                                        'transparent',
+                                      minHeight: `${heightMultiplier * 60}px`
                                     }}
-                                    title={`${schedule.studentName} - ${schedule.teacherName}\n${schedule.time} (${schedule.duration})`}
-                                    onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                   >
-                                    <div className="font-semibold truncate">{schedule.studentName}</div>
-                                    <div className="text-[10px] opacity-90 truncate">{schedule.teacherName}</div>
-                                    <div className="text-[10px] opacity-80 mt-1">{schedule.time}</div>
+                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                      <Badge className={cn("text-xs", courseColors[schedule.course as keyof typeof courseColors])}>
+                                        {schedule.course}
+                                      </Badge>
+                                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Button 
+                                          variant="ghost" 
+                                          size="icon" 
+                                          className="h-5 w-5 p-0"
+                                          onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsEditOpen(true); }}
+                                        >
+                                          <Pencil className="h-3 w-3" />
+                                        </Button>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="icon" 
+                                          className="h-5 w-5 p-0 text-destructive"
+                                          onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsDeleteOpen(true); }}
+                                        >
+                                          <Trash2 className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                    <p className="font-medium text-sm truncate">{schedule.studentName}</p>
+                                    <p className="text-xs text-muted-foreground truncate">{schedule.teacherName}</p>
+                                    <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+                                      <Clock className="h-3 w-3" />
+                                      <span>{schedule.time}</span>
+                                      <span>•</span>
+                                      <span>{schedule.duration}</span>
+                                    </div>
+                                    {schedule.status === "in_progress" && (
+                                      <Button size="sm" variant="success" className="w-full mt-2 h-7 text-xs">
+                                        <Video className="h-3 w-3 mr-1" />
+                                        Join Now
+                                      </Button>
+                                    )}
                                   </div>
                                 );
                               })}
