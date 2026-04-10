@@ -392,7 +392,7 @@ export default function Schedule() {
                               )}
                             >
                               {hasSchedule ? (
-                                <div className="absolute inset-1">
+                                <div className="absolute inset-0">
                                   {schedulesInSlot.map((schedule, idx) => {
                                     const scheduleHour = parseTimeToHour(schedule.time);
                                     const isFirstSlot = slot.hour === scheduleHour;
@@ -401,21 +401,22 @@ export default function Schedule() {
                                     if (!isFirstSlot) return null;
 
                                     const duration = parseDuration(schedule.duration);
-                                    const totalHeight = duration * 160 - 8; // 160px per hour minus padding
+                                    const totalHeight = duration * 160; // 160px per hour exactly
 
                                     return (
                                       <Card
                                         key={schedule.id || schedule._id || idx}
                                         variant="interactive"
                                         className={cn(
-                                          "w-full h-full shadow-soft hover:shadow-medium transition-all duration-300",
+                                          "absolute inset-0 shadow-soft hover:shadow-medium transition-all duration-300",
                                           statusConfig[schedule.status].color
                                         )}
                                         style={{
                                           backgroundColor: courseBlockColors[schedule.course as keyof typeof courseBlockColors] ? 
                                             `${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}20` : 
                                             'transparent',
-                                          height: `${totalHeight}px`
+                                          height: `${totalHeight}px`,
+                                          zIndex: 10
                                         }}
                                         onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                       >
