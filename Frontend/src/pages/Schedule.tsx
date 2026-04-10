@@ -360,7 +360,7 @@ export default function Schedule() {
               <div className="overflow-x-auto">
                 <div className="min-w-[1200px]">
                   {/* Grid Header */}
-                  <div className="grid grid-cols-[121px_repeat(7,1fr)] gap-0 border border-b bg-muted/30">
+                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0 border border-b bg-muted/30">
                     <div className="p-3 border-r border-b font-medium text-sm">Time</div>
                     {weekDays.map((day, index) => (
                       <div
@@ -376,7 +376,7 @@ export default function Schedule() {
                   </div>
 
                   {/* Time Slots Grid */}
-                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0 border border-l-0 border-t-0 border-r-0">
+                  <div className="grid grid-cols-[121px_repeat(7,1fr)] gap-0 border border-l-0 border-t-0 border-r-0">
                     {timeSlots.map((slot) => (
                       <React.Fragment key={slot.hour}>
                         {/* Time Label */}
