@@ -356,17 +356,17 @@ export default function Schedule() {
                 ))}
               </div>
 
-              {/* Schedule Class Matrix - Original Compact Design */}
+              {/* Schedule Class Matrix - Fixed Height and Alignment */}
               <div className="overflow-x-auto">
-                <div className="min-w-[1200px]">
-                  {/* CSS Grid Matrix */}
-                  <div className="grid grid-cols-[100px_repeat(7,1fr)] gap-0 border-t border-l">
+                <div className="min-w-[1400px]">
+                  {/* CSS Grid Matrix - Properly Aligned */}
+                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0 border-t border-l">
                     {/* Time Labels Column */}
                     <div className="col-span-1">
                       {timeSlots.map((slot) => (
                         <div 
                           key={slot.hour} 
-                          className="h-[120px] border-r border-b flex items-center justify-center p-2 bg-muted/30"
+                          className="h-[160px] border-r border-b flex items-center justify-center p-3 bg-muted/30"
                         >
                           <span className="text-sm text-muted-foreground font-medium">
                             {slot.label}
@@ -387,12 +387,12 @@ export default function Schedule() {
                             <div
                               key={`${day}-${slot.hour}`}
                               className={cn(
-                                "h-[120px] border-r border-b relative overflow-hidden",
+                                "h-[160px] border-r border-b relative",
                                 isToday && "bg-primary/5"
                               )}
                             >
                               {hasSchedule ? (
-                                <div className="absolute inset-0">
+                                <div className="absolute inset-1">
                                   {schedulesInSlot.map((schedule, idx) => {
                                     const scheduleHour = parseTimeToHour(schedule.time);
                                     const isFirstSlot = slot.hour === scheduleHour;
@@ -401,28 +401,27 @@ export default function Schedule() {
                                     if (!isFirstSlot) return null;
 
                                     const duration = parseDuration(schedule.duration);
-                                    const totalHeight = duration * 120; // 120px per hour
+                                    const totalHeight = duration * 160 - 8; // 160px per hour minus padding
 
                                     return (
                                       <Card
                                         key={schedule.id || schedule._id || idx}
                                         variant="interactive"
                                         className={cn(
-                                          "absolute inset-0 overflow-hidden",
+                                          "w-full h-full shadow-soft hover:shadow-medium transition-all duration-300",
                                           statusConfig[schedule.status].color
                                         )}
                                         style={{
                                           backgroundColor: courseBlockColors[schedule.course as keyof typeof courseBlockColors] ? 
                                             `${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}20` : 
                                             'transparent',
-                                          height: `${totalHeight}px`,
-                                          zIndex: 10
+                                          height: `${totalHeight}px`
                                         }}
                                         onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                       >
-                                        <CardContent className="p-2 h-full flex flex-col">
+                                        <CardContent className="p-3 h-full flex flex-col">
                                           {/* Header */}
-                                          <div className="flex items-start justify-between gap-2 mb-1">
+                                          <div className="flex items-start justify-between gap-2 mb-2">
                                             <Badge 
                                               className={cn(
                                                 "text-xs font-semibold shrink-0",
@@ -435,7 +434,7 @@ export default function Schedule() {
                                               <Button 
                                                 variant="ghost" 
                                                 size="icon" 
-                                                className="h-5 w-5 p-0"
+                                                className="h-6 w-6 p-0 hover:bg-accent/50"
                                                 onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsEditOpen(true); }}
                                               >
                                                 <Pencil className="h-3 w-3" />
@@ -443,7 +442,7 @@ export default function Schedule() {
                                               <Button 
                                                 variant="ghost" 
                                                 size="icon" 
-                                                className="h-5 w-5 p-0 text-destructive"
+                                                className="h-6 w-6 p-0 text-destructive hover:bg-destructive/10"
                                                 onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsDeleteOpen(true); }}
                                               >
                                                 <Trash2 className="h-3 w-3" />
@@ -453,12 +452,12 @@ export default function Schedule() {
 
                                           {/* Content */}
                                           <div className="flex-1 min-h-0">
-                                            <h3 className="font-semibold text-sm truncate mb-1">{schedule.studentName}</h3>
-                                            <p className="text-xs text-muted-foreground truncate">{schedule.teacherName}</p>
+                                            <h3 className="font-semibold text-sm truncate mb-2">{schedule.studentName}</h3>
+                                            <p className="text-xs text-muted-foreground truncate mb-2">{schedule.teacherName}</p>
                                           </div>
 
                                           {/* Footer */}
-                                          <div className="flex items-center justify-between mt-1">
+                                          <div className="flex items-center justify-between mt-auto">
                                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                               <Clock className="h-3 w-3 shrink-0" />
                                               <span className="truncate">{schedule.time}</span>
@@ -467,7 +466,7 @@ export default function Schedule() {
                                             </div>
                                             
                                             {schedule.status === "in_progress" && (
-                                              <Button size="sm" variant="success" className="h-5 text-xs px-2">
+                                              <Button size="sm" variant="success" className="h-6 text-xs bg-green-500 hover:bg-green-600">
                                                 <Video className="h-3 w-3 mr-1" />
                                                 Join
                                               </Button>
@@ -479,7 +478,7 @@ export default function Schedule() {
                                   })}
                                 </div>
                               ) : (
-                                <div className="h-full bg-gray-50 hover:bg-gray-100 transition-colors"></div>
+                                <div className="h-full bg-gray-50 hover:bg-gray-100 transition-colors m-2 rounded"></div>
                               )}
                             </div>
                           );
