@@ -361,12 +361,12 @@ export default function Schedule() {
                 <div className="min-w-[1200px]">
                   {/* Grid Header */}
                   <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0 border border-b bg-muted/30">
-                    <div className="p-3 border-r font-medium text-sm">Time</div>
+                    <div className="p-3 border-r border-b font-medium text-sm">Time</div>
                     {weekDays.map((day, index) => (
                       <div
                         key={day}
                         className={cn(
-                          "p-3 border-r text-center font-medium text-sm",
+                          "p-3 border-r border-b text-center font-medium text-sm",
                           index === 6 && "border-r-0"
                         )}
                       >
@@ -418,14 +418,14 @@ export default function Schedule() {
                                       onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                     >
                                       <div className="flex items-start justify-between gap-2 mb-2">
-                                        <Badge 
+                                        <div 
                                           className={cn(
-                                            "text-xs font-semibold shrink-0",
+                                            "text-xs font-semibold shrink-0 px-2 py-1 rounded",
                                             courseColors[schedule.course as keyof typeof courseColors]
                                           )}
                                         >
                                           {schedule.course}
-                                        </Badge>
+                                        </div>
                                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                           <Button 
                                             variant="ghost" 
