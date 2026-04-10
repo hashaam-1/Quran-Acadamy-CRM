@@ -27,7 +27,7 @@ exports.teacherLogin = async (req, res) => {
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
 
-    console.log(`Teacher ${teacher.name} login - checking attendance for today ${today.toISOString()}`);
+    console.log(`Teacher ${teacher.name} login - checking attendance for today ${today.toISOString()} to ${endOfDay.toISOString()}`);
 
     // First, clean up ALL duplicate records for this teacher today
     const allTodayRecords = await Attendance.find({
@@ -37,6 +37,11 @@ exports.teacherLogin = async (req, res) => {
     }).sort({ createdAt: 1 });
 
     console.log(`Found ${allTodayRecords.length} attendance records for teacher ${teacher.name} today`);
+    
+    // Debug: Log all found records
+    allTodayRecords.forEach((record, index) => {
+      console.log(`Record ${index + 1}: ID=${record._id}, date=${record.date}, checkIn=${record.checkInTime}, checkOut=${record.checkOutTime}`);
+    });
 
     let existingAttendance = null;
     
@@ -64,6 +69,7 @@ exports.teacherLogin = async (req, res) => {
         
         // Delete the duplicate
         await Attendance.findByIdAndDelete(duplicate._id);
+        console.log(`Deleted duplicate record ${duplicate._id}`);
       }
       
       // Save the merged record
@@ -110,12 +116,12 @@ exports.teacherLogin = async (req, res) => {
         userType: 'teacher',
         teacherId: teacher._id,
         teacherName: teacher.name,
-        date: today,
+        date: today, // Use today's date at midnight for proper comparison
         checkInTime: actualTime,
         status: 'present'
       });
       await attendance.save();
-      console.log(`Teacher ${teacher.name} new attendance record created, checked in at ${actualTime}, record ID: ${attendance._id}`);
+      console.log(`Teacher ${teacher.name} new attendance record created, checked in at ${actualTime}, record ID: ${attendance._id}, date: ${attendance.date}`);
     }
 
     const teacherData = {
