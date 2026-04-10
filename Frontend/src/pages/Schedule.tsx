@@ -283,6 +283,50 @@ export default function Schedule() {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card variant="stat" className="animate-slide-up">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-info/10 flex items-center justify-center">
+                <Calendar className="h-5 w-5 text-info" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{todayClassCount}</p>
+                <p className="text-sm text-muted-foreground">Total Classes Today</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card variant="stat" className="animate-slide-up" style={{ animationDelay: "0.1s" }}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
+                <ClipboardCheck className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{completedToday}</p>
+                <p className="text-sm text-muted-foreground">Completed Today</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card variant="stat" className="animate-slide-up" style={{ animationDelay: "0.2s" }}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                <Clock className="h-5 w-5 text-accent" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{schedules.length}</p>
+                <p className="text-sm text-muted-foreground">Total Scheduled</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card className="animate-slide-up overflow-hidden">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -329,7 +373,7 @@ export default function Schedule() {
                         <div
                           key={`${day}-${slot.hour}`}
                           className={cn(
-                            "border-r last:border-r-0 min-h-[60px] relative",
+                            "border-r last:border-r-0 min-h-[100px] relative",
                             weekDates.find(d => d.day === day)?.isToday && "bg-primary/5"
                           )}
                         >
@@ -355,7 +399,7 @@ export default function Schedule() {
                                       backgroundColor: courseBlockColors[schedule.course as keyof typeof courseBlockColors] ? 
                                         `${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}20` : 
                                         'transparent',
-                                      minHeight: `${heightMultiplier * 60}px`
+                                      minHeight: `${heightMultiplier * 100}px`
                                     }}
                                   >
                                     <div className="flex items-start justify-between gap-2 mb-2">
@@ -422,48 +466,6 @@ export default function Schedule() {
             <span className="text-sm">{course}</span>
           </div>
         ))}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-        <Card variant="stat" className="animate-slide-up">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-info/10 flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-info" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{todayClassCount}</p>
-                <p className="text-sm text-muted-foreground">Total Classes Today</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="stat" className="animate-slide-up">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
-                <User className="h-5 w-5 text-success" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{completedToday}</p>
-                <p className="text-sm text-muted-foreground">Completed Today</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="stat" className="animate-slide-up">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
-                <Clock className="h-5 w-5 text-warning" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{schedules.length}</p>
-                <p className="text-sm text-muted-foreground">Total Scheduled</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       <ScheduleForm
