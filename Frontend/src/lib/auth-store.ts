@@ -245,22 +245,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           set({ currentUser: user, isAuthenticated: true });
           console.log('Teacher login successful:', user);
           
-          // Auto check-in teacher on login
-          try {
-            await fetch(`${API_BASE_URL}/attendance`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                userType: 'teacher',
-                teacherId: teacherData._id,
-                teacherName: teacherData.name,
-                status: 'present'
-              }),
-            });
-            console.log('Teacher auto check-in successful');
-          } catch (error) {
-            console.error('Error auto checking in teacher:', error);
-          }
+          // Note: Teacher attendance is automatically marked by the backend during login
+          // No need for separate frontend API call
           
           return { success: true, user };
         } else if (teacherResponse.status !== 404) {
