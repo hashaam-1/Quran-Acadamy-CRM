@@ -376,7 +376,7 @@ export default function Schedule() {
                   </div>
 
                   {/* Time Slots Grid */}
-                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0 border border-l-0 border-t-0">
+                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0 border border-l-0 border-t-0 border-r-0">
                     {timeSlots.map((slot) => (
                       <React.Fragment key={slot.hour}>
                         {/* Time Label */}
@@ -411,9 +411,13 @@ export default function Schedule() {
                                     <div
                                       key={schedule.id || schedule._id || idx}
                                       className={cn(
-                                        "bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer",
+                                        "border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer",
                                         courseBlockColors[schedule.course as keyof typeof courseBlockColors] && 
-                                        `border-l-4 border-l-[${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}]`
+                                        `bg-opacity-20 border-l-4 border-l-[${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}]`,
+                                        schedule.course === 'Qaida' && 'bg-blue-100',
+                                        schedule.course === 'Nazra' && 'bg-green-100',
+                                        schedule.course === 'Hifz' && 'bg-yellow-100',
+                                        schedule.course === 'Tajweed' && 'bg-purple-100'
                                       )}
                                       onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                     >
