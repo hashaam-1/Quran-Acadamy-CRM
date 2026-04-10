@@ -356,88 +356,122 @@ export default function Schedule() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <div className="min-w-[1200px]">
-              {/* Schedule List - Original Design */}
-              <div className="space-y-4">
-                {filteredSchedules.length === 0 ? (
-                  <Card className="p-8 text-center">
-                    <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No classes scheduled</h3>
-                    <p className="text-muted-foreground">
-                      {teacherFilter === "all" 
-                        ? "No classes found for the selected week."
-                        : "No classes found for this teacher in the selected week."
-                      }
-                    </p>
-                  </Card>
-                ) : (
-                  filteredSchedules.map((schedule, idx) => (
-                    <Card
-                      key={schedule.id || schedule._id || idx}
-                      variant="interactive"
-                      className={cn("overflow-hidden", statusConfig[schedule.status].color)}
-                      onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
-                    >
-                      <CardContent className="p-0">
-                        <div className="p-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge className={cn("text-xs font-semibold", courseColors[schedule.course as keyof typeof courseColors])}>
-                                  {schedule.course}
-                                </Badge>
-                                <Badge 
-                                  variant={statusConfig[schedule.status].variant === "default" ? "default" : "secondary"}
-                                  className="text-xs"
-                                >
-                                  {statusConfig[schedule.status].label}
-                                </Badge>
-                              </div>
-                              <h3 className="font-semibold text-lg mb-1">{schedule.studentName}</h3>
-                              <p className="text-sm text-muted-foreground mb-2">{schedule.teacherName}</p>
-                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>{schedule.day}</span>
+              {/* Schedule Grid View */}
+              <div className="overflow-x-auto">
+                <div className="min-w-[1200px]">
+                  {/* Grid Header */}
+                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0 border-b bg-muted/30">
+                    <div className="p-3 border-r font-medium text-sm">Time</div>
+                    {weekDays.map((day, index) => (
+                      <div
+                        key={day}
+                        className={cn(
+                          "p-3 border-r text-center font-medium text-sm",
+                          index === 6 && "border-r-0"
+                        )}
+                      >
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Time Slots Grid */}
+                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0">
+                    {timeSlots.map((slot) => (
+                      <React.Fragment key={slot.hour}>
+                        {/* Time Label */}
+                        <div className="h-[100px] border-r border-b flex items-center justify-center p-3 bg-muted/20">
+                          <span className="text-sm text-muted-foreground font-medium">
+                            {slot.label}
+                          </span>
+                        </div>
+
+                        {/* Day Columns */}
+                        {weekDays.map((day) => {
+                          const schedulesInSlot = getSchedulesByDay(day).filter(schedule => {
+                            const scheduleHour = parseTimeToHour(schedule.time);
+                            const duration = parseDuration(schedule.duration);
+                            return slot.hour >= scheduleHour && slot.hour < scheduleHour + duration;
+                          });
+
+                          const isToday = weekDates.find(d => d.day === day)?.isToday;
+
+                          return (
+                            <div
+                              key={`${day}-${slot.hour}`}
+                              className={cn(
+                                "h-[100px] border-r border-b relative",
+                                isToday && "bg-primary/5",
+                                slot.hour === 6 && "border-t-2"
+                              )}
+                            >
+                              {schedulesInSlot.length > 0 ? (
+                                <div className="p-2 h-full overflow-y-auto">
+                                  {schedulesInSlot.map((schedule, idx) => (
+                                    <div
+                                      key={schedule.id || schedule._id || idx}
+                                      className={cn(
+                                        "bg-white border rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer",
+                                        courseBlockColors[schedule.course as keyof typeof courseBlockColors] && 
+                                        `border-l-4 border-l-[${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}]`
+                                      )}
+                                      onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
+                                    >
+                                      <div className="flex items-start justify-between gap-2 mb-1">
+                                        <Badge 
+                                          className={cn(
+                                            "text-xs font-semibold shrink-0",
+                                            courseColors[schedule.course as keyof typeof courseColors]
+                                          )}
+                                        >
+                                          {schedule.course}
+                                        </Badge>
+                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-5 w-5 p-0"
+                                            onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsEditOpen(true); }}
+                                          >
+                                            <Pencil className="h-3 w-3" />
+                                          </Button>
+                                          <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-5 w-5 p-0 text-destructive"
+                                            onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsDeleteOpen(true); }}
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                      <h4 className="font-semibold text-xs truncate mb-1">{schedule.studentName}</h4>
+                                      <p className="text-xs text-muted-foreground truncate mb-1">{schedule.teacherName}</p>
+                                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                        <Clock className="h-3 w-3 shrink-0" />
+                                        <span>{schedule.time}</span>
+                                        <span className="shrink-0">â¢</span>
+                                        <span className="shrink-0">{schedule.duration}</span>
+                                      </div>
+                                      {schedule.status === "in_progress" && (
+                                        <Button size="sm" variant="success" className="h-5 text-xs mt-1 w-full">
+                                          <Video className="h-3 w-3 mr-1" />
+                                          Join
+                                        </Button>
+                                      )}
+                                    </div>
+                                  ))}
                                 </div>
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-4 w-4" />
-                                  <span>{schedule.time}</span>
-                                </div>
-                                <span>{schedule.duration}</span>
-                              </div>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <div className="flex gap-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsEditOpen(true); }}
-                                >
-                                  <Pencil className="h-4 w-4 mr-1" />
-                                  Edit
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsDeleteOpen(true); }}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-1" />
-                                  Delete
-                                </Button>
-                              </div>
-                              {schedule.status === "in_progress" && (
-                                <Button size="sm" variant="success">
-                                  <Video className="h-4 w-4 mr-2" />
-                                  Join Now
-                                </Button>
+                              ) : (
+                                <div className="h-full bg-gray-50 hover:bg-gray-100 transition-colors"></div>
                               )}
                             </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
+                          );
+                        })}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
