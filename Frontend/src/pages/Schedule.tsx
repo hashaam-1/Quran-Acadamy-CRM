@@ -356,19 +356,19 @@ export default function Schedule() {
                 ))}
               </div>
 
-              {/* Responsive Time Slots Grid */}
+              {/* Schedule Class Matrix - Previous List Design */}
               <div className="overflow-x-auto">
-                <div className="min-w-[800px]">
-                  {/* CSS Grid Matrix */}
-                  <div className="grid grid-cols-[80px_repeat(7,1fr)] gap-0 border-t border-l">
+                <div className="min-w-[1200px]">
+                  {/* CSS Grid Matrix - Adjusted for Schedule Class Size */}
+                  <div className="grid grid-cols-[100px_repeat(7,1fr)] gap-0 border-t border-l">
                     {/* Time Labels Column */}
                     <div className="col-span-1">
                       {timeSlots.map((slot) => (
                         <div 
                           key={slot.hour} 
-                          className="h-[80px] md:h-[100px] border-r border-b flex items-center justify-center p-2 bg-muted/50"
+                          className="h-[120px] border-r border-b flex items-center justify-center p-3 bg-muted/30"
                         >
-                          <span className="text-xs md:text-sm text-muted-foreground font-medium">
+                          <span className="text-sm text-muted-foreground font-medium">
                             {slot.label}
                           </span>
                         </div>
@@ -387,12 +387,12 @@ export default function Schedule() {
                             <div
                               key={`${day}-${slot.hour}`}
                               className={cn(
-                                "h-[80px] md:h-[100px] border-r border-b relative overflow-hidden",
+                                "h-[120px] border-r border-b relative overflow-hidden",
                                 isToday && "bg-primary/5"
                               )}
                             >
                               {hasSchedule ? (
-                                <div className="absolute inset-0 p-1">
+                                <div className="absolute inset-0 p-2">
                                   {schedulesInSlot.map((schedule, idx) => {
                                     const scheduleHour = parseTimeToHour(schedule.time);
                                     const isFirstSlot = slot.hour === scheduleHour;
@@ -401,31 +401,31 @@ export default function Schedule() {
                                     if (!isFirstSlot) return null;
 
                                     const duration = parseDuration(schedule.duration);
-                                    const totalHeight = duration * 100; // 100px per hour (responsive via CSS)
+                                    const totalHeight = duration * 120; // 120px per hour for proper card size
 
                                     return (
-                                      <div
+                                      <Card
                                         key={schedule.id || schedule._id || idx}
+                                        variant="interactive"
                                         className={cn(
-                                          "absolute inset-1 rounded-lg border-l-4 shadow-soft hover:shadow-lg transition-all cursor-pointer group overflow-hidden",
+                                          "absolute inset-0 overflow-hidden",
                                           statusConfig[schedule.status].color
                                         )}
                                         style={{
                                           backgroundColor: courseBlockColors[schedule.course as keyof typeof courseBlockColors] ? 
-                                            `${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}60` : 
+                                            `${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}20` : 
                                             'transparent',
-                                          height: `${totalHeight - 8}px`,
+                                          height: `${totalHeight}px`,
                                           zIndex: 10
                                         }}
                                         onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                       >
-                                        {/* Previous Design Schedule Slot */}
-                                        <div className="p-2 md:p-3 h-full flex flex-col justify-between">
-                                          {/* Header with Badge and Actions */}
-                                          <div className="flex items-start justify-between gap-1 mb-1">
+                                        <CardContent className="p-3 h-full flex flex-col">
+                                          {/* Header - Previous List Design */}
+                                          <div className="flex items-start justify-between gap-2 mb-2">
                                             <Badge 
                                               className={cn(
-                                                "text-xs font-semibold shrink-0",
+                                                "text-xs font-semibold",
                                                 courseColors[schedule.course as keyof typeof courseColors]
                                               )}
                                             >
@@ -435,15 +435,15 @@ export default function Schedule() {
                                               <Button 
                                                 variant="ghost" 
                                                 size="icon" 
-                                                className="h-5 w-5 p-0 hover:bg-white/20"
+                                                className="h-6 w-6 p-0"
                                                 onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsEditOpen(true); }}
                                               >
-                                                <Pencil className="h-3 w-3 text-white" />
+                                                <Pencil className="h-3 w-3" />
                                               </Button>
                                               <Button 
                                                 variant="ghost" 
                                                 size="icon" 
-                                                className="h-5 w-5 p-0 text-red-200 hover:text-red-400"
+                                                className="h-6 w-6 p-0 text-destructive"
                                                 onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsDeleteOpen(true); }}
                                               >
                                                 <Trash2 className="h-3 w-3" />
@@ -451,43 +451,35 @@ export default function Schedule() {
                                             </div>
                                           </div>
 
-                                          {/* Content */}
+                                          {/* Content - Previous List Design */}
                                           <div className="flex-1 min-h-0">
-                                            <p className="font-semibold text-sm md:text-base text-white truncate mb-1">
-                                              {schedule.studentName}
-                                            </p>
-                                            <p className="text-xs md:text-sm text-white/90 truncate mb-2">
-                                              {schedule.teacherName}
-                                            </p>
+                                            <h3 className="font-semibold text-sm truncate mb-1">{schedule.studentName}</h3>
+                                            <p className="text-xs text-muted-foreground truncate mb-2">{schedule.teacherName}</p>
                                           </div>
 
-                                          {/* Footer with Time and Actions */}
-                                          <div className="space-y-1">
-                                            <div className="flex items-center gap-1 text-xs text-white/80">
-                                              <Clock className="h-3 w-3 shrink-0" />
-                                              <span className="truncate">{schedule.time}</span>
-                                              <span className="shrink-0">â¢</span>
-                                              <span className="shrink-0">{schedule.duration}</span>
+                                          {/* Footer - Previous List Design */}
+                                          <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                              <Clock className="h-3 w-3" />
+                                              <span>{schedule.time}</span>
+                                              <span>â¢</span>
+                                              <span>{schedule.duration}</span>
                                             </div>
                                             
                                             {schedule.status === "in_progress" && (
-                                              <Button 
-                                                size="sm" 
-                                                variant="success" 
-                                                className="w-full h-6 md:h-7 text-xs bg-green-500 hover:bg-green-600 text-white border-0"
-                                              >
+                                              <Button size="sm" variant="success" className="h-6 text-xs">
                                                 <Video className="h-3 w-3 mr-1" />
-                                                Join Now
+                                                Join
                                               </Button>
                                             )}
                                           </div>
-                                        </div>
-                                      </div>
+                                        </CardContent>
+                                      </Card>
                                     );
                                   })}
                                 </div>
                               ) : (
-                                <div className="h-full bg-gray-50/80 hover:bg-gray-100/80 transition-colors"></div>
+                                <div className="h-full bg-gray-50 hover:bg-gray-100 transition-colors"></div>
                               )}
                             </div>
                           );
