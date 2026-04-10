@@ -32,6 +32,7 @@ import {
   Trash2,
   Grid3x3,
   List,
+  ClipboardCheck,
 } from "lucide-react";
 import { ClassSchedule } from "@/lib/store";
 import { ScheduleForm } from "@/components/forms/ScheduleForm";
