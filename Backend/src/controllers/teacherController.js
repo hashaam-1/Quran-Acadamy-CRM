@@ -29,6 +29,7 @@ exports.teacherLogin = async (req, res) => {
     // Auto-mark teacher attendance on login (check-in or check-out)
     // Wrap in try-catch to prevent attendance issues from breaking login
     try {
+      const now = new Date();
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const endOfDay = new Date();
@@ -85,7 +86,6 @@ exports.teacherLogin = async (req, res) => {
       }
 
       // Get current time with proper formatting
-      const now = new Date();
       const hours = now.getHours();
       const minutes = now.getMinutes();
       const seconds = now.getSeconds();
@@ -93,7 +93,7 @@ exports.teacherLogin = async (req, res) => {
       const displayHours = hours % 12 || 12;
       const actualTime = `${displayHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${ampm}`;
 
-      console.log(`Current time: ${actualTime}`);
+      console.log(`Current time: ${actualTime}, Current date: ${now.toISOString()}`);
 
       if (existingAttendance) {
         console.log(`Existing attendance found: checkIn=${existingAttendance.checkInTime}, checkOut=${existingAttendance.checkOutTime}`);
@@ -123,7 +123,7 @@ exports.teacherLogin = async (req, res) => {
           userType: 'teacher',
           teacherId: teacher._id,
           teacherName: teacher.name,
-          date: today, // Use today's date at midnight for proper comparison
+          date: now, // Use current date/time for proper sorting
           checkInTime: actualTime,
           status: 'present'
         });

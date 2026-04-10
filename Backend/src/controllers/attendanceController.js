@@ -25,7 +25,7 @@ exports.getAttendance = async (req, res) => {
     const attendance = await Attendance.find(filter)
       .populate('studentId', 'name email')
       .populate('teacherId', 'name email')
-      .sort({ date: -1, checkInTime: -1, createdAt: -1 });
+      .sort({ date: -1, createdAt: -1 });
 
     // Map _id to id for frontend compatibility
     const mappedAttendance = attendance.map(record => ({
