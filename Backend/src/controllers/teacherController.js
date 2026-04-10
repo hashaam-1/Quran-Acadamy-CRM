@@ -27,39 +27,48 @@ exports.teacherLogin = async (req, res) => {
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
 
-    // Find or create single attendance record for today
-    console.log(`Teacher ${teacher.name} login - checking attendance for today`);
-    
-    let existingAttendance = await Attendance.findOne({
+    console.log(`Teacher ${teacher.name} login - checking attendance for today ${today.toISOString()}`);
+
+    // First, clean up ALL duplicate records for this teacher today
+    const allTodayRecords = await Attendance.find({
       teacherId: teacher._id,
       userType: 'teacher',
       date: { $gte: today, $lte: endOfDay }
-    });
+    }).sort({ createdAt: 1 });
 
-    // Clean up any duplicate records if they exist
-    if (existingAttendance) {
-      const duplicateRecords = await Attendance.find({
-        _id: { $ne: existingAttendance._id },
-        teacherId: teacher._id,
-        userType: 'teacher',
-        date: { $gte: today, $lte: endOfDay }
-      });
+    console.log(`Found ${allTodayRecords.length} attendance records for teacher ${teacher.name} today`);
+
+    let existingAttendance = null;
+    
+    if (allTodayRecords.length > 0) {
+      // Use the first record as the main one and merge others
+      existingAttendance = allTodayRecords[0];
+      console.log(`Using record ${existingAttendance._id} as main record`);
       
-      if (duplicateRecords.length > 0) {
-        console.log(`Found ${duplicateRecords.length} duplicate records, cleaning up...`);
-        // Merge any check-in/check-out times from duplicates
-        for (const duplicate of duplicateRecords) {
-          if (duplicate.checkInTime && !existingAttendance.checkInTime) {
-            existingAttendance.checkInTime = duplicate.checkInTime;
-          }
-          if (duplicate.checkOutTime && !existingAttendance.checkOutTime) {
-            existingAttendance.checkOutTime = duplicate.checkOutTime;
-          }
-          await Attendance.findByIdAndDelete(duplicate._id);
+      // Merge data from other records and delete them
+      for (let i = 1; i < allTodayRecords.length; i++) {
+        const duplicate = allTodayRecords[i];
+        console.log(`Merging and deleting duplicate record ${duplicate._id}`);
+        
+        // Merge check-in time if main record doesn't have it
+        if (!existingAttendance.checkInTime && duplicate.checkInTime) {
+          existingAttendance.checkInTime = duplicate.checkInTime;
+          console.log(`Merged checkInTime: ${duplicate.checkInTime}`);
         }
-        await existingAttendance.save();
-        console.log(`Cleaned up duplicates and merged data`);
+        
+        // Merge check-out time if main record doesn't have it
+        if (!existingAttendance.checkOutTime && duplicate.checkOutTime) {
+          existingAttendance.checkOutTime = duplicate.checkOutTime;
+          console.log(`Merged checkOutTime: ${duplicate.checkOutTime}`);
+        }
+        
+        // Delete the duplicate
+        await Attendance.findByIdAndDelete(duplicate._id);
       }
+      
+      // Save the merged record
+      await existingAttendance.save();
+      console.log(`Successfully merged ${allTodayRecords.length} records into one`);
     }
 
     // Get current time with proper formatting
@@ -70,6 +79,8 @@ exports.teacherLogin = async (req, res) => {
     const ampm = hours >= 12 ? 'PM' : 'AM';
     const displayHours = hours % 12 || 12;
     const actualTime = `${displayHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${ampm}`;
+
+    console.log(`Current time: ${actualTime}`);
 
     if (existingAttendance) {
       console.log(`Existing attendance found: checkIn=${existingAttendance.checkInTime}, checkOut=${existingAttendance.checkOutTime}`);

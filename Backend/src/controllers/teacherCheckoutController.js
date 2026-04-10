@@ -15,11 +15,49 @@ exports.teacherCheckout = async (req, res) => {
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
 
-    const attendance = await Attendance.findOne({
+    console.log(`Teacher checkout - finding attendance for teacher ${teacherId}`);
+
+    // First, clean up ALL duplicate records for this teacher today
+    const allTodayRecords = await Attendance.find({
       teacherId,
       userType: 'teacher',
       date: { $gte: today, $lte: endOfDay }
-    });
+    }).sort({ createdAt: 1 });
+
+    console.log(`Found ${allTodayRecords.length} attendance records for teacher checkout`);
+
+    let attendance = null;
+    
+    if (allTodayRecords.length > 0) {
+      // Use the first record as the main one and merge others
+      attendance = allTodayRecords[0];
+      console.log(`Using record ${attendance._id} as main record for checkout`);
+      
+      // Merge data from other records and delete them
+      for (let i = 1; i < allTodayRecords.length; i++) {
+        const duplicate = allTodayRecords[i];
+        console.log(`Merging and deleting duplicate record ${duplicate._id} during checkout`);
+        
+        // Merge check-in time if main record doesn't have it
+        if (!attendance.checkInTime && duplicate.checkInTime) {
+          attendance.checkInTime = duplicate.checkInTime;
+          console.log(`Merged checkInTime: ${duplicate.checkInTime}`);
+        }
+        
+        // Merge check-out time if main record doesn't have it
+        if (!attendance.checkOutTime && duplicate.checkOutTime) {
+          attendance.checkOutTime = duplicate.checkOutTime;
+          console.log(`Merged checkOutTime: ${duplicate.checkOutTime}`);
+        }
+        
+        // Delete the duplicate
+        await Attendance.findByIdAndDelete(duplicate._id);
+      }
+      
+      // Save the merged record
+      await attendance.save();
+      console.log(`Successfully merged ${allTodayRecords.length} records into one for checkout`);
+    }
 
     if (!attendance) {
       return res.status(404).json({ message: 'No attendance record found for today. Please check in first.' });
