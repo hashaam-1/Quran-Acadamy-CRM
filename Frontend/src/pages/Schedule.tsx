@@ -356,17 +356,17 @@ export default function Schedule() {
                 ))}
               </div>
 
-              {/* Schedule Class Matrix - Previous List Design */}
+              {/* Schedule Class Matrix - Original Compact Design */}
               <div className="overflow-x-auto">
                 <div className="min-w-[1200px]">
-                  {/* CSS Grid Matrix - Adjusted for Schedule Class Size */}
+                  {/* CSS Grid Matrix */}
                   <div className="grid grid-cols-[100px_repeat(7,1fr)] gap-0 border-t border-l">
                     {/* Time Labels Column */}
                     <div className="col-span-1">
                       {timeSlots.map((slot) => (
                         <div 
                           key={slot.hour} 
-                          className="h-[120px] border-r border-b flex items-center justify-center p-3 bg-muted/30"
+                          className="h-[120px] border-r border-b flex items-center justify-center p-2 bg-muted/30"
                         >
                           <span className="text-sm text-muted-foreground font-medium">
                             {slot.label}
@@ -392,7 +392,7 @@ export default function Schedule() {
                               )}
                             >
                               {hasSchedule ? (
-                                <div className="absolute inset-0 p-2">
+                                <div className="absolute inset-0">
                                   {schedulesInSlot.map((schedule, idx) => {
                                     const scheduleHour = parseTimeToHour(schedule.time);
                                     const isFirstSlot = slot.hour === scheduleHour;
@@ -401,7 +401,7 @@ export default function Schedule() {
                                     if (!isFirstSlot) return null;
 
                                     const duration = parseDuration(schedule.duration);
-                                    const totalHeight = duration * 120; // 120px per hour for proper card size
+                                    const totalHeight = duration * 120; // 120px per hour
 
                                     return (
                                       <Card
@@ -420,12 +420,12 @@ export default function Schedule() {
                                         }}
                                         onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                       >
-                                        <CardContent className="p-3 h-full flex flex-col">
-                                          {/* Header - Previous List Design */}
-                                          <div className="flex items-start justify-between gap-2 mb-2">
+                                        <CardContent className="p-2 h-full flex flex-col">
+                                          {/* Header */}
+                                          <div className="flex items-start justify-between gap-2 mb-1">
                                             <Badge 
                                               className={cn(
-                                                "text-xs font-semibold",
+                                                "text-xs font-semibold shrink-0",
                                                 courseColors[schedule.course as keyof typeof courseColors]
                                               )}
                                             >
@@ -435,7 +435,7 @@ export default function Schedule() {
                                               <Button 
                                                 variant="ghost" 
                                                 size="icon" 
-                                                className="h-6 w-6 p-0"
+                                                className="h-5 w-5 p-0"
                                                 onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsEditOpen(true); }}
                                               >
                                                 <Pencil className="h-3 w-3" />
@@ -443,7 +443,7 @@ export default function Schedule() {
                                               <Button 
                                                 variant="ghost" 
                                                 size="icon" 
-                                                className="h-6 w-6 p-0 text-destructive"
+                                                className="h-5 w-5 p-0 text-destructive"
                                                 onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsDeleteOpen(true); }}
                                               >
                                                 <Trash2 className="h-3 w-3" />
@@ -451,23 +451,23 @@ export default function Schedule() {
                                             </div>
                                           </div>
 
-                                          {/* Content - Previous List Design */}
+                                          {/* Content */}
                                           <div className="flex-1 min-h-0">
                                             <h3 className="font-semibold text-sm truncate mb-1">{schedule.studentName}</h3>
-                                            <p className="text-xs text-muted-foreground truncate mb-2">{schedule.teacherName}</p>
+                                            <p className="text-xs text-muted-foreground truncate">{schedule.teacherName}</p>
                                           </div>
 
-                                          {/* Footer - Previous List Design */}
-                                          <div className="flex items-center justify-between">
+                                          {/* Footer */}
+                                          <div className="flex items-center justify-between mt-1">
                                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                              <Clock className="h-3 w-3" />
-                                              <span>{schedule.time}</span>
-                                              <span>â¢</span>
-                                              <span>{schedule.duration}</span>
+                                              <Clock className="h-3 w-3 shrink-0" />
+                                              <span className="truncate">{schedule.time}</span>
+                                              <span className="shrink-0">â¢</span>
+                                              <span className="shrink-0">{schedule.duration}</span>
                                             </div>
                                             
                                             {schedule.status === "in_progress" && (
-                                              <Button size="sm" variant="success" className="h-6 text-xs">
+                                              <Button size="sm" variant="success" className="h-5 text-xs px-2">
                                                 <Video className="h-3 w-3 mr-1" />
                                                 Join
                                               </Button>
