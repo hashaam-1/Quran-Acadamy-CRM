@@ -360,7 +360,7 @@ export default function Schedule() {
               <div className="overflow-x-auto">
                 <div className="min-w-[1200px]">
                   {/* Grid Header */}
-                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0 border-b bg-muted/30">
+                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0 border border-b bg-muted/30">
                     <div className="p-3 border-r font-medium text-sm">Time</div>
                     {weekDays.map((day, index) => (
                       <div
@@ -376,7 +376,7 @@ export default function Schedule() {
                   </div>
 
                   {/* Time Slots Grid */}
-                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0">
+                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0 border border-l-0 border-t-0">
                     {timeSlots.map((slot) => (
                       <React.Fragment key={slot.hour}>
                         {/* Time Label */}
@@ -387,7 +387,7 @@ export default function Schedule() {
                         </div>
 
                         {/* Day Columns */}
-                        {weekDays.map((day) => {
+                        {weekDays.map((day, dayIndex) => {
                           const schedulesInSlot = getSchedulesByDay(day).filter(schedule => {
                             const scheduleHour = parseTimeToHour(schedule.time);
                             const duration = parseDuration(schedule.duration);
@@ -402,7 +402,7 @@ export default function Schedule() {
                               className={cn(
                                 "min-h-[140px] border-r border-b relative",
                                 isToday && "bg-primary/5",
-                                slot.hour === 6 && "border-t-2"
+                                dayIndex === 6 && "border-r-0"
                               )}
                             >
                               {schedulesInSlot.length > 0 ? (
