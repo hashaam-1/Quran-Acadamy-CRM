@@ -232,11 +232,32 @@ exports.getStudentsStats = async (req, res) => {
 // Get students by teacher
 exports.getStudentsByTeacher = async (req, res) => {
   try {
-    const students = await Student.find({ teacherId: req.params.teacherId })
+    const teacherId = req.params.teacherId;
+    console.log(`getStudentsByTeacher called with teacherId: ${teacherId}`);
+    
+    // First, let's see all students to debug
+    const allStudents = await Student.find({});
+    console.log(`Total students in database: ${allStudents.length}`);
+    console.log('All students with teacherId:', allStudents.map(s => ({
+      name: s.name,
+      teacherId: s.teacherId,
+      teacher: s.teacher
+    })));
+    
+    const students = await Student.find({ teacherId: teacherId })
       .populate('teacherId', 'name email')
       .sort({ createdAt: -1 });
+    
+    console.log(`Found ${students.length} students for teacher ${teacherId}`);
+    console.log('Students found:', students.map(s => ({
+      name: s.name,
+      teacherId: s.teacherId,
+      teacher: s.teacher
+    })));
+    
     res.json(students);
   } catch (error) {
+    console.error('Error in getStudentsByTeacher:', error);
     res.status(500).json({ message: error.message });
   }
 };
