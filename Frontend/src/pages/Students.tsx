@@ -110,7 +110,7 @@ export default function Students() {
     let matchesRole = true;
     if (currentUser?.role === 'teacher') {
       // Teachers can only see their assigned students
-      matchesRole = s.teacherId === (currentUser as any).teacherId || s.teacherId === currentUser.id;
+      matchesRole = s.teacherId === currentUser.id || s.teacher === currentUser.name;
     } else if (currentUser?.role === 'student') {
       // Students can only see themselves
       matchesRole = s.id === currentUser.id || s.userId === currentUser.email;
