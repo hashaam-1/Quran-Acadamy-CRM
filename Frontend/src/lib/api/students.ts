@@ -28,7 +28,9 @@ export const studentsApi = {
   },
 
   getByTeacher: async (teacherId: string) => {
+    console.log('studentsApi.getByTeacher - Making request:', { teacherId, url: `/students/teacher/${teacherId}` });
     const { data } = await api.get(`/students/teacher/${teacherId}`);
+    console.log('studentsApi.getByTeacher - Response:', data);
     return data;
   },
 

@@ -25,7 +25,9 @@ export const useStudentsByTeacher = (teacherId: string) => {
   return useQuery({
     queryKey: ['students', 'teacher', teacherId],
     queryFn: async () => {
+      console.log('useStudentsByTeacher - API call:', { teacherId });
       const data = await studentsApi.getByTeacher(teacherId);
+      console.log('useStudentsByTeacher - API response:', data);
       return Array.isArray(data) ? data : [];
     },
     enabled: !!teacherId,

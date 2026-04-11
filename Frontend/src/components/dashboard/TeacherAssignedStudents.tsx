@@ -20,6 +20,14 @@ export function TeacherAssignedStudents() {
   const { currentUser } = useAuthStore();
   const { data: allSchedules = [], isLoading: schedulesLoading } = useSchedules();
   
+  // Debug current user info
+  console.log('TeacherAssignedStudents - Current user:', {
+    role: currentUser?.role,
+    id: currentUser?.id,
+    name: currentUser?.name,
+    teacherId: (currentUser as any)?._id || (currentUser as any)?.teacherId
+  });
+  
   // Use different hooks based on user role
   const { data: allStudents = [], isLoading: studentsLoading } = currentUser?.role === 'teacher' 
     ? useStudentsByTeacher(currentUser?.id || '')
@@ -27,6 +35,17 @@ export function TeacherAssignedStudents() {
 
   const teacherId = currentUser?.id || (currentUser as any)?._id || (currentUser as any)?.teacherId;
   const teacherName = currentUser?.name;
+
+  // Debug API call results
+  console.log('TeacherAssignedStudents - Data:', {
+    isTeacher: currentUser?.role === 'teacher',
+    teacherId,
+    teacherName,
+    studentsLoading,
+    schedulesLoading,
+    allStudentsCount: allStudents.length,
+    allStudents: allStudents
+  });
 
   // For teachers, students are already filtered by backend, for others we need to filter
   const assignedStudents = currentUser?.role === 'teacher' 
@@ -37,6 +56,12 @@ export function TeacherAssignedStudents() {
           : student.teacherId;
         return studentTeacherId === teacherId || student.teacher === teacherName;
       });
+
+  // Debug assigned students
+  console.log('TeacherAssignedStudents - Assigned students:', {
+    assignedStudentsCount: assignedStudents.length,
+    assignedStudents
+  });
 
   // Get today's schedules for these students
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
