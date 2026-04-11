@@ -70,14 +70,16 @@ exports.teacherCheckout = async (req, res) => {
       });
     }
 
-    // Set checkout time with proper formatting
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
+    // Set checkout time with proper formatting (using local timezone)
+    const localNow = new Date();
+    const hours = localNow.getHours();
+    const minutes = localNow.getMinutes();
+    const seconds = localNow.getSeconds();
     const ampm = hours >= 12 ? 'PM' : 'AM';
     const displayHours = hours % 12 || 12;
     attendance.checkOutTime = `${displayHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${ampm}`;
+    
+    console.log(`Teacher checkout - local time: ${attendance.checkOutTime}, UTC time: ${new Date().toISOString()}`);
     
     await attendance.save();
 

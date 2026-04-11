@@ -85,15 +85,16 @@ exports.teacherLogin = async (req, res) => {
         console.log(`Successfully merged ${allTodayRecords.length} records into one`);
       }
 
-      // Get current time with proper formatting
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-      const seconds = now.getSeconds();
+      // Get current time with proper formatting (using local timezone)
+      const localNow = new Date();
+      const hours = localNow.getHours();
+      const minutes = localNow.getMinutes();
+      const seconds = localNow.getSeconds();
       const ampm = hours >= 12 ? 'PM' : 'AM';
       const displayHours = hours % 12 || 12;
       const actualTime = `${displayHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${ampm}`;
 
-      console.log(`Current time: ${actualTime}, Current date: ${now.toISOString()}`);
+      console.log(`Current local time: ${actualTime}, Current UTC date: ${now.toISOString()}, Local timezone offset: ${localNow.getTimezoneOffset()} minutes`);
 
       if (existingAttendance) {
         console.log(`Existing attendance found: checkIn=${existingAttendance.checkInTime}, checkOut=${existingAttendance.checkOutTime}`);
