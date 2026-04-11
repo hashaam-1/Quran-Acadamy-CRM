@@ -454,7 +454,7 @@ export default function Schedule() {
                                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                                         <Clock className="h-3 w-3 shrink-0" />
                                         <span>{schedule.time}</span>
-                                        <span className="shrink-0">â¢</span>
+                                        <span className="shrink-0">•</span>
                                         <span className="shrink-0">{schedule.duration}</span>
                                       </div>
                                       {schedule.status === "in_progress" && (
