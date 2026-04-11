@@ -36,7 +36,7 @@ import {
 import { Plus, Search, BookOpen, Clock, Calendar, User, Globe, Star, Pencil, Trash2, MessageSquare, Key, Eye, EyeOff, Send, Copy, Check, Mail, UserPlus } from "lucide-react";
 import { Student } from "@/lib/store";
 import { useAuthStore } from "@/lib/auth-store";
-import { useStudents, useCreateStudent, useUpdateStudent, useDeleteStudent } from "@/hooks/useStudents";
+import { useStudents, useStudentsByTeacher, useCreateStudent, useUpdateStudent, useDeleteStudent } from "@/hooks/useStudents";
 import { useTeachers } from "@/hooks/useTeachers";
 import { useCreateChat, useSendMessage } from "@/hooks/useChats";
 import { toast } from "sonner";
@@ -64,6 +64,7 @@ const emptyStudent: Omit<Student, "id"> = {
   teacher: "", 
   teacherId: "",
   email: "",
+  password: "",
   userId: "",
   schedule: "", 
   progress: 0, 
@@ -73,14 +74,18 @@ const emptyStudent: Omit<Student, "id"> = {
 
 export default function Students() {
   const navigate = useNavigate();
-  const { data: students = [], isLoading: studentsLoading } = useStudents();
+  const { currentUser } = useAuthStore();
   const { data: teachers = [], isLoading: teachersLoading } = useTeachers();
+  
+  // Use different hooks based on user role
+  const { data: students = [], isLoading: studentsLoading } = currentUser?.role === 'teacher' 
+    ? useStudentsByTeacher(currentUser?.id || '') 
+    : useStudents();
   const createStudent = useCreateStudent();
   const createChatMutation = useCreateChat();
   const sendMessageMutation = useSendMessage();
   const updateStudentMutation = useUpdateStudent();
   const deleteStudentMutation = useDeleteStudent();
-  const { currentUser } = useAuthStore();
   const canAddStudent = currentUser?.role !== 'teacher';
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
