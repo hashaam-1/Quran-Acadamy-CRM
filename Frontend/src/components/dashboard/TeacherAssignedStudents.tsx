@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { User, TrendingUp, MessageSquare, BookOpen, Clock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { useStudents } from "@/hooks/useStudents";
+import { useStudents, useStudentsByTeacher } from "@/hooks/useStudents";
 import { useSchedules } from "@/hooks/useSchedules";
 import { useAuthStore } from "@/lib/auth-store";
 
@@ -18,19 +18,25 @@ const statusConfig = {
 
 export function TeacherAssignedStudents() {
   const { currentUser } = useAuthStore();
-  const { data: allStudents = [], isLoading: studentsLoading } = useStudents();
   const { data: allSchedules = [], isLoading: schedulesLoading } = useSchedules();
+  
+  // Use different hooks based on user role
+  const { data: allStudents = [], isLoading: studentsLoading } = currentUser?.role === 'teacher' 
+    ? useStudentsByTeacher(currentUser?.id || '')
+    : useStudents();
 
   const teacherId = currentUser?.id || (currentUser as any)?._id || (currentUser as any)?.teacherId;
   const teacherName = currentUser?.name;
 
-  // Filter students assigned to this teacher
-  const assignedStudents = allStudents.filter(student => {
-    const studentTeacherId = typeof student.teacherId === 'object' && student.teacherId !== null
-      ? (student.teacherId as any)._id || (student.teacherId as any).id
-      : student.teacherId;
-    return studentTeacherId === teacherId || student.teacher === teacherName;
-  });
+  // For teachers, students are already filtered by backend, for others we need to filter
+  const assignedStudents = currentUser?.role === 'teacher' 
+    ? allStudents 
+    : allStudents.filter(student => {
+        const studentTeacherId = typeof student.teacherId === 'object' && student.teacherId !== null
+          ? (student.teacherId as any)._id || (student.teacherId as any).id
+          : student.teacherId;
+        return studentTeacherId === teacherId || student.teacher === teacherName;
+      });
 
   // Get today's schedules for these students
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
