@@ -235,20 +235,33 @@ exports.getStudentsByTeacher = async (req, res) => {
     const teacherId = req.params.teacherId;
     console.log(`getStudentsByTeacher called with teacherId: ${teacherId}`);
     
-    // First, let's see all students to debug
-    const allStudents = await Student.find({});
-    console.log(`Total students in database: ${allStudents.length}`);
-    console.log('All students with teacherId:', allStudents.map(s => ({
-      name: s.name,
-      teacherId: s.teacherId,
-      teacher: s.teacher
-    })));
+    // First, get the teacher's name to match both by ID and name
+    const Teacher = require('../models/Teacher');
+    const teacher = await Teacher.findById(teacherId);
+    const teacherName = teacher ? teacher.name : null;
     
-    const students = await Student.find({ teacherId: teacherId })
+    console.log(`Teacher found: ${teacherName} for ID: ${teacherId}`);
+    
+    // Find students by either teacherId OR teacher name (to handle legacy data)
+    let filter = {};
+    if (teacherName) {
+      filter = {
+        $or: [
+          { teacherId: teacherId },
+          { teacher: teacherName }
+        ]
+      };
+    } else {
+      filter = { teacherId: teacherId };
+    }
+    
+    console.log('Using filter:', filter);
+    
+    const students = await Student.find(filter)
       .populate('teacherId', 'name email')
       .sort({ createdAt: -1 });
     
-    console.log(`Found ${students.length} students for teacher ${teacherId}`);
+    console.log(`Found ${students.length} students for teacher ${teacherId} (${teacherName})`);
     console.log('Students found:', students.map(s => ({
       name: s.name,
       teacherId: s.teacherId,
