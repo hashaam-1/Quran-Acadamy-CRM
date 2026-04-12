@@ -2,7 +2,7 @@ const express = require("express");
 const crypto = require("crypto");
 const router = express.Router();
 
-console.log("ZOOM FILE UPDATED - FORCE DEPLOY CHECK");
+console.log("ZOOM FILE UPDATED - FORCE DEPLOY CHECK - " + new Date().toISOString());
 console.log("zoom.js FILE LOADED - STEP 2 DEBUG");
 console.log("Zoom.js route file loaded - POST /signature-test endpoint available (mounted at /api/zoom)");
 console.log("ACTIVE ZOOM ROUTER LOADED - SINGLE SYSTEM");
