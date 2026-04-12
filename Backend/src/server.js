@@ -69,7 +69,7 @@ app.use('/api/chats', chatRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/syllabus', syllabusRoutes);
 app.use('/api/homework', homeworkRoutes);
-app.use('/api', zoomRoutes);
+app.use('/api/zoom', zoomRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
