@@ -418,7 +418,7 @@ export default function Schedule() {
                                     <div
                                       key={schedule.id || schedule._id || idx}
                                       className={cn(
-                                        "border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer",
+                                        "group border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer",
                                         courseBlockColors[schedule.course as keyof typeof courseBlockColors] && 
                                         `bg-opacity-20 border-l-4 border-l-[${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}]`,
                                         schedule.course === 'Qaida' && 'bg-blue-100',
@@ -428,10 +428,10 @@ export default function Schedule() {
                                       )}
                                       onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                     >
-                                      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10">
                                         <JoinClassButton 
                                           meetingNumber={schedule.meetingNumber || generateMeetingNumber(schedule.id || schedule._id)}
-                                          className="h-6 w-6 p-0"
+                                          className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700 text-white shadow-lg"
                                         />
                                       </div>
                                       <div className="pr-8">
@@ -448,12 +448,10 @@ export default function Schedule() {
                                           <span className="shrink-0">â¢</span>
                                           <span className="shrink-0">{schedule.duration}</span>
                                         </div>
-                                        {schedule.status === "in_progress" && (
-                                          <JoinClassButton 
-                                            meetingNumber={schedule.meetingNumber || generateMeetingNumber(schedule.id || schedule._id)}
-                                            className="h-6 text-xs mt-2 w-full"
-                                          />
-                                        )}
+                                        <JoinClassButton 
+                                          meetingNumber={schedule.meetingNumber || generateMeetingNumber(schedule.id || schedule._id)}
+                                          className="h-6 text-xs mt-2 w-full"
+                                        />
                                       </div>
                                     </div>
                                   ))}
