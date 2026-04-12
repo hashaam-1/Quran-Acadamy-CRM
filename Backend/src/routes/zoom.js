@@ -4,6 +4,7 @@ const router = express.Router();
 
 console.log("ZOOM FILE UPDATED - FORCE DEPLOY CHECK");
 console.log("Zoom.js route file loaded - POST /signature-test endpoint available (mounted at /api/zoom)");
+console.log("ACTIVE ZOOM ROUTER LOADED - SINGLE SYSTEM");
 
 router.post("/signature-test", (req, res) => {
   try {
