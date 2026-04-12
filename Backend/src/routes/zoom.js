@@ -3,10 +3,12 @@ const crypto = require("crypto");
 const router = express.Router();
 
 console.log("ZOOM FILE UPDATED - FORCE DEPLOY CHECK");
+console.log("zoom.js FILE LOADED - STEP 2 DEBUG");
 console.log("Zoom.js route file loaded - POST /signature-test endpoint available (mounted at /api/zoom)");
 console.log("ACTIVE ZOOM ROUTER LOADED - SINGLE SYSTEM");
 
 router.post("/signature-test", (req, res) => {
+  console.log("SIGNATURE ROUTE HIT - STEP 2 DEBUG");
   try {
     const { meetingNumber, role = 0 } = req.body;
 

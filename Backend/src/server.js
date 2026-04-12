@@ -1,3 +1,5 @@
+console.log("SERVER RUNNING FILE ACTIVE - STEP 3 DEBUG");
+
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -32,6 +34,12 @@ console.log("ACTIVE SERVER FILE: Backend/src/server.js - CORRECT FILE RUNNING");
 connectDB();
 
 const app = express();
+
+// Global request logger - STEP 1 DEBUG
+app.use((req, res, next) => {
+  console.log("REQUEST HIT:", req.method, req.url);
+  next();
+});
 
 // Middleware
 app.use(helmet()); // Security headers
