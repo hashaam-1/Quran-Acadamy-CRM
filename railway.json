@@ -1,0 +1,10 @@
+{
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "cd Backend && npm start",
+    "healthcheckPath": "/api/health",
+    "rootDirectory": "Backend"
+  }
+}
