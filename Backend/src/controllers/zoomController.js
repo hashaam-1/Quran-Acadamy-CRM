@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 // Zoom Meeting SDK signature generation
 exports.generateSignature = async (req, res) => {
   try {
+    console.log('Zoom signature request received:', { meetingNumber, role });
     const { meetingNumber, role } = req.body;
     
     // Zoom SDK credentials from environment
