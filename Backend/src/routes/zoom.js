@@ -2,6 +2,8 @@ const express = require("express");
 const crypto = require("crypto");
 const router = express.Router();
 
+console.log("Zoom.js route file loaded - POST /zoom/signature endpoint available");
+
 router.post("/zoom/signature", (req, res) => {
   try {
     const { meetingNumber, role = 0 } = req.body;
