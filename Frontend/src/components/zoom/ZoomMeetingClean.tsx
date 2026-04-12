@@ -9,7 +9,7 @@ import { useAuthStore } from '@/lib/auth-store';
 import { toast } from 'sonner';
 
 // Import Zoom Meeting SDK from npm package - NO CDN LOADING
-import { ZoomMtgEmbedded } from '@zoom/meetingsdk';
+import { ZoomMtg } from '@zoom/meetingsdk';
 
 interface MeetingConfig {
   meetingNumber: string;
@@ -41,8 +41,8 @@ export default function JoinClassButtonClean({
       try {
         console.log('Initializing Zoom SDK from npm package...');
         
-        // Check if ZoomMtgEmbedded is available
-        if (typeof ZoomMtgEmbedded !== 'undefined') {
+        // Check if ZoomMtg is available
+        if (typeof ZoomMtg !== 'undefined') {
           console.log('Zoom SDK available from npm package');
           setSdkLoaded(true);
           return;
@@ -50,7 +50,7 @@ export default function JoinClassButtonClean({
 
         console.log('Zoom SDK not available, checking imports...');
         setTimeout(() => {
-          if (typeof ZoomMtgEmbedded !== 'undefined') {
+          if (typeof ZoomMtg !== 'undefined') {
             console.log('Zoom SDK initialized successfully from npm package');
             setSdkLoaded(true);
           } else {
@@ -143,27 +143,43 @@ export default function JoinClassButtonClean({
 
       console.log('Joining Zoom meeting with correct API...');
       
-      // Create Zoom client using correct v6.0.0 API
-      const client = ZoomMtgEmbedded.createClient();
+      // Initialize Zoom SDK
+      ZoomMtg.setZoomJSLib('https://source.zoom.us/2.18.0/lib', '/av');
+      ZoomMtg.preLoadWasm();
+      ZoomMtg.prepareWebSDK();
       
-      // Initialize client
-      await client.init({
-        zoomAppRoot: zoomContainerRef.current,
-        language: 'en-US'
+      // Initialize Zoom client
+      ZoomMtg.init({
+        leaveUrl: 'https://quran-academy-production.up.railway.app',
+        isSupportAV: true,
+        success: () => {
+          console.log('Zoom SDK initialized successfully');
+          
+          // Join meeting
+          ZoomMtg.join({
+            meetingNumber: meetingConfig.meetingNumber,
+            userName: meetingConfig.userName,
+            signature: meetingConfig.signature,
+            sdkKey: meetingConfig.sdkKey,
+            passWord: '',
+            success: (success: any) => {
+              console.log('Successfully joined Zoom meeting:', success);
+              setIsJoined(true);
+              toast.success('Joined Zoom meeting successfully');
+            },
+            error: (error: any) => {
+              console.error('Error joining Zoom meeting:', error);
+              setError('Failed to join meeting: ' + (error.message || 'Unknown error'));
+              toast.error('Failed to join meeting');
+            }
+          });
+        },
+        error: (error: any) => {
+          console.error('Zoom SDK initialization error:', error);
+          setError('Failed to initialize Zoom SDK');
+          toast.error('Failed to initialize Zoom SDK');
+        }
       });
-
-      // Join meeting
-      await client.join({
-        sdkKey: meetingConfig.sdkKey,
-        signature: meetingConfig.signature,
-        meetingNumber: meetingConfig.meetingNumber,
-        userName: meetingConfig.userName,
-        password: ''
-      });
-
-      console.log('Successfully joined Zoom meeting');
-      setIsJoined(true);
-      toast.success('Joined Zoom meeting successfully');
       
     } catch (err) {
       console.error('Error joining meeting:', err);
