@@ -428,12 +428,6 @@ export default function Schedule() {
                                       )}
                                       onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                     >
-                                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10">
-                                        <JoinClassButton 
-                                          meetingNumber={schedule.meetingNumber || generateMeetingNumber(schedule.id || schedule._id)}
-                                          className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700 text-white shadow-lg"
-                                        />
-                                      </div>
                                       <div className="pr-8">
                                         <div className="flex items-center gap-1 mb-2">
                                           <Badge variant="outline" className="text-xs">
@@ -448,9 +442,11 @@ export default function Schedule() {
                                           <span className="shrink-0">â¢</span>
                                           <span className="shrink-0">{schedule.duration}</span>
                                         </div>
+                                      </div>
+                                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 bg-black/50 rounded-lg">
                                         <JoinClassButton 
                                           meetingNumber={schedule.meetingNumber || generateMeetingNumber(schedule.id || schedule._id)}
-                                          className="h-6 text-xs mt-2 w-full"
+                                          className="h-10 px-4 bg-green-600 hover:bg-green-700 text-white shadow-lg"
                                         />
                                       </div>
                                     </div>

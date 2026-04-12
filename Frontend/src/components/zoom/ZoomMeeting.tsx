@@ -360,7 +360,8 @@ export function JoinClassButton({ meetingNumber, className }: JoinClassButtonPro
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const { currentUser } = useAuthStore();
 
-  const handleJoinClass = () => {
+  const handleJoinClass = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (!meetingNumber) {
       toast.error('No meeting number available');
       return;
