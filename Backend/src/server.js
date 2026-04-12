@@ -26,6 +26,8 @@ const homeworkRoutes = require('./routes/homeworkRoutes.js');
 // Load environment variables
 dotenv.config();
 
+console.log("ACTIVE SERVER FILE: Backend/src/server.js - CORRECT FILE RUNNING");
+
 // Connect to MongoDB
 connectDB();
 
