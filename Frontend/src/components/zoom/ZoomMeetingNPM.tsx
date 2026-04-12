@@ -87,7 +87,7 @@ export function ZoomMeetingNPM({ isOpen, onClose, meetingNumber = '', userName =
       let signature = '';
       try {
         console.log('Attempting backend signature generation...');
-        const response = await fetch('/api/zoom/signature', {
+        const response = await fetch('/api/zoom/signature-test', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
