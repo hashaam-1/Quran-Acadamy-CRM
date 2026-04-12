@@ -87,7 +87,13 @@ export function ZoomMeetingNPM({ isOpen, onClose, meetingNumber = '', userName =
       let signature = '';
       try {
         console.log('Attempting backend signature generation...');
-        const response = await fetch('/api/zoom/signature-test', {
+        console.log('FRONTEND DEBUG: Current API URL =', import.meta.env.VITE_API_URL || 'NOT SET');
+        
+        // TEMPORARY FIX: Use correct backend URL directly
+        const correctBackendUrl = 'https://quran-acadamy-crm-production.up.railway.app/api/zoom/signature-test';
+        console.log('FRONTEND DEBUG: Using corrected URL =', correctBackendUrl);
+        
+        const response = await fetch(correctBackendUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
