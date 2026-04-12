@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { ClassSchedule } from "@/lib/store";
 import { ScheduleForm } from "@/components/forms/ScheduleForm";
+import { JoinClassButton } from "@/components/zoom/ZoomMeeting";
 import { toast } from "sonner";
 import { useSchedules, useCreateSchedule, useUpdateSchedule, useDeleteSchedule } from "@/hooks/useSchedules";
 import { useTeachers } from "@/hooks/useTeachers";
@@ -80,6 +81,12 @@ const generateTimeSlots = () => {
 };
 
 const timeSlots = generateTimeSlots();
+
+// Generate meeting number from schedule ID
+const generateMeetingNumber = (scheduleId: string): string => {
+  const hash = scheduleId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return (10000000000 + (hash % 90000000000)).toString();
+};
 
 // Parse time string to hour (24-hour format)
 const parseTimeToHour = (timeStr: string): number => {
@@ -421,48 +428,33 @@ export default function Schedule() {
                                       )}
                                       onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                     >
-                                      <div className="flex items-start justify-between gap-2 mb-2">
-                                        <div 
-                                          className={cn(
-                                            "text-xs font-semibold shrink-0 px-2 py-1 rounded",
-                                            courseColors[schedule.course as keyof typeof courseColors]
-                                          )}
-                                        >
-                                          {schedule.course}
-                                        </div>
-                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                          <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            className="h-5 w-5 p-0"
-                                            onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsEditOpen(true); }}
-                                          >
-                                            <Pencil className="h-3 w-3" />
-                                          </Button>
-                                          <Button 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            className="h-5 w-5 p-0 text-destructive"
-                                            onClick={(e) => { e.stopPropagation(); setCurrent(schedule); setIsDeleteOpen(true); }}
-                                          >
-                                            <Trash2 className="h-3 w-3" />
-                                          </Button>
-                                        </div>
+                                      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                        <JoinClassButton 
+                                          meetingNumber={schedule.meetingNumber || generateMeetingNumber(schedule.id || schedule._id)}
+                                          className="h-6 w-6 p-0"
+                                        />
                                       </div>
-                                      <h4 className="font-semibold text-sm truncate mb-1">{schedule.studentName}</h4>
-                                      <p className="text-xs text-muted-foreground truncate mb-2">{schedule.teacherName}</p>
-                                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                        <Clock className="h-3 w-3 shrink-0" />
-                                        <span>{schedule.time}</span>
-                                        <span className="shrink-0">•</span>
-                                        <span className="shrink-0">{schedule.duration}</span>
+                                      <div className="pr-8">
+                                        <div className="flex items-center gap-1 mb-2">
+                                          <Badge variant="outline" className="text-xs">
+                                            {schedule.course}
+                                          </Badge>
+                                        </div>
+                                        <h4 className="font-semibold text-sm truncate mb-1">{schedule.studentName}</h4>
+                                        <p className="text-xs text-muted-foreground truncate mb-2">{schedule.teacherName}</p>
+                                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                          <Clock className="h-3 w-3 shrink-0" />
+                                          <span>{schedule.time}</span>
+                                          <span className="shrink-0">â¢</span>
+                                          <span className="shrink-0">{schedule.duration}</span>
+                                        </div>
+                                        {schedule.status === "in_progress" && (
+                                          <JoinClassButton 
+                                            meetingNumber={schedule.meetingNumber || generateMeetingNumber(schedule.id || schedule._id)}
+                                            className="h-6 text-xs mt-2 w-full"
+                                          />
+                                        )}
                                       </div>
-                                      {schedule.status === "in_progress" && (
-                                        <Button size="sm" variant="success" className="h-6 text-xs mt-2 w-full">
-                                          <Video className="h-3 w-3 mr-1" />
-                                          Join
-                                        </Button>
-                                      )}
                                     </div>
                                   ))}
                                 </div>

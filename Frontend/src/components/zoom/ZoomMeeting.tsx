@@ -1,0 +1,391 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, Video, VideoOff, Mic, MicOff, Users, Settings } from 'lucide-react';
+import { useAuthStore } from '@/lib/auth-store';
+import { toast } from 'sonner';
+
+// Import Zoom Meeting SDK
+declare global {
+  interface Window {
+    ZoomMtgEmbedded: any;
+  }
+}
+
+interface ZoomMeetingProps {
+  isOpen: boolean;
+  onClose: () => void;
+  meetingNumber?: string;
+  userName?: string;
+  role?: number; // 0 for host, 1 for participant
+}
+
+interface MeetingConfig {
+  meetingNumber: string;
+  userName: string;
+  role: number;
+  signature: string;
+  sdkKey: string;
+}
+
+export function ZoomMeeting({ isOpen, onClose, meetingNumber = '', userName = '', role = 1 }: ZoomMeetingProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isJoined, setIsJoined] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoOn, setIsVideoOn] = useState(true);
+  const [signature, setSignature] = useState('');
+  const [meetingConfig, setMeetingConfig] = useState<MeetingConfig | null>(null);
+  const [error, setError] = useState('');
+  const zoomContainerRef = useRef<HTMLDivElement>(null);
+  const zoomClientRef = useRef<any>(null);
+  const { currentUser } = useAuthStore();
+
+  // Load Zoom SDK script
+  useEffect(() => {
+    const loadZoomSDK = () => {
+      if (window.ZoomMtgEmbedded) {
+        console.log('Zoom SDK already loaded');
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://source.zoom.us/2.18.0/lib/embedded.js';
+      script.async = true;
+      script.onload = () => {
+        console.log('Zoom SDK loaded successfully');
+      };
+      script.onerror = () => {
+        console.error('Failed to load Zoom SDK');
+        setError('Failed to load Zoom SDK. Please refresh the page.');
+      };
+      document.head.appendChild(script);
+    };
+
+    if (isOpen) {
+      loadZoomSDK();
+    }
+  }, [isOpen]);
+
+  // Generate signature when component opens
+  useEffect(() => {
+    if (isOpen && meetingNumber && userName) {
+      generateSignature();
+    }
+  }, [isOpen, meetingNumber, userName]);
+
+  const generateSignature = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+
+      const response = await fetch('/api/zoom/signature', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          meetingNumber,
+          role,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate signature');
+      }
+
+      const data = await response.json();
+      setSignature(data.signature);
+
+      const config: MeetingConfig = {
+        meetingNumber,
+        userName: userName || currentUser?.name || 'User',
+        role,
+        signature: data.signature,
+        sdkKey: 'YNdDIn95StmFL25wVBoGQ',
+      };
+
+      setMeetingConfig(config);
+      console.log('Zoom meeting config prepared:', config);
+    } catch (err) {
+      console.error('Error generating signature:', err);
+      setError('Failed to generate meeting signature. Please try again.');
+      toast.error('Failed to join meeting');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const joinMeeting = async () => {
+    if (!meetingConfig || !window.ZoomMtgEmbedded || !zoomContainerRef.current) {
+      setError('Meeting not ready. Please wait...');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError('');
+
+      // Create Zoom client
+      const client = window.ZoomMtgEmbedded.createClient();
+      zoomClientRef.current = client;
+
+      // Initialize meeting
+      await client.init({
+        appKey: meetingConfig.sdkKey,
+        zoomAppDomain: 'zoom.us',
+        version: '2.18.0',
+        language: 'en-US',
+      });
+
+      // Join meeting
+      await client.join({
+        signature: meetingConfig.signature,
+        sdkKey: meetingConfig.sdkKey,
+        meetingNumber: meetingConfig.meetingNumber,
+        userName: meetingConfig.userName,
+        password: '', // Add password if required
+        success: () => {
+          console.log('Successfully joined Zoom meeting');
+          setIsJoined(true);
+          setIsLoading(false);
+          toast.success('Joined meeting successfully');
+        },
+        error: (error: any) => {
+          console.error('Error joining meeting:', error);
+          setError('Failed to join meeting. Please check your meeting details.');
+          setIsLoading(false);
+          toast.error('Failed to join meeting');
+        },
+      });
+
+      // Setup event listeners
+      client.on('user-added', (payload: any) => {
+        console.log('User added to meeting:', payload);
+      });
+
+      client.on('user-left', (payload: any) => {
+        console.log('User left meeting:', payload);
+      });
+
+    } catch (err) {
+      console.error('Error joining meeting:', err);
+      setError('Failed to join meeting. Please try again.');
+      setIsLoading(false);
+      toast.error('Failed to join meeting');
+    }
+  };
+
+  const leaveMeeting = () => {
+    if (zoomClientRef.current) {
+      try {
+        zoomClientRef.current.leave();
+        setIsJoined(false);
+        toast.success('Left meeting');
+        onClose();
+      } catch (err) {
+        console.error('Error leaving meeting:', err);
+        onClose();
+      }
+    }
+  };
+
+  const toggleMute = () => {
+    if (zoomClientRef.current && isJoined) {
+      try {
+        if (isMuted) {
+          zoomClientRef.current.unmute();
+        } else {
+          zoomClientRef.current.mute();
+        }
+        setIsMuted(!isMuted);
+      } catch (err) {
+        console.error('Error toggling mute:', err);
+      }
+    }
+  };
+
+  const toggleVideo = () => {
+    if (zoomClientRef.current && isJoined) {
+      try {
+        if (isVideoOn) {
+          zoomClientRef.current.stopVideo();
+        } else {
+          zoomClientRef.current.startVideo();
+        }
+        setIsVideoOn(!isVideoOn);
+      } catch (err) {
+        console.error('Error toggling video:', err);
+      }
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Video className="h-5 w-5" />
+            Zoom Meeting
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Meeting Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Meeting Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Meeting ID</Label>
+                  <Input value={meetingNumber} readOnly className="bg-muted" />
+                </div>
+                <div>
+                  <Label>Your Name</Label>
+                  <Input 
+                    value={userName || currentUser?.name || ''} 
+                    readOnly 
+                    className="bg-muted" 
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant={isJoined ? "default" : "secondary"}>
+                  {isJoined ? "Connected" : "Not Connected"}
+                </Badge>
+                {currentUser && (
+                  <Badge variant="outline">
+                    {currentUser.role}
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Error Display */}
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Meeting Container */}
+          {!isJoined ? (
+            <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg">
+              <Video className="h-16 w-16 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Join Zoom Meeting</h3>
+              <p className="text-muted-foreground text-center mb-4">
+                Click the button below to join the meeting
+              </p>
+              <Button 
+                onClick={joinMeeting} 
+                disabled={isLoading || !signature}
+                className="min-w-[200px]"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Joining...
+                  </>
+                ) : (
+                  <>
+                    <Video className="h-4 w-4 mr-2" />
+                    Join Meeting
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Zoom Video Container */}
+              <div 
+                ref={zoomContainerRef} 
+                className="w-full h-[400px] bg-black rounded-lg"
+                id="zoom-container"
+              />
+
+              {/* Meeting Controls */}
+              <div className="flex items-center justify-center gap-2 p-4 bg-muted rounded-lg">
+                <Button
+                  variant={isMuted ? "destructive" : "default"}
+                  size="sm"
+                  onClick={toggleMute}
+                  className="flex items-center gap-2"
+                >
+                  {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  {isMuted ? "Unmute" : "Mute"}
+                </Button>
+
+                <Button
+                  variant={isVideoOn ? "default" : "destructive"}
+                  size="sm"
+                  onClick={toggleVideo}
+                  className="flex items-center gap-2"
+                >
+                  {isVideoOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
+                  {isVideoOn ? "Stop Video" : "Start Video"}
+                </Button>
+
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={leaveMeeting}
+                  className="flex items-center gap-2"
+                >
+                  Leave Meeting
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Join Class Button Component
+interface JoinClassButtonProps {
+  meetingNumber?: string;
+  className?: string;
+}
+
+export function JoinClassButton({ meetingNumber, className }: JoinClassButtonProps) {
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const { currentUser } = useAuthStore();
+
+  const handleJoinClass = () => {
+    if (!meetingNumber) {
+      toast.error('No meeting number available');
+      return;
+    }
+    setIsZoomOpen(true);
+  };
+
+  return (
+    <>
+      <Button
+        onClick={handleJoinClass}
+        className={`bg-green-600 hover:bg-green-700 text-white ${className}`}
+        size="sm"
+      >
+        <Video className="h-4 w-4 mr-2" />
+        Join Class
+      </Button>
+
+      <ZoomMeeting
+        isOpen={isZoomOpen}
+        onClose={() => setIsZoomOpen(false)}
+        meetingNumber={meetingNumber}
+        userName={currentUser?.name}
+        role={currentUser?.role === 'teacher' ? 0 : 1} // Teacher as host, others as participants
+      />
+    </>
+  );
+}
