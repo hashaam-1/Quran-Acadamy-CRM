@@ -75,6 +75,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Quran Academy CRM API is running' });
 });
 
+// Zoom health check endpoint
+app.get('/api/zoom/health', (req, res) => {
+  res.json({ status: 'OK', message: 'Zoom API endpoints are available' });
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
