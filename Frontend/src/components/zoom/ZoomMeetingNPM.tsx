@@ -9,7 +9,7 @@ import { useAuthStore } from '@/lib/auth-store';
 import { toast } from 'sonner';
 
 // Import Zoom Meeting SDK from npm package
-import { ZoomMtgEmbedded } from '@zoom/meetingsdk';
+import { ZoomMtg } from '@zoom/meetingsdk';
 
 interface ZoomMeetingProps {
   isOpen: boolean;
@@ -46,24 +46,42 @@ export function ZoomMeetingNPM({ isOpen, onClose, meetingNumber = '', userName =
   // Initialize Zoom Meeting SDK from npm package
   useEffect(() => {
     const initializeZoomSDK = () => {
-      if (ZoomMtgEmbedded) {
-        console.log('Zoom SDK available from npm package');
-        setSdkLoaded(true);
-        return;
-      }
-
-      console.log('Zoom SDK not available, checking imports...');
-      // The SDK should be available via import, no need for script loading
-      setTimeout(() => {
-        if (ZoomMtgEmbedded) {
-          console.log('Zoom SDK initialized successfully from npm package');
+      try {
+        console.log('Initializing Zoom SDK from npm package...');
+        
+        // Check if ZoomMtg is available
+        if (typeof ZoomMtg !== 'undefined') {
+          console.log('Zoom SDK available from npm package');
+          
+          // Initialize Zoom SDK
+          ZoomMtg.setZoomJSLib('https://source.zoom.us/2.18.0/lib', '/av');
+          ZoomMtg.preLoadWasm();
+          ZoomMtg.prepareWebSDK();
+          
           setSdkLoaded(true);
-        } else {
-          console.error('Zoom SDK not available from npm package');
-          setError('Zoom SDK not available. Please check installation.');
-          toast.error('Zoom SDK not available');
+          console.log('Zoom SDK initialized successfully');
+          return;
         }
-      }, 1000);
+
+        console.log('Zoom SDK not available, checking imports...');
+        // Try to access the SDK differently
+        setTimeout(() => {
+          if (typeof ZoomMtg !== 'undefined') {
+            console.log('Zoom SDK initialized successfully from npm package');
+            setSdkLoaded(true);
+          } else {
+            console.error('Zoom SDK not available from npm package');
+            console.log('ZoomMtg type:', typeof ZoomMtg);
+            console.log('ZoomMtg value:', ZoomMtg);
+            setError('Zoom SDK not available. Please check installation.');
+            toast.error('Zoom SDK not available');
+          }
+        }, 1000);
+      } catch (error) {
+        console.error('Error initializing Zoom SDK:', error);
+        setError('Failed to initialize Zoom SDK');
+        toast.error('Failed to initialize Zoom SDK');
+      }
     };
 
     if (isOpen && !sdkLoaded) {
@@ -142,15 +160,21 @@ export function ZoomMeetingNPM({ isOpen, onClose, meetingNumber = '', userName =
   };
 
   const joinMeeting = async () => {
-    if (!meetingConfig || !zoomContainerRef.current) {
+    if (!meetingConfig) {
       setError('Meeting not ready. Please wait...');
       return;
     }
 
     // Check if Zoom SDK is loaded
-    if (!ZoomMtgEmbedded) {
+    if (!ZoomMtg) {
       console.log('Zoom SDK not loaded');
       setError('Zoom SDK not loaded. Please refresh the page.');
+      return;
+    }
+
+    if (!zoomContainerRef.current) {
+      console.log('Zoom container not found');
+      setError('Zoom container not found. Please refresh the page.');
       return;
     }
 
@@ -161,7 +185,7 @@ export function ZoomMeetingNPM({ isOpen, onClose, meetingNumber = '', userName =
       console.log('Initializing Zoom client from npm package...');
       
       // Initialize Zoom client from npm package
-      const zoomClient = ZoomMtgEmbedded.createClient();
+      const zoomClient = ZoomMtg.createClient();
       zoomClientRef.current = zoomClient;
 
       // Setup event listeners
