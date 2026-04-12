@@ -36,7 +36,7 @@ import {
 } from "lucide-react";
 import { ClassSchedule } from "@/lib/store";
 import { ScheduleForm } from "@/components/forms/ScheduleForm";
-import { JoinClassButtonNPM } from "@/components/zoom/ZoomMeetingNPM";
+import JoinClassButtonClean from "@/components/zoom/ZoomMeetingClean";
 import { toast } from "sonner";
 import { useSchedules, useCreateSchedule, useUpdateSchedule, useDeleteSchedule } from "@/hooks/useSchedules";
 import { useTeachers } from "@/hooks/useTeachers";
@@ -458,7 +458,7 @@ export default function Schedule() {
                                         </Button>
                                       </div>
                                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 bg-black/50 rounded-lg">
-                                        <JoinClassButtonNPM 
+                                        <JoinClassButtonClean 
                                           meetingNumber={schedule.meetingNumber || generateMeetingNumber(schedule.id || schedule._id)}
                                           className="h-10 px-4 bg-green-600 hover:bg-green-700 text-white shadow-lg"
                                         />
