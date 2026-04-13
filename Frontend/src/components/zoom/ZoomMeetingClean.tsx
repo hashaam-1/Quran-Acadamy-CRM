@@ -227,69 +227,79 @@ export default function JoinClassButtonClean({
               </Alert>
             )}
 
-            {!isJoined ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Meeting Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Badge variant="outline">
-                      Meeting Number: {meetingNumber || 'N/A'}
-                    </Badge>
-                  </div>
-                  <div>
-                    <Badge variant="outline">
-                      User: {currentUser?.name || 'Guest'}
-                    </Badge>
-                  </div>
-                  <div>
-                    <Badge variant="outline">
-                      SDK Status: {sdkLoaded ? 'Loaded' : 'Loading...'}
-                    </Badge>
-                  </div>
-                  <Button
-                    onClick={joinMeeting}
-                    disabled={isLoading || !sdkLoaded || !meetingConfig}
-                    className="w-full"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Joining...
-                      </>
-                    ) : (
-                      <>
-                        <Video className="w-4 h-4 mr-2" />
-                        Join Meeting
-                      </>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
+            <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    <span>Meeting in Progress</span>
-                    <Badge variant="default">Connected</Badge>
+                    <span>{isJoined ? 'Meeting in Progress' : 'Meeting Details'}</span>
+                    <Badge variant={isJoined ? 'default' : 'outline'}>
+                      {isJoined ? 'Connected' : 'Ready'}
+                    </Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
+                  {/* Always render the Zoom container */}
                   <div
                     ref={zoomContainerRef}
-                    className="w-full h-[600px] bg-gray-100 rounded-lg"
+                    className={`w-full h-[600px] rounded-lg ${isJoined ? 'bg-gray-100' : 'bg-gray-50 border-2 border-dashed border-gray-300'}`}
                     id="zoomContainer"
-                  />
-                  <div className="mt-4 flex justify-center">
-                    <Button onClick={leaveMeeting} variant="destructive">
-                      <Phone className="w-4 h-4 mr-2" />
-                      Leave Meeting
-                    </Button>
+                  >
+                    {!isJoined && (
+                      <div className="flex items-center justify-center h-full text-gray-500">
+                        <div className="text-center">
+                          <Video className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                          <p>Zoom meeting will appear here</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
+                  
+                  {!isJoined ? (
+                    <>
+                      <div className="space-y-2">
+                        <div>
+                          <Badge variant="outline">
+                            Meeting Number: {meetingNumber || 'N/A'}
+                          </Badge>
+                        </div>
+                        <div>
+                          <Badge variant="outline">
+                            User: {currentUser?.name || 'Guest'}
+                          </Badge>
+                        </div>
+                        <div>
+                          <Badge variant="outline">
+                            SDK Status: {sdkLoaded ? 'Loaded' : 'Loading...'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={joinMeeting}
+                        disabled={isLoading || !sdkLoaded || !meetingConfig}
+                        className="w-full"
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Joining...
+                          </>
+                        ) : (
+                          <>
+                            <Video className="w-4 h-4 mr-2" />
+                            Join Meeting
+                          </>
+                        )}
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="flex justify-center">
+                      <Button onClick={leaveMeeting} variant="destructive">
+                        <Phone className="w-4 h-4 mr-2" />
+                        Leave Meeting
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
-            )}
           </div>
         </DialogContent>
       </Dialog>

@@ -443,11 +443,10 @@ export default function Schedule() {
                                           <span className="shrink-0">{schedule.duration}</span>
                                         </div>
                                       </div>
-                                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-200 z-20">
+                                      <div className="absolute top-2 right-2 opacity-100 transition-all duration-200 z-20">
                                         <Button
                                           size="sm"
                                           variant="outline"
-                                          className="h-6 w-6 p-0 bg-white hover:bg-gray-50"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             setCurrent(schedule);
