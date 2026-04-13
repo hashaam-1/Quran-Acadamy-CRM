@@ -23,7 +23,7 @@ const attendanceRoutes = require('./routes/attendance.js');
 const chatRoutes = require('./routes/chat.js');
 const settingRoutes = require('./routes/settingRoutes.js');
 const syllabusRoutes = require('./routes/syllabusRoutes.js');
-
+const homeworkRoutes = require('./routes/homeworkRoutes.js');
 
 
 // Load environment variables
@@ -86,6 +86,7 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/syllabus', syllabusRoutes);
+app.use('/api/homework', homeworkRoutes);
 app.use('/api/zoom', require('./routes/zoom.js'));
 console.log("Zoom mounted at /api/zoom");
 console.log("Meetings mounted at /api/meetings");
