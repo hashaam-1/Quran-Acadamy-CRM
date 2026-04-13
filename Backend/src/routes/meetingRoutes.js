@@ -7,7 +7,7 @@ const {
   getStudentMeetings,
   endClass,
   getMeetingDetails
-} = require('../controllers/meetingController');
+} = require('../../controllers/meetingController');
 
 console.log("MEETING ROUTES LOADED - All endpoints available");
 

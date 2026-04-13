@@ -1,6 +1,5 @@
 const Meeting = require('../models/Meeting');
 const crypto = require('crypto');
-//const axios = require('axios');
 
 // Generate unique meeting number
 const generateMeetingNumber = () => {
@@ -9,10 +8,19 @@ const generateMeetingNumber = () => {
   return '86543219876'; // Real test meeting number
 };
 
-// Create Zoom meeting using Zoom API
+// Create Zoom meeting using Zoom API (SAFE IMPLEMENTATION)
 const createZoomMeeting = async (meetingData) => {
   try {
+    // SAFETY: Check if Zoom token exists
+    if (!process.env.ZOOM_JWT_TOKEN) {
+      console.warn("Zoom JWT token not found - using fallback");
+      return { success: false, message: "Zoom not configured" };
+    }
+
     const { topic, startTime, duration, teacherEmail } = meetingData;
+    
+    // SAFETY: Import axios only when needed
+    const axios = require('axios');
     
     const zoomApiUrl = 'https://api.zoom.us/v2/users/me/meetings';
     const headers = {

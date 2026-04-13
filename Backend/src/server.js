@@ -87,8 +87,8 @@ app.use('/api/chats', chatRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/syllabus', syllabusRoutes);
 app.use('/api/homework', homeworkRoutes);
-app.use('/api/meetings', require('./routes/meetingRoutes.js'));
-app.use('/api/zoom', require('./routes/zoom.js'));
+app.use('/api/meetings', require('./src/routes/meetingRoutes.js'));
+app.use('/api/zoom', require('./src/routes/zoom.js'));
 console.log("Zoom mounted at /api/zoom");
 console.log("Meetings mounted at /api/meetings");
 
@@ -113,12 +113,21 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+// Connect to MongoDB BEFORE starting server
+const startServer = async () => {
+  try {
+    await connectDB();
+    console.log("MongoDB connected - starting server");
+    
+    app.listen(PORT, () => {
+      console.log("Server running on port", PORT);
+    });
+  } catch (err) {
+    console.error("Failed to connect to MongoDB:", err.message);
+    process.exit(1);
+  }
+};
 
-  connectDB()
-    .then(() => console.log("MongoDB connected"))
-    .catch((err) => console.error("DB error:", err.message));
-});
+startServer();
 
 module.exports = app;
