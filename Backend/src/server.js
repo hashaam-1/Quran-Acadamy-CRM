@@ -24,7 +24,7 @@ const chatRoutes = require('./routes/chat.js');
 const settingRoutes = require('./routes/settingRoutes.js');
 const syllabusRoutes = require('./routes/syllabusRoutes.js');
 const homeworkRoutes = require('./routes/homeworkRoutes.js');
-const meetingRoutes = require('../routes/meetingRoutes.js');
+const meetingRoutes = require('./routes/meetingRoutes.js');
 
 // Load environment variables
 dotenv.config();
@@ -85,11 +85,6 @@ app.use('/api/zoom', require('./routes/zoom.js'));
 console.log("Zoom mounted at /api/zoom");
 console.log("Meetings mounted at /api/meetings");
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Quran Academy CRM API is running' });
-});
-
 // Zoom health check endpoint
 app.get('/api/zoom/health', (req, res) => {
   res.json({ status: 'OK', message: 'Zoom API endpoints are available' });
@@ -109,21 +104,14 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
-const startServer = async () => {
-  try {
-    await connectDB(); // connect first (safe)
+app.listen(PORT, () => {
+  console.log("Server running on port", PORT);
 
-    app.listen(PORT, () => {
-      console.log("Server running on port", PORT);
-    });
-  } catch (err) {
-    console.error("Startup error:", err);
-    // DO NOT exit process on Railway
-  }
-};
-
-startServer();
+  connectDB()
+    .then(() => console.log("MongoDB connected"))
+    .catch((err) => console.error("DB error:", err.message));
+});
 
 module.exports = app;
