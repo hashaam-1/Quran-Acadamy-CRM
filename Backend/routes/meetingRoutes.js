@@ -9,6 +9,18 @@ const {
   getMeetingDetails
 } = require('../controllers/meetingController');
 
+console.log("MEETING ROUTES LOADED - All endpoints available");
+
+// Test endpoint
+router.get('/test', (req, res) => {
+  console.log("MEETING TEST ENDPOINT HIT");
+  res.json({ 
+    success: true, 
+    message: 'Meeting routes are working',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Teacher routes
 router.post('/start-class', startClass);
 router.get('/teacher/meetings', getTeacherMeetings);

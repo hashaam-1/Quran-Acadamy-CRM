@@ -50,10 +50,16 @@ const createZoomMeeting = async (meetingData) => {
 
 // Teacher starts a class
 const startClass = async (req, res) => {
+  console.log("START CLASS ENDPOINT HIT - Meeting controller working");
+  console.log("Request body:", req.body);
+  console.log("User:", req.user);
+  
   try {
     const { scheduleId, className, course, startTime, endTime } = req.body;
-    const teacherId = req.user.id;
-    const teacherName = req.user.name;
+    
+    // For testing, use hardcoded user if no auth
+    const teacherId = req.user?.id || 'test-teacher-id';
+    const teacherName = req.user?.name || 'Test Teacher';
     
     // Check if meeting already exists for this schedule
     const existingMeeting = await Meeting.findOne({ 
