@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const compression = require("compression");
+const mongoose = require("mongoose");
 const connectDB = require("./config/database.js");
 
 // Routes
@@ -38,7 +39,7 @@ app.get("/api/health", (req, res) => {
   return res.status(200).json({
     status: "OK",
     message: "Backend running fine",
-    db: require("mongoose").connection.readyState === 1 ? "connected" : "not connected",
+    db: mongoose.connection?.readyState === 1 ? "connected" : "not connected",
     time: new Date().toISOString()
   });
 });
@@ -100,15 +101,21 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    await connectDB(); // MUST be first
+    console.log("Connecting DB...");
+    await connectDB();
+    console.log("DB Connected");
 
     app.listen(PORT, () => {
       console.log("Server running on port:", PORT);
     });
 
   } catch (err) {
-    console.error("Failed to start server:", err.message);
-    process.exit(1);
+    console.error("CRITICAL ERROR:", err.message);
+
+    // IMPORTANT: DO NOT EXIT (Railway needs process alive)
+    app.listen(PORT, () => {
+      console.log("Server started WITHOUT DB (fallback mode)");
+    });
   }
 };
 
