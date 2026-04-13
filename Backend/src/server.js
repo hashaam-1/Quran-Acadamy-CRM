@@ -31,9 +31,6 @@ dotenv.config();
 
 console.log("ACTIVE SERVER FILE: Backend/src/server.js - CORRECT FILE RUNNING");
 
-// Connect to MongoDB
-connectDB();
-
 const app = express();
 
 // Global request logger - STEP 1 DEBUG
@@ -109,9 +106,16 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(PORT, async () => {
+  console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+
+  try {
+    await connectDB();
+    console.log("Database connected");
+  } catch (err) {
+    console.error("DB failed:", err.message);
+  }
 });
 
 module.exports = app;
