@@ -24,7 +24,7 @@ const chatRoutes = require('./routes/chat.js');
 const settingRoutes = require('./routes/settingRoutes.js');
 const syllabusRoutes = require('./routes/syllabusRoutes.js');
 const homeworkRoutes = require('./routes/homeworkRoutes.js');
-const meetingRoutes = require('./routes/meetingRoutes.js');
+const meetingRoutes = require('../routes/meetingRoutes.js');
 
 // Load environment variables
 dotenv.config();
