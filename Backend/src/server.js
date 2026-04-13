@@ -10,37 +10,40 @@ dotenv.config();
 const app = express();
 
 /* =========================
-   HEALTH CHECK (MUST BE FIRST)
+   HEALTH CHECK (FAST RESPONSE)
 ========================= */
 app.get("/api/health", (req, res) => {
-  return res.status(200).send("OK");
+  res.status(200).send("OK");
 });
 
 /* =========================
-   BASIC MIDDLEWARE ONLY
+   MIDDLEWARE (MINIMAL SAFE)
 ========================= */
 app.use(cors());
 app.use(express.json());
 
 /* =========================
-   ONLY TEST ROUTE FIRST
-   (IMPORTANT FOR RAILWAY)
+   TEST ROUTE
 ========================= */
-
 app.get("/", (req, res) => {
   res.send("Backend Running");
 });
 
 /* =========================
-   START SERVER (FIXED FLOW)
+   START SERVER (SAFE ORDER)
 ========================= */
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log("SERVER RUNNING ON PORT:", PORT);
 
-  connectDB()
-    .then(() => console.log("DB CONNECTED"))
-    .catch((err) => console.log("DB ERROR:", err.message));
+  try {
+    await connectDB();
+    console.log("DB CONNECTED");
+  } catch (err) {
+    console.log("DB ERROR:", err.message);
+  }
 });
+
+module.exports = app;
