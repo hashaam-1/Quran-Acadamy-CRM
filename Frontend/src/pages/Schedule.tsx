@@ -3,6 +3,8 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import StartClassButton from "@/components/zoom/StartClassButton";
+import JoinClassButton from "@/components/zoom/JoinClassButton";
 import {
   Select,
   SelectContent,
@@ -82,12 +84,8 @@ const generateTimeSlots = () => {
 
 const timeSlots = generateTimeSlots();
 
-// Use a real Zoom meeting number for testing
-const generateMeetingNumber = (scheduleId: string): string => {
-  // Return a real Zoom meeting number for testing purposes
-  // In production, this should come from actual Zoom meetings
-  return '86543219876'; // Real test meeting number
-};
+// Production-ready system uses real meeting numbers from database
+// No need for generateMeetingNumber function anymore
 
 // Parse time string to hour (24-hour format)
 const parseTimeToHour = (timeStr: string): number => {
@@ -458,10 +456,24 @@ export default function Schedule() {
                                         </Button>
                                       </div>
                                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 bg-black/50 rounded-lg" onClick={(e) => e.stopPropagation()}>
-                                        <JoinClassButtonClean 
-                                          meetingNumber={schedule.meetingNumber || generateMeetingNumber(schedule.id || schedule._id)}
-                                          className="h-10 px-4 bg-green-600 hover:bg-green-700 text-white shadow-lg"
-                                        />
+                                        {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
+                                          <StartClassButton 
+                                            scheduleId={schedule.id || schedule._id}
+                                            studentId={typeof schedule.studentId === 'object' ? schedule.studentId._id : schedule.studentId}
+                                            studentName={schedule.studentName}
+                                            course={schedule.course}
+                                            time={schedule.time}
+                                            className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+                                          />
+                                        ) : (
+                                          <JoinClassButton 
+                                            meetingNumber={schedule.meetingNumber}
+                                            teacherName={schedule.teacherName}
+                                            course={schedule.course}
+                                            time={schedule.time}
+                                            className="h-10 px-4 bg-green-600 hover:bg-green-700 text-white shadow-lg"
+                                          />
+                                        )}
                                       </div>
                                     </div>
                                   ))}
