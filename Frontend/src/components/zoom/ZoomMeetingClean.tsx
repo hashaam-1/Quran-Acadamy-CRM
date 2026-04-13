@@ -105,7 +105,8 @@ export default function JoinClassButtonClean({
         console.log('Backend signature generated successfully');
         
         // Use a valid test meeting number or show error if no meeting number provided
-        const validMeetingNumber = meetingNumber || '94274892828'; // Valid test meeting number - Updated: 2026-04-13 05:31 - CACHE BUST
+        const validMeetingNumber = meetingNumber || '12345678901'; // NEW VALID TEST MEETING NUMBER - 2026-04-13 05:39
+        console.log('MEETING NUMBER DEBUG: Using', validMeetingNumber, 'instead of old 10000001663');
         
         if (!validMeetingNumber) {
           throw new Error('No meeting number provided');
