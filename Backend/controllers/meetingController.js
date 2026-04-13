@@ -56,8 +56,8 @@ const startClass = async (req, res) => {
   try {
     const { className, course, scheduleId } = req.body;
 
-    const teacherId = req.user.id;
-    const teacherName = req.user.name;
+    const teacherId = req.user?.id || "guest";
+    const teacherName = req.user?.name || "Guest";
 
     const existing = await Meeting.findOne({
       scheduleId,
@@ -115,8 +115,8 @@ const joinClass = async (req, res) => {
     }
 
     meeting.participants.push({
-      userId: req.user.id,
-      name: req.user.name,
+      userId: req.user?.id || "guest",
+      name: req.user?.name || "Guest",
       role: 0
     });
 
@@ -133,7 +133,7 @@ const joinClass = async (req, res) => {
    GET TEACHER MEETINGS
 ========================= */
 const getTeacherMeetings = async (req, res) => {
-  const meetings = await Meeting.find({ teacherId: req.user.id });
+  const meetings = await Meeting.find({ teacherId: req.user?.id || "guest" });
   res.json({ meetings });
 };
 
@@ -142,7 +142,7 @@ const getTeacherMeetings = async (req, res) => {
 ========================= */
 const getStudentMeetings = async (req, res) => {
   const meetings = await Meeting.find({
-    "participants.userId": req.user.id
+    "participants.userId": req.user?.id || "guest"
   });
 
   res.json({ meetings });
