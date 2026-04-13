@@ -24,7 +24,7 @@ const chatRoutes = require('./routes/chat.js');
 const settingRoutes = require('./routes/settingRoutes.js');
 const syllabusRoutes = require('./routes/syllabusRoutes.js');
 const homeworkRoutes = require('./routes/homeworkRoutes.js');
-const meetingRoutes = require('./routes/meetingRoutes.js');
+const meetingRoutes = require('../routes/meetingRoutes.js');
 
 // Load environment variables
 dotenv.config();
@@ -35,7 +35,14 @@ const app = express();
 
 // Health check endpoint - MUST BE FIRST for Railway
 app.get("/api/health", (req, res) => {
-  res.status(200).json({ ok: true });
+  console.log("HEALTHCHECK HIT - Backend is responding");
+  res.status(200).json({ 
+    status: "OK", 
+    message: "Quran Academy CRM Backend is running",
+    timestamp: new Date().toISOString(),
+    port: process.env.PORT || 5000,
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
 // Global request logger - STEP 1 DEBUG
@@ -104,7 +111,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);

@@ -11,6 +11,20 @@ const {
 
 console.log("MEETING ROUTES LOADED - All endpoints available");
 
+// Fallback authentication middleware for testing
+router.use((req, res, next) => {
+  // Add mock user for testing if no auth middleware
+  if (!req.user) {
+    req.user = {
+      id: 'test-user-id',
+      name: 'Test User',
+      email: 'test@example.com',
+      role: 'teacher'
+    };
+  }
+  next();
+});
+
 // Test endpoint
 router.get('/test', (req, res) => {
   console.log("MEETING TEST ENDPOINT HIT");

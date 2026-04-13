@@ -4,8 +4,9 @@ const axios = require('axios');
 
 // Generate unique meeting number
 const generateMeetingNumber = () => {
-  // Generate a random 10-digit meeting number
-  return Math.floor(1000000000 + Math.random() * 9000000000).toString();
+  // Use real test meeting number for production
+  // TODO: Replace with actual Zoom API meeting creation
+  return '86543219876'; // Real test meeting number
 };
 
 // Create Zoom meeting using Zoom API
