@@ -87,7 +87,7 @@ app.use('/api/chats', chatRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/syllabus', syllabusRoutes);
 app.use('/api/homework', homeworkRoutes);
-app.use('/api/meetings', meetingRoutes);
+app.use('/api/meetings', require('./routes/meetingRoutes.js'));
 app.use('/api/zoom', require('./routes/zoom.js'));
 console.log("Zoom mounted at /api/zoom");
 console.log("Meetings mounted at /api/meetings");
