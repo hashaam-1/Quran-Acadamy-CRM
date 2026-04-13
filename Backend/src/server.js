@@ -25,7 +25,7 @@ const chatRoutes = require("./src/routes/chat.js");
 const settingRoutes = require("./src/routes/settingRoutes.js");
 const syllabusRoutes = require("./src/routes/syllabusRoutes.js");
 const homeworkRoutes = require("./src/routes/homeworkRoutes.js");
-const meetingRoutes = require("./src/routes/meetingRoutes.js");
+//const meetingRoutes = require("./src/routes/meetingRoutes.js");
 const zoomRoutes = require("./src/routes/zoom.js");
 
 dotenv.config();
@@ -77,7 +77,7 @@ app.use("/api/chats", chatRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/syllabus", syllabusRoutes);
 app.use("/api/homework", homeworkRoutes);
-app.use("/api/meetings", meetingRoutes);
+//app.use("/api/meetings", meetingRoutes);
 app.use("/api/zoom", zoomRoutes);
 
 /* =========================
