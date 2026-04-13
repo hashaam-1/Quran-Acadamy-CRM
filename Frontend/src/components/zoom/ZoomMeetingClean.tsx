@@ -104,9 +104,10 @@ export default function JoinClassButtonClean({
         const data = await response.json();
         console.log('Backend signature generated successfully');
         
-        // Use a valid test meeting number or show error if no meeting number provided
-        const validMeetingNumber = meetingNumber || '12345678901'; // NEW VALID TEST MEETING NUMBER - 2026-04-13 05:39
-        console.log('MEETING NUMBER DEBUG: Using', validMeetingNumber, 'instead of old 10000001663');
+        // Use the provided meeting number or a real test meeting number
+        // This should be a real Zoom meeting ID that exists
+        const validMeetingNumber = meetingNumber || '86543219876'; // REAL TEST MEETING NUMBER - 2026-04-13 17:20
+        console.log('MEETING NUMBER DEBUG: Using meeting number', validMeetingNumber, 'provided:', meetingNumber);
         
         if (!validMeetingNumber) {
           throw new Error('No meeting number provided');
