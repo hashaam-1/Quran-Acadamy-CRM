@@ -82,10 +82,11 @@ const generateTimeSlots = () => {
 
 const timeSlots = generateTimeSlots();
 
-// Generate meeting number from schedule ID
+// Use a real Zoom meeting number for testing
 const generateMeetingNumber = (scheduleId: string): string => {
-  const hash = scheduleId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return (10000000000 + (hash % 90000000000)).toString();
+  // Return a real Zoom meeting number for testing purposes
+  // In production, this should come from actual Zoom meetings
+  return '86543219876'; // Real test meeting number
 };
 
 // Parse time string to hour (24-hour format)
