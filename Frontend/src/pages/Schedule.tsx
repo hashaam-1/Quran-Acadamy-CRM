@@ -456,7 +456,7 @@ export default function Schedule() {
                                           <Pencil className="h-3 w-3" />
                                         </Button>
                                       </div>
-                                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 bg-black/50 rounded-lg">
+                                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 bg-black/50 rounded-lg" onClick={(e) => e.stopPropagation()}>
                                         <JoinClassButtonClean 
                                           meetingNumber={schedule.meetingNumber || generateMeetingNumber(schedule.id || schedule._id)}
                                           className="h-10 px-4 bg-green-600 hover:bg-green-700 text-white shadow-lg"

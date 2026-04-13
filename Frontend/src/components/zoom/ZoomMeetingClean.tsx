@@ -104,8 +104,15 @@ export default function JoinClassButtonClean({
         const data = await response.json();
         console.log('Backend signature generated successfully');
         
+        // Use a valid test meeting number or show error if no meeting number provided
+        const validMeetingNumber = meetingNumber || '94274892828'; // Valid test meeting number
+        
+        if (!validMeetingNumber) {
+          throw new Error('No meeting number provided');
+        }
+        
         const config: MeetingConfig = {
-          meetingNumber: meetingNumber || '10000001663',
+          meetingNumber: validMeetingNumber,
           userName: currentUser?.name || 'Admin',
           role: 1,
           signature: data.signature || 'test-signature',
