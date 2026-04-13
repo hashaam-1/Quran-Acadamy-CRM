@@ -16,6 +16,8 @@ const scheduleRoutes = require('./routes/scheduleRoutes.js');
 const invoiceRoutes = require('./routes/invoiceRoutes.js');
 const progressRoutes = require('./routes/progressRoutes.js');
 const messageRoutes = require('./routes/messageRoutes.js');
+const studentLeaveRoutes = require('./routes/studentLeaveRoutes.js');
+const teamMemberRoutes = require('./routes/teamMemberRoutes.js');
 
 
 // Load environment variables
@@ -69,6 +71,9 @@ app.use('/api/teachers', teacherRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/student-leaves', studentLeaveRoutes);
+app.use('/api/team-members', teamMemberRoutes);
 app.use('/api/zoom', require('./routes/zoom.js'));
 console.log("Zoom mounted at /api/zoom");
 console.log("Meetings mounted at /api/meetings");
