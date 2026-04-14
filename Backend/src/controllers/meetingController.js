@@ -20,18 +20,31 @@ const generateMeetingNumber = () => {
 ===================== */
 const getZoomAccessToken = async () => {
   try {
-    if (!axios) return null;
+    if (!axios) {
+      console.log("Axios not available");
+      return null;
+    }
 
     const clientId = process.env.ZOOM_CLIENT_ID;
     const clientSecret = process.env.ZOOM_CLIENT_SECRET;
     const accountId = process.env.ZOOM_ACCOUNT_ID;
 
+    console.log("Zoom OAuth Credentials Check:", {
+      hasClientId: !!clientId,
+      hasClientSecret: !!clientSecret,
+      hasAccountId: !!accountId,
+      clientIdLength: clientId?.length || 0,
+      accountIdLength: accountId?.length || 0
+    });
+
     if (!clientId || !clientSecret || !accountId) {
-      console.log("Missing Zoom OAuth credentials");
+      console.log("Missing Zoom OAuth credentials - check Railway environment variables");
       return null;
     }
 
     const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    
+    console.log("Attempting Zoom OAuth token request...");
     
     const response = await axios.post(
       `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${accountId}`,
@@ -44,38 +57,55 @@ const getZoomAccessToken = async () => {
       }
     );
 
+    console.log("Zoom OAuth response status:", response.status);
+    console.log("Zoom OAuth success - token received");
+
     return response.data.access_token;
   } catch (err) {
     console.log("Zoom OAuth Error:", err.message);
+    console.log("Zoom OAuth Error Details:", err.response?.data || err);
     return null;
   }
 };
 
 const createZoomMeeting = async ({ topic, startTime, duration = 60 }) => {
   try {
-    if (!axios) return null;
-
-    const accessToken = await getZoomAccessToken();
-    if (!accessToken) {
-      console.log("Failed to get Zoom access token");
+    if (!axios) {
+      console.log("Axios not available for Zoom API");
       return null;
     }
 
+    console.log("Creating Zoom meeting with params:", { topic, startTime, duration });
+
+    const accessToken = await getZoomAccessToken();
+    if (!accessToken) {
+      console.log("Failed to get Zoom access token - cannot create meeting");
+      return null;
+    }
+
+    console.log("Got access token, creating Zoom meeting...");
+    console.log("Access token length:", accessToken.length);
+    console.log("Access token preview:", accessToken.substring(0, 20) + "...");
+
+    const meetingRequest = {
+      topic,
+      type: 1, // Scheduled meeting
+      start_time: startTime,
+      duration: duration,
+      settings: {
+        join_before_host: true,
+        participant_video: true,
+        host_video: true,
+        mute_upon_entry: false,
+        waiting_room: false
+      }
+    };
+
+    console.log("Zoom meeting request payload:", meetingRequest);
+
     const response = await axios.post(
       "https://api.zoom.us/v2/users/me/meetings",
-      {
-        topic,
-        type: 1, // Scheduled meeting
-        start_time: startTime,
-        duration: duration,
-        settings: {
-          join_before_host: true,
-          participant_video: true,
-          host_video: true,
-          mute_upon_entry: false,
-          waiting_room: false
-        }
-      },
+      meetingRequest,
       {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -84,10 +114,22 @@ const createZoomMeeting = async ({ topic, startTime, duration = 60 }) => {
       }
     );
 
+    console.log("Zoom API response status:", response.status);
     console.log("Zoom meeting created successfully:", response.data.id);
+    console.log("Zoom meeting details:", {
+      id: response.data.id,
+      topic: response.data.topic,
+      join_url: response.data.join_url,
+      start_url: response.data.start_url,
+      password: response.data.password
+    });
+
     return response.data;
   } catch (err) {
-    console.log("Zoom Meeting Creation Error:", err.response?.data || err.message);
+    console.log("Zoom Meeting Creation Error:", err.message);
+    console.log("Zoom API Error Details:", err.response?.data || err);
+    console.log("Zoom API Status:", err.response?.status);
+    console.log("Zoom API Headers:", err.response?.headers);
     return null;
   }
 };
