@@ -88,7 +88,6 @@ const teacherSchema = new mongoose.Schema({
 
 // Indexes
 teacherSchema.index({ status: 1 });
-teacherSchema.index({ email: 1 });
 
 const Teacher = mongoose.model('Teacher', teacherSchema);
 
