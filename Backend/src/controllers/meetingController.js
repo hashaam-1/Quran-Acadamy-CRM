@@ -34,17 +34,22 @@ const getZoomAccessToken = async () => {
       hasClientSecret: !!clientSecret,
       hasAccountId: !!accountId,
       clientIdLength: clientId?.length || 0,
-      accountIdLength: accountId?.length || 0
+      accountIdLength: accountId?.length || 0,
+      clientId: clientId?.substring(0, 10) + "...",
+      accountId: accountId?.substring(0, 10) + "..."
     });
 
     if (!clientId || !clientSecret || !accountId) {
       console.log("Missing Zoom OAuth credentials - check Railway environment variables");
+      console.log("Required: ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET, ZOOM_ACCOUNT_ID");
       return null;
     }
 
     const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
     
     console.log("Attempting Zoom OAuth token request...");
+    console.log("OAuth URL:", `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${accountId}`);
+    console.log("Basic auth preview:", `Basic ${credentials.substring(0, 20)}...`);
     
     const response = await axios.post(
       `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${accountId}`,
@@ -58,12 +63,24 @@ const getZoomAccessToken = async () => {
     );
 
     console.log("Zoom OAuth response status:", response.status);
-    console.log("Zoom OAuth success - token received");
+    console.log("Zoom OAuth response data:", {
+      access_token: response.data.access_token ? "RECEIVED" : "MISSING",
+      token_type: response.data.token_type,
+      expires_in: response.data.expires_in
+    });
 
+    if (!response.data.access_token) {
+      console.log("OAuth response missing access token");
+      return null;
+    }
+
+    console.log("Zoom OAuth success - token received");
     return response.data.access_token;
   } catch (err) {
     console.log("Zoom OAuth Error:", err.message);
     console.log("Zoom OAuth Error Details:", err.response?.data || err);
+    console.log("Zoom OAuth Status:", err.response?.status);
+    console.log("Zoom OAuth Headers:", err.response?.headers);
     return null;
   }
 };
