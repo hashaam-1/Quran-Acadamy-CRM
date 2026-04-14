@@ -1,4 +1,4 @@
-const Meeting = require("../models/Meeting");
+const Meeting = require("../../models/Meeting");
 
 let axios = null;
 try {

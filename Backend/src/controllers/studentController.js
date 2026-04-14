@@ -1,4 +1,4 @@
-const Student = require('../models/Student.js');
+const Student = require('../../models/Student.js');
 const bcrypt = require('bcryptjs');
 const { sendEmail, emailTemplates } = require('../config/email.js');
 const { generatePassword } = require('../utils/passwordGenerator.js');
@@ -236,7 +236,7 @@ exports.getStudentsByTeacher = async (req, res) => {
     console.log(`getStudentsByTeacher called with teacherId: ${teacherId}`);
     
     // First, get the teacher's name to match both by ID and name
-    const Teacher = require('../models/Teacher');
+    const Teacher = require('../../models/Teacher');
     const teacher = await Teacher.findById(teacherId);
     const teacherName = teacher ? teacher.name : null;
     
