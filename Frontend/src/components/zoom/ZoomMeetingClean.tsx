@@ -9,7 +9,7 @@ import { Loader2, Video, Phone } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { toast } from 'sonner';
 
-// Import Zoom Meeting SDK from npm package - NO CDN LOADING
+// Import Zoom Meeting SDK from npm package
 import { ZoomMtg } from '@zoom/meetingsdk';
 
 interface MeetingConfig {
@@ -38,32 +38,71 @@ export default function ZoomMeetingClean() {
 
   // Initialize Zoom Meeting SDK from npm package
   useEffect(() => {
-    const initializeZoomSDK = () => {
+    const initializeZoomSDK = async () => {
       try {
-        console.log('Initializing Zoom SDK from npm package...');
+        console.log('Initializing Zoom SDK v6.0.0...');
         
         // Check if ZoomMtg is available
         if (typeof ZoomMtg !== 'undefined') {
           console.log('Zoom SDK available from npm package');
-          setSdkLoaded(true);
+          
+          // Initialize Zoom SDK with correct API for v6.0.0
+          ZoomMtg.setZoomJSLib('https://source.zoom.us/3.11.2/lib', '/av');
+          
+          // Prepare SDK initialization options
+          const initOptions = {
+            leaveUrl: '/dashboard',
+            isSupportAV: true,
+            isSupportChat: true,
+            isSupportQA: true,
+            isSupportCC: true,
+            isSupportPolling: true,
+            isSupportBreakout: true,
+            showMeetingHeader: true,
+            showPureSharingContent: false,
+            videoDrag: true,
+            sharingMode: 'both',
+            isSupportNonverbal: true,
+            isShowJoiningErrorDialog: true,
+            disableJoinAudio: false,
+            audioPanelAlwaysOpen: false,
+            isEnableLiveTranscription: false,
+            rwcBackup: '',
+            isLockBottom: true,
+            disableCallOut: false,
+            disableRecord: false,
+            isSupportGallery: true,
+            isSupportVirtualBackground: true,
+            isSupportAnnotation: true,
+            isSupportWhiteboard: true,
+            isSupportRemoteControl: true,
+            isSupportLiveTranslation: true,
+            isSupportExternalLiveStream: true,
+          };
+          
+          console.log('Initializing Zoom SDK with options:', initOptions);
+          
+          // Initialize the SDK
+          ZoomMtg.init({
+            ...initOptions,
+            success: () => {
+              console.log('Zoom SDK initialized successfully');
+              setSdkLoaded(true);
+            },
+            error: (err: any) => {
+              console.error('Zoom SDK initialization error:', err);
+              setError(`Zoom SDK initialization failed: ${err.errorMessage || err}`);
+            }
+          });
+          
           return;
         }
-
-        console.log('Zoom SDK not available, checking imports...');
-        setTimeout(() => {
-          if (typeof ZoomMtg !== 'undefined') {
-            console.log('Zoom SDK initialized successfully from npm package');
-            setSdkLoaded(true);
-          } else {
-            console.error('Zoom SDK not available from npm package');
-            setError('Zoom SDK not available. Please check installation.');
-            toast.error('Zoom SDK not available');
-          }
-        }, 1000);
-      } catch (error) {
-        console.error('Error initializing Zoom SDK:', error);
+        
+        console.error('Zoom SDK not available');
+        setError('Zoom SDK not loaded');
+      } catch (err) {
+        console.error('Error initializing Zoom SDK:', err);
         setError('Failed to initialize Zoom SDK');
-        toast.error('Failed to initialize Zoom SDK');
       }
     };
 
@@ -150,43 +189,30 @@ export default function ZoomMeetingClean() {
       setIsLoading(true);
       setError('');
 
-      console.log('Joining Zoom meeting with correct API...');
+      console.log('Joining Zoom meeting with v6.0.0 API...');
       
-      // Initialize Zoom SDK
-      ZoomMtg.setZoomJSLib('https://source.zoom.us/2.18.0/lib', '/av');
-      ZoomMtg.preLoadWasm();
-      ZoomMtg.prepareWebSDK();
+      // Use the already initialized SDK from useEffect
+      if (!sdkLoaded) {
+        setError('Zoom SDK not initialized yet. Please wait...');
+        return;
+      }
       
-      // Initialize Zoom client
-      ZoomMtg.init({
-        leaveUrl: 'https://quran-academy-production.up.railway.app',
-        isSupportAV: true,
-        success: () => {
-          console.log('Zoom SDK initialized successfully');
-          
-          // Join meeting
-          ZoomMtg.join({
-            meetingNumber: meetingConfig.meetingNumber,
-            userName: meetingConfig.userName,
-            signature: meetingConfig.signature,
-            sdkKey: meetingConfig.sdkKey,
-            passWord: '',
-            success: (success: any) => {
-              console.log('Successfully joined Zoom meeting:', success);
-              setIsJoined(true);
-              toast.success('Joined Zoom meeting successfully');
-            },
-            error: (error: any) => {
-              console.error('Error joining Zoom meeting:', error);
-              setError('Failed to join meeting: ' + (error.message || 'Unknown error'));
-              toast.error('Failed to join meeting');
-            }
-          });
+      // Join meeting with correct v6.0.0 API
+      ZoomMtg.join({
+        meetingNumber: meetingConfig.meetingNumber,
+        userName: meetingConfig.userName,
+        signature: meetingConfig.signature,
+        sdkKey: meetingConfig.sdkKey,
+        passWord: '',
+        success: (success: any) => {
+          console.log('Successfully joined Zoom meeting:', success);
+          setIsJoined(true);
+          toast.success('Joined Zoom meeting successfully');
         },
         error: (error: any) => {
-          console.error('Zoom SDK initialization error:', error);
-          setError('Failed to initialize Zoom SDK');
-          toast.error('Failed to initialize Zoom SDK');
+          console.error('Error joining Zoom meeting:', error);
+          setError('Failed to join meeting: ' + (error.errorMessage || error.message || 'Unknown error'));
+          toast.error('Failed to join meeting');
         }
       });
       
@@ -202,7 +228,7 @@ export default function ZoomMeetingClean() {
   const leaveMeeting = () => {
     try {
       setIsJoined(false);
-      setIsOpen(false);
+      navigate('/dashboard');
       toast.success('Left meeting');
     } catch (error) {
       console.error('Error leaving meeting:', error);
