@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 interface StartClassButtonProps {
   scheduleId?: string;
   className?: string;
+  meetingClassName?: string;
   studentId?: string;
   studentName?: string;
   course?: string;
@@ -21,7 +22,8 @@ interface StartClassButtonProps {
 
 export default function StartClassButton({ 
   scheduleId, 
-  className: customClassName = "",
+  className: buttonClassName = "",
+  meetingClassName = "",
   studentId,
   studentName = "",
   course = "",
@@ -52,7 +54,7 @@ export default function StartClassButton({
     try {
       const payload = {
         scheduleId: scheduleId || null,
-        className: customClassName?.trim() || `${course} Class`,
+        className: meetingClassName?.trim() || `${course} Class`,
         course: course.trim()
       };
 
@@ -126,7 +128,7 @@ export default function StartClassButton({
       <Button
         onClick={() => setIsOpen(true)}
         disabled={disabled || isLoading}
-        className="w-full"
+        className={buttonClassName || "w-full"}
       >
         {isLoading ? (
           <>
