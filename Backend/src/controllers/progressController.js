@@ -28,7 +28,7 @@ exports.getProgressRecords = async (req, res) => {
 };
 
 // Get single progress record
-module.exports.getProgressById = async (req, res) => {
+exports.getProgressById = async (req, res) => {
   try {
     const record = await Progress.findById(req.params.id)
       .populate('studentId', 'name age course teacher')
@@ -43,7 +43,7 @@ module.exports.getProgressById = async (req, res) => {
 };
 
 // Create progress record
-module.exports.createProgress = async (req, res) => {
+exports.createProgress = async (req, res) => {
   try {
     const { studentId, completion } = req.body;
     
@@ -72,7 +72,7 @@ module.exports.createProgress = async (req, res) => {
 };
 
 // Update progress record
-module.exports.updateProgress = async (req, res) => {
+exports.updateProgress = async (req, res) => {
   try {
     const { studentId, completion } = req.body;
     
@@ -104,7 +104,7 @@ module.exports.updateProgress = async (req, res) => {
 };
 
 // Delete progress record
-module.exports.deleteProgress = async (req, res) => {
+exports.deleteProgress = async (req, res) => {
   try {
     const record = await Progress.findByIdAndDelete(req.params.id);
     if (!record) {
@@ -117,7 +117,7 @@ module.exports.deleteProgress = async (req, res) => {
 };
 
 // Get progress by student
-module.exports.getProgressByStudent = async (req, res) => {
+exports.getProgressByStudent = async (req, res) => {
   try {
     const records = await Progress.find({ studentId: req.params.studentId })
       .populate('studentId', 'name age course teacher')
@@ -143,7 +143,7 @@ module.exports.getProgressByStudent = async (req, res) => {
 };
 
 // Get latest progress for all students
-module.exports.getLatestProgress = async (req, res) => {
+exports.getLatestProgress = async (req, res) => {
   try {
     const latestRecords = await Progress.aggregate([
       { $sort: { studentId: 1, date: -1 } },
@@ -165,7 +165,7 @@ module.exports.getLatestProgress = async (req, res) => {
 };
 
 // Get progress statistics
-module.exports.getProgressStats = async (req, res) => {
+exports.getProgressStats = async (req, res) => {
   try {
     const avgCompletion = await Progress.aggregate([
       {

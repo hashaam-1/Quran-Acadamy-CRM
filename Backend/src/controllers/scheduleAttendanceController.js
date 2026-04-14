@@ -218,8 +218,3 @@ exports.getScheduleAttendanceSummary = async (req, res) => {
   }
 };
 
-module.exports = {
-  getTodayScheduledClasses: exports.getTodayScheduledClasses,
-  markScheduledAttendance: exports.markScheduledAttendance,
-  getScheduleAttendanceSummary: exports.getScheduleAttendanceSummary
-};

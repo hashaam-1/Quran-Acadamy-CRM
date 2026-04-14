@@ -14,7 +14,7 @@ exports.getSchedules = async (req, res) => {
 };
 
 // Get single schedule
-module.exports. getScheduleById = async (req, res) => {
+exports.getScheduleById = async (req, res) => {
   try {
     const schedule = await Schedule.findById(req.params.id)
       .populate('studentId')
@@ -29,7 +29,7 @@ module.exports. getScheduleById = async (req, res) => {
 };
 
 // Create schedule
-module.exports. createSchedule = async (req, res) => {
+exports.createSchedule = async (req, res) => {
   try {
     const schedule = new Schedule(req.body);
     const newSchedule = await schedule.save();
@@ -40,7 +40,7 @@ module.exports. createSchedule = async (req, res) => {
 };
 
 // Update schedule
-module.exports. updateSchedule = async (req, res) => {
+exports.updateSchedule = async (req, res) => {
   try {
     const schedule = await Schedule.findByIdAndUpdate(
       req.params.id,
@@ -57,7 +57,7 @@ module.exports. updateSchedule = async (req, res) => {
 };
 
 // Delete schedule
-module.exports. deleteSchedule = async (req, res) => {
+exports.deleteSchedule = async (req, res) => {
   try {
     const schedule = await Schedule.findByIdAndDelete(req.params.id);
     if (!schedule) {
@@ -70,7 +70,7 @@ module.exports. deleteSchedule = async (req, res) => {
 };
 
 // Get schedules by day
-module.exports. getSchedulesByDay = async (req, res) => {
+exports.getSchedulesByDay = async (req, res) => {
   try {
     const schedules = await Schedule.find({ day: req.params.day })
       .populate('studentId', 'name')
@@ -83,7 +83,7 @@ module.exports. getSchedulesByDay = async (req, res) => {
 };
 
 // Get schedules by teacher
-module.exports. getSchedulesByTeacher = async (req, res) => {
+exports.getSchedulesByTeacher = async (req, res) => {
   try {
     const schedules = await Schedule.find({ teacherId: req.params.teacherId })
       .populate('studentId', 'name')
@@ -95,7 +95,7 @@ module.exports. getSchedulesByTeacher = async (req, res) => {
 };
 
 // Request reschedule
-module.exports. requestReschedule = async (req, res) => {
+exports.requestReschedule = async (req, res) => {
   try {
     const schedule = await Schedule.findById(req.params.id);
     if (!schedule) {
@@ -111,7 +111,7 @@ module.exports. requestReschedule = async (req, res) => {
 };
 
 // Approve/Reject reschedule
-module.exports. handleReschedule = async (req, res) => {
+exports.handleReschedule = async (req, res) => {
   try {
     const { approved } = req.body;
     const schedule = await Schedule.findById(req.params.id);
@@ -137,7 +137,7 @@ module.exports. handleReschedule = async (req, res) => {
 };
 
 // Get schedule statistics
-module.exports. getScheduleStats = async (req, res) => {
+exports.getScheduleStats = async (req, res) => {
   try {
     const total = await Schedule.countDocuments();
     const completed = await Schedule.countDocuments({ status: 'completed' });
