@@ -1,7 +1,7 @@
-const Attendance = require('../../models/Attendance.js');
-const Student = require('../../models/Student.js');
-const Teacher = require('../../models/Teacher.js');
-const Schedule = require('../../models/Schedule.js');
+const Attendance = require('../models/Attendance.js');
+const Student = require('../models/Student.js');
+const Teacher = require('../models/Teacher.js');
+const Schedule = require('../models/Schedule.js');
 
 // Get all attendance
 exports.getAttendance = async (req, res) => {

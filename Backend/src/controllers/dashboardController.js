@@ -1,10 +1,10 @@
-const Lead = require('../../models/Lead.js');
-const Student = require('../../models/Student.js');
-const Teacher = require('../../models/Teacher.js');
-const Schedule = require('../../models/Schedule.js');
-const Invoice = require('../../models/Invoice.js');
-const Progress = require('../../models/Progress.js');
-const StudentLeave = require('../../models/StudentLeave.js');
+const Lead = require('../models/Lead.js');
+const Student = require('../models/Student.js');
+const Teacher = require('../models/Teacher.js');
+const Schedule = require('../models/Schedule.js');
+const Invoice = require('../models/Invoice.js');
+const Progress = require('../models/Progress.js');
+const StudentLeave = require('../models/StudentLeave.js');
 
 // Get dashboard statistics
 exports.getDashboardStats = async (req, res) => {

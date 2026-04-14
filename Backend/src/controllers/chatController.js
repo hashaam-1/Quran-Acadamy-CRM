@@ -1,4 +1,4 @@
-const Chat = require('../../models/Chat.js');
+const Chat = require('../models/Chat.js');
 const { filterMessage, sanitizeMessage } = require('../utils/messageFilter.js');
 
 // Get all chats for a user based on their role
