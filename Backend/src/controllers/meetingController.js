@@ -56,21 +56,38 @@ const startClass = async (req, res) => {
     const teacherId = req.user?.id || "guest";
     const teacherName = req.user?.name || "Guest";
 
-    // Prevent crash if DB query fails
+    // Check for existing live meeting (SMART RECOVERY LOGIC)
     let existing = null;
     try {
       existing = await Meeting.findOne({
         scheduleId,
-        status: { $in: ["live", "scheduled"] },
+        status: { $in: ["live"] },
       });
     } catch (dbErr) {
-      console.log("DB check error:", dbErr.message);
+      console.log("DB query error:", dbErr.message);
     }
 
+    // Auto-expire abandoned meetings (2+ hours old)
+    const twoHours = 2 * 60 * 60 * 1000;
+    if (
+      existing &&
+      existing.status === "live" &&
+      Date.now() - new Date(existing.createdAt).getTime() > twoHours
+    ) {
+      console.log("Meeting expired - marking as expired");
+      existing.status = "expired";
+      await existing.save();
+      existing = null; // Allow new meeting creation
+    }
+
+    // If meeting exists and is live, return it for rejoining
     if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: "Class already exists",
+      console.log("Rejoining existing live meeting:", existing.meetingNumber);
+      return res.json({
+        success: true,
+        message: "Rejoining existing class",
+        meeting: existing,
+        rejoin: true,
       });
     }
 
