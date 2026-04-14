@@ -40,9 +40,9 @@ router.post("/join/:meetingNumber", joinClass);
 router.get("/teacher/meetings", getTeacherMeetings);
 router.get("/student/meetings", getStudentMeetings);
 router.put("/end-class/:meetingNumber", endClass);
+router.get("/test-zoom", testZoomCredentials);
 router.get("/:meetingNumber", getMeetingDetails);
 router.post("/schedule/:scheduleId/create-meeting", createScheduledMeeting);
 router.delete("/:meetingNumber", deleteMeeting);
-router.get("/test-zoom", testZoomCredentials);
 
 module.exports = router;
