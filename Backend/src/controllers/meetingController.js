@@ -7,12 +7,16 @@ try {
   console.log("Axios not installed - Zoom disabled");
 }
 
-/* Generate Meeting Number */
+/* =====================
+   GENERATE MEETING ID
+===================== */
 const generateMeetingNumber = () => {
   return Date.now().toString().slice(-10);
 };
 
-/* Optional Zoom Meeting */
+/* =====================
+   ZOOM (SAFE)
+===================== */
 const createZoomMeeting = async ({ topic, startTime }) => {
   try {
     if (!axios || !process.env.ZOOM_JWT_TOKEN) return null;
@@ -23,13 +27,13 @@ const createZoomMeeting = async ({ topic, startTime }) => {
         topic,
         type: 1,
         start_time: startTime,
-        duration: 60
+        duration: 60,
       },
       {
         headers: {
           Authorization: `Bearer ${process.env.ZOOM_JWT_TOKEN}`,
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
 
@@ -40,65 +44,95 @@ const createZoomMeeting = async ({ topic, startTime }) => {
   }
 };
 
-/* Start Class */
+/* =====================
+   START CLASS (FIXED)
+===================== */
 const startClass = async (req, res) => {
   try {
     const { className, course, scheduleId } = req.body;
 
+    // SAFE USER HANDLING (IMPORTANT FIX)
     const teacherId = req.user?.id || "guest";
     const teacherName = req.user?.name || "Guest";
 
-    const existing = await Meeting.findOne({
-      scheduleId,
-      status: { $in: ["live", "scheduled"] }
-    });
+    // Prevent crash if DB query fails
+    let existing = null;
+    try {
+      existing = await Meeting.findOne({
+        scheduleId,
+        status: { $in: ["live", "scheduled"] },
+      });
+    } catch (dbErr) {
+      console.log("DB check error:", dbErr.message);
+    }
 
     if (existing) {
       return res.status(400).json({
         success: false,
-        message: "Class already exists"
+        message: "Class already exists",
       });
     }
 
     const meetingNumber = generateMeetingNumber();
 
-    const zoom = await createZoomMeeting({
-      topic: `${className} - ${course}`,
-      startTime: new Date().toISOString()
-    });
+    // SAFE ZOOM CALL
+    let zoom = null;
+    try {
+      zoom = await createZoomMeeting({
+        topic: `${className} - ${course}`,
+        startTime: new Date().toISOString(),
+      });
+    } catch (zErr) {
+      console.log("Zoom skipped:", zErr.message);
+    }
 
-    const meeting = await Meeting.create({
-      className,
-      course,
-      scheduleId,
-      teacherId,
-      teacherName,
-      meetingNumber,
-      status: "live",
-      zoomMeetingId: zoom?.id || meetingNumber,
-      participants: [
-        {
-          userId: teacherId,
-          name: teacherName,
-          role: 1
-        }
-      ]
-    });
+    let meeting;
 
-    res.json({
+    try {
+      meeting = await Meeting.create({
+        className,
+        course,
+        scheduleId,
+        teacherId,
+        teacherName,
+        meetingNumber,
+        status: "live",
+        zoomMeetingId: zoom?.id || meetingNumber,
+        participants: [
+          {
+            userId: teacherId,
+            name: teacherName,
+            role: 1,
+          },
+        ],
+      });
+    } catch (createErr) {
+      console.log("Meeting create error:", createErr.message);
+
+      return res.status(500).json({
+        success: false,
+        message: "Database error creating meeting",
+        error: createErr.message,
+      });
+    }
+
+    return res.json({
       success: true,
-      meeting
+      meeting,
     });
   } catch (err) {
-    console.error(err);
+    console.error("START CLASS CRASH:", err);
+
     res.status(500).json({
       success: false,
-      message: "Failed to start class"
+      message: err.message || "Failed to start class",
     });
   }
 };
 
-/* Join Class */
+/* =====================
+   JOIN CLASS (SAFE)
+===================== */
 const joinClass = async (req, res) => {
   try {
     const { meetingNumber } = req.params;
@@ -108,19 +142,22 @@ const joinClass = async (req, res) => {
     if (!meeting) {
       return res.status(404).json({
         success: false,
-        message: "Meeting not found"
+        message: "Meeting not found",
       });
     }
 
+    const userId = req.user?.id || "guest";
+    const userName = req.user?.name || "Guest";
+
     const already = meeting.participants.find(
-      (p) => String(p.userId) === String(req.user.id)
+      (p) => String(p.userId) === String(userId)
     );
 
     if (!already) {
       meeting.participants.push({
-        userId: req.user.id,
-        name: req.user.name,
-        role: 0
+        userId,
+        name: userName,
+        role: 0,
       });
 
       await meeting.save();
@@ -128,21 +165,25 @@ const joinClass = async (req, res) => {
 
     res.json({
       success: true,
-      meeting
+      meeting,
     });
   } catch (err) {
+    console.log("JOIN ERROR:", err.message);
+
     res.status(500).json({
       success: false,
-      message: "Join failed"
+      message: "Join failed",
     });
   }
 };
 
-/* Teacher Meetings */
+/* =====================
+   OTHER APIs (UNCHANGED BUT SAFE)
+===================== */
 const getTeacherMeetings = async (req, res) => {
   try {
     const meetings = await Meeting.find({
-      teacherId: req.user.id
+      teacherId: req.user?.id,
     }).sort({ createdAt: -1 });
 
     res.json({ success: true, meetings });
@@ -151,11 +192,10 @@ const getTeacherMeetings = async (req, res) => {
   }
 };
 
-/* Student Meetings */
 const getStudentMeetings = async (req, res) => {
   try {
     const meetings = await Meeting.find({
-      "participants.userId": req.user.id
+      "participants.userId": req.user?.id,
     }).sort({ createdAt: -1 });
 
     res.json({ success: true, meetings });
@@ -164,7 +204,6 @@ const getStudentMeetings = async (req, res) => {
   }
 };
 
-/* End Class */
 const endClass = async (req, res) => {
   try {
     await Meeting.updateOne(
@@ -178,16 +217,15 @@ const endClass = async (req, res) => {
   }
 };
 
-/* Details */
 const getMeetingDetails = async (req, res) => {
   try {
     const meeting = await Meeting.findOne({
-      meetingNumber: req.params.meetingNumber
+      meetingNumber: req.params.meetingNumber,
     });
 
     res.json({
       success: true,
-      meeting
+      meeting,
     });
   } catch (err) {
     res.status(500).json({ success: false });
@@ -200,5 +238,5 @@ module.exports = {
   getTeacherMeetings,
   getStudentMeetings,
   endClass,
-  getMeetingDetails
+  getMeetingDetails,
 };
