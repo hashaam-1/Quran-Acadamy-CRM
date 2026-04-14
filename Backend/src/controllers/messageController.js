@@ -12,7 +12,7 @@ exports.getConversations = async (req, res) => {
 };
 
 // Get single conversation
-module.exports. getConversationById = async (req, res) => {
+exports.getConversationById = async (req, res) => {
   try {
     const conversation = await Conversation.findById(req.params.id);
     if (!conversation) {
@@ -25,7 +25,7 @@ module.exports. getConversationById = async (req, res) => {
 };
 
 // Create conversation
-module.exports. createConversation = async (req, res) => {
+exports.createConversation = async (req, res) => {
   try {
     const conversation = new Conversation(req.body);
     const newConversation = await conversation.save();
@@ -36,7 +36,7 @@ module.exports. createConversation = async (req, res) => {
 };
 
 // Get messages by conversation
-module.exports. getMessagesByConversation = async (req, res) => {
+exports.getMessagesByConversation = async (req, res) => {
   try {
     const messages = await Message.find({ conversationId: req.params.conversationId })
       .sort({ createdAt: 1 });
@@ -47,7 +47,7 @@ module.exports. getMessagesByConversation = async (req, res) => {
 };
 
 // Send message
-module.exports. sendMessage = async (req, res) => {
+exports.sendMessage = async (req, res) => {
   try {
     const message = new Message(req.body);
     const newMessage = await message.save();
@@ -69,7 +69,7 @@ module.exports. sendMessage = async (req, res) => {
 };
 
 // Mark conversation as read
-module.exports. markAsRead = async (req, res) => {
+exports.markAsRead = async (req, res) => {
   try {
     const conversation = await Conversation.findByIdAndUpdate(
       req.params.id,
@@ -94,7 +94,7 @@ module.exports. markAsRead = async (req, res) => {
 };
 
 // Delete conversation
-module.exports. deleteConversation = async (req, res) => {
+exports.deleteConversation = async (req, res) => {
   try {
     const conversation = await Conversation.findByIdAndDelete(req.params.id);
     if (!conversation) {

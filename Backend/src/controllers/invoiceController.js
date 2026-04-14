@@ -13,7 +13,7 @@ exports.getInvoices = async (req, res) => {
 };
 
 // Get single invoice
-module.exports. getInvoiceById = async (req, res) => {
+exports.getInvoiceById = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id)
       .populate('studentId');
@@ -27,7 +27,7 @@ module.exports. getInvoiceById = async (req, res) => {
 };
 
 // Create invoice
-module.exports. createInvoice = async (req, res) => {
+exports.createInvoice = async (req, res) => {
   try {
     const invoice = new Invoice(req.body);
     const newInvoice = await invoice.save();
@@ -38,7 +38,7 @@ module.exports. createInvoice = async (req, res) => {
 };
 
 // Update invoice
-module.exports. updateInvoice = async (req, res) => {
+exports.updateInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findByIdAndUpdate(
       req.params.id,
@@ -55,7 +55,7 @@ module.exports. updateInvoice = async (req, res) => {
 };
 
 // Delete invoice
-module.exports. deleteInvoice = async (req, res) => {
+exports.deleteInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findByIdAndDelete(req.params.id);
     if (!invoice) {
@@ -68,7 +68,7 @@ module.exports. deleteInvoice = async (req, res) => {
 };
 
 // Get invoices by student
-module.exports. getInvoicesByStudent = async (req, res) => {
+exports.getInvoicesByStudent = async (req, res) => {
   try {
     const invoices = await Invoice.find({ studentId: req.params.studentId })
       .sort({ createdAt: -1 });
@@ -79,7 +79,7 @@ module.exports. getInvoicesByStudent = async (req, res) => {
 };
 
 // Get invoice statistics
-module.exports. getInvoiceStats = async (req, res) => {
+exports.getInvoiceStats = async (req, res) => {
   try {
     const total = await Invoice.countDocuments();
     const paid = await Invoice.countDocuments({ status: 'paid' });
@@ -126,7 +126,7 @@ module.exports. getInvoiceStats = async (req, res) => {
 };
 
 // Mark invoice as paid
-module.exports. markAsPaid = async (req, res) => {
+exports.markAsPaid = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
     if (!invoice) {

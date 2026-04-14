@@ -1,7 +1,7 @@
 const Setting = require('../models/Setting');
 
 // Get all settings
-module.exports.getSettings = async (req, res) => {
+exports.getSettings = async (req, res) => {
   try {
     const settings = await Setting.getSettings();
     res.json(settings);
@@ -11,7 +11,7 @@ module.exports.getSettings = async (req, res) => {
 };
 
 // Update settings
-module.exports.updateSettings = async (req, res) => {
+exports.updateSettings = async (req, res) => {
   try {
     const settings = await Setting.getSettings();
     
@@ -30,7 +30,7 @@ module.exports.updateSettings = async (req, res) => {
 };
 
 // Reset settings to defaults
-module.exports.resetSettings = async (req, res) => {
+exports.resetSettings = async (req, res) => {
   try {
     await Setting.deleteMany({});
     const defaultSettings = await Setting.create({});
