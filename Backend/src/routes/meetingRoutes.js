@@ -10,9 +10,7 @@ const {
   getMeetingDetails
 } = require("../controllers/meetingController");
 
-/* =========================
-   TEST ROUTE
-========================= */
+/* Test */
 router.get("/test", (req, res) => {
   res.json({
     success: true,
@@ -20,9 +18,7 @@ router.get("/test", (req, res) => {
   });
 });
 
-/* =========================
-   MOCK USER (FOR TESTING)
-========================= */
+/* Mock User */
 router.use((req, res, next) => {
   if (!req.user) {
     req.user = {
@@ -35,9 +31,7 @@ router.use((req, res, next) => {
   next();
 });
 
-/* =========================
-   ROUTES
-========================= */
+/* Routes */
 router.post("/start-class", startClass);
 router.post("/join/:meetingNumber", joinClass);
 router.get("/teacher/meetings", getTeacherMeetings);
