@@ -5,61 +5,70 @@ const cors = require("cors");
 const helmet = require("helmet");
 const compression = require("compression");
 const morgan = require("morgan");
+const mongoose = require("mongoose");
+const path = require("path");
 const connectDB = require("./config/database");
 
 const app = express();
 
 /* =========================
-   BASIC MIDDLEWARE
+   MIDDLEWARE
 ========================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(helmet());
 app.use(compression());
 app.use(morgan("dev"));
 
 /* =========================
-   HEALTHCHECK FIRST
+   HEALTH CHECK (RAILWAY)
 ========================= */
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
     message: "Backend Running",
-    time: new Date().toISOString()
+    db:
+      mongoose.connection.readyState === 1
+        ? "connected"
+        : "not connected",
+    time: new Date().toISOString(),
   });
 });
 
 /* =========================
    SAFE ROUTE LOADER
 ========================= */
-const loadRoute = (path, routePath) => {
+const loadRoute = (routePath, urlPath) => {
   try {
-    const route = require(path);
-    app.use(routePath, route);
-    console.log("Loaded:", routePath);
+    const route = require(path.join(__dirname, "routes", routePath));
+    app.use(urlPath, route);
+    console.log("Loaded:", urlPath);
   } catch (err) {
-    console.log("Skipped:", routePath, "-", err.message);
+    console.log("Skipped:", urlPath, "-", err.message);
   }
 };
 
-loadRoute("./routes/leadRoutes", "/api/leads");
-loadRoute("./routes/studentRoutes", "/api/students");
-loadRoute("./routes/teacherRoutes", "/api/teachers");
-loadRoute("./routes/scheduleRoutes", "/api/schedules");
-loadRoute("./routes/invoiceRoutes", "/api/invoices");
-loadRoute("./routes/progressRoutes", "/api/progress");
-loadRoute("./routes/messageRoutes", "/api/messages");
-loadRoute("./routes/studentLeaveRoutes", "/api/student-leaves");
-loadRoute("./routes/teamMemberRoutes", "/api/team-members");
-loadRoute("./routes/dashboardRoutes", "/api/dashboard");
-loadRoute("./routes/attendance", "/api/attendance");
-loadRoute("./routes/chat", "/api/chats");
-loadRoute("./routes/settingRoutes", "/api/settings");
-loadRoute("./routes/syllabusRoutes", "/api/syllabus");
-loadRoute("./routes/homeworkRoutes", "/api/homework");
-loadRoute("./routes/meetingRoutes", "/api/meetings");
-loadRoute("./routes/zoom", "/api/zoom");
+/* =========================
+   ROUTES
+========================= */
+loadRoute("leadRoutes.js", "/api/leads");
+loadRoute("studentRoutes.js", "/api/students");
+loadRoute("teacherRoutes.js", "/api/teachers");
+loadRoute("scheduleRoutes.js", "/api/schedules");
+loadRoute("invoiceRoutes.js", "/api/invoices");
+loadRoute("progressRoutes.js", "/api/progress");
+loadRoute("messageRoutes.js", "/api/messages");
+loadRoute("studentLeaveRoutes.js", "/api/student-leaves");
+loadRoute("teamMemberRoutes.js", "/api/team-members");
+loadRoute("dashboardRoutes.js", "/api/dashboard");
+loadRoute("attendance.js", "/api/attendance");
+loadRoute("chat.js", "/api/chats");
+loadRoute("settingRoutes.js", "/api/settings");
+loadRoute("syllabusRoutes.js", "/api/syllabus");
+loadRoute("homeworkRoutes.js", "/api/homework");
+loadRoute("meetingRoutes.js", "/api/meetings");
+loadRoute("zoom.js", "/api/zoom");
 
 /* =========================
    404
@@ -75,22 +84,18 @@ app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({
     message: "Server Error",
-    error: err.message
+    error: err.message,
   });
 });
 
 /* =========================
-   START SERVER FIRST
+   START SERVER (RAILWAY SAFE)
 ========================= */
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("Server running on port:", PORT);
 
-  try {
-    await connectDB();
-    console.log("MongoDB Connected");
-  } catch (err) {
-    console.log("MongoDB Failed:", err.message);
-  }
+  // DB connects AFTER server starts (IMPORTANT FOR RAILWAY)
+  await connectDB();
 });
