@@ -16,31 +16,78 @@ const generateMeetingNumber = () => {
 };
 
 /* =====================
-   ZOOM (SAFE)
+   ZOOM (SERVER-TO-SERVER OAUTH)
 ===================== */
-const createZoomMeeting = async ({ topic, startTime }) => {
+const getZoomAccessToken = async () => {
   try {
-    if (!axios || !process.env.ZOOM_JWT_TOKEN) return null;
+    if (!axios) return null;
+
+    const clientId = process.env.ZOOM_CLIENT_ID;
+    const clientSecret = process.env.ZOOM_CLIENT_SECRET;
+    const accountId = process.env.ZOOM_ACCOUNT_ID;
+
+    if (!clientId || !clientSecret || !accountId) {
+      console.log("Missing Zoom OAuth credentials");
+      return null;
+    }
+
+    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    
+    const response = await axios.post(
+      `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${accountId}`,
+      {},
+      {
+        headers: {
+          'Authorization': `Basic ${credentials}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
+
+    return response.data.access_token;
+  } catch (err) {
+    console.log("Zoom OAuth Error:", err.message);
+    return null;
+  }
+};
+
+const createZoomMeeting = async ({ topic, startTime, duration = 60 }) => {
+  try {
+    if (!axios) return null;
+
+    const accessToken = await getZoomAccessToken();
+    if (!accessToken) {
+      console.log("Failed to get Zoom access token");
+      return null;
+    }
 
     const response = await axios.post(
       "https://api.zoom.us/v2/users/me/meetings",
       {
         topic,
-        type: 1,
+        type: 1, // Scheduled meeting
         start_time: startTime,
-        duration: 60,
+        duration: duration,
+        settings: {
+          join_before_host: true,
+          participant_video: true,
+          host_video: true,
+          mute_upon_entry: false,
+          waiting_room: false
+        }
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.ZOOM_JWT_TOKEN}`,
-          "Content-Type": "application/json",
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
         },
       }
     );
 
+    console.log("Zoom meeting created successfully:", response.data.id);
     return response.data;
   } catch (err) {
-    console.log("Zoom Error:", err.message);
+    console.log("Zoom Meeting Creation Error:", err.response?.data || err.message);
     return null;
   }
 };
@@ -91,29 +138,41 @@ const startClass = async (req, res) => {
       });
     }
 
-    const meetingNumber = generateMeetingNumber();
-
     // REQUIRE REAL ZOOM MEETING
     let zoom;
     try {
-      zoom = await createZoomMeeting({
+      console.log("CREATING ZOOM MEETING:", {
         topic: `${className} - ${course}`,
         startTime: new Date().toISOString(),
+        className,
+        course,
+        scheduleId
       });
+      
+      zoom = await createZoomMeeting({
+        topic: `${className} - ${course}`,
+        startTime: new Date().toISOString()
+      });
+      
+      console.log("ZOOM MEETING CREATION RESULT:", zoom);
     } catch (zErr) {
       console.error("Zoom meeting creation failed:", zErr.message);
+      console.error("Zoom Error Details:", zErr.response?.data || zErr);
       return res.status(500).json({
         success: false,
         message: "Failed to create Zoom meeting. Please check Zoom credentials.",
         error: zErr.message,
+        details: zErr.response?.data
       });
     }
 
     // Validate Zoom meeting creation
     if (!zoom || !zoom.id) {
+      console.error("INVALID ZOOM RESPONSE:", zoom);
       return res.status(500).json({
         success: false,
         message: "Zoom meeting creation failed - no meeting ID returned",
+        zoomResponse: zoom
       });
     }
 
@@ -335,12 +394,36 @@ const getMeetingDetails = async (req, res) => {
       meetingNumber: req.params.meetingNumber,
     });
 
+    if (!meeting) {
+      return res.status(404).json({
+        success: false,
+        message: "Meeting not found"
+      });
+    }
+
+    // Check if this is a real Zoom meeting
+    const isRealZoomMeeting = meeting.zoomMeetingId && 
+      meeting.zoomMeetingId !== meeting.meetingNumber &&
+      meeting.zoomMeetingId.length > 10;
+
     res.json({
       success: true,
       meeting,
+      isRealZoomMeeting,
+      debug: {
+        meetingNumber: meeting.meetingNumber,
+        zoomMeetingId: meeting.zoomMeetingId,
+        hasZoomPassword: !!meeting.zoomPassword,
+        hasZoomJoinUrl: !!meeting.zoomJoinUrl,
+        hasZoomStartUrl: !!meeting.zoomStartUrl
+      }
     });
   } catch (err) {
-    res.status(500).json({ success: false });
+    console.error("Get meeting details error:", err);
+    res.status(500).json({ 
+      success: false,
+      error: err.message 
+    });
   }
 };
 
