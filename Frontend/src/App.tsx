@@ -20,6 +20,7 @@ import Syllabus from "./pages/Syllabus";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
 import StudentProfile from "./pages/StudentProfile";
+import ZoomMeetingClean from "./components/zoom/ZoomMeetingClean";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ function AppRoutes() {
       <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><StudentProfile /></ProtectedRoute>} />
+      <Route path="/zoom-join/:meetingNumber?" element={<ProtectedRoute><ZoomMeetingClean /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
