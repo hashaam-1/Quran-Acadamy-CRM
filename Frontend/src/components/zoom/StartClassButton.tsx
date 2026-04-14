@@ -80,7 +80,13 @@ export default function StartClassButton({
       }
 
       setMeeting(data.meeting);
-      toast.success("Class started successfully!");
+      
+      // Handle both new meetings and rejoining existing meetings
+      if (data.rejoin) {
+        toast.success("Rejoining existing class!");
+      } else {
+        toast.success("Class started successfully!");
+      }
 
       if (data.meeting?.meetingNumber) {
         navigate(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}&role=1`);

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -19,21 +20,21 @@ interface MeetingConfig {
   sdkKey: string;
 }
 
-export default function JoinClassButtonClean({ 
-  meetingNumber, 
-  className 
-}: { 
-  meetingNumber?: string; 
-  className?: string;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function ZoomMeetingClean() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [sdkLoaded, setSdkLoaded] = useState(false);
   const [meetingConfig, setMeetingConfig] = useState<MeetingConfig | null>(null);
   const [isJoined, setIsJoined] = useState(false);
+  const [meeting, setMeeting] = useState<any>(null);
   const zoomContainerRef = useRef<HTMLDivElement>(null);
   const { currentUser } = useAuthStore();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Get meeting details from URL
+  const meetingNumber = searchParams.get('meetingNumber');
+  const role = parseInt(searchParams.get('role') || '1');
 
   // Initialize Zoom Meeting SDK from npm package
   useEffect(() => {
@@ -66,28 +67,31 @@ export default function JoinClassButtonClean({
       }
     };
 
-    if (isOpen && !sdkLoaded) {
+    if (!sdkLoaded) {
       initializeZoomSDK();
     }
-  }, [isOpen, sdkLoaded]);
+  }, [sdkLoaded]);
 
-  // Generate signature when component opens
+  // Generate signature when component loads
   useEffect(() => {
-    if (isOpen && meetingNumber) {
+    if (meetingNumber && sdkLoaded) {
       generateSignature();
     }
-  }, [isOpen, meetingNumber]);
+  }, [meetingNumber, sdkLoaded]);
 
   const generateSignature = async () => {
     try {
       setIsLoading(true);
       setError('');
 
-      console.log('Attempting backend signature generation...');
+      if (!meetingNumber) {
+        throw new Error('No meeting number provided in URL');
+      }
+
+      console.log('Generating signature for meeting:', meetingNumber, 'role:', role);
       
-      // Use correct backend URL directly
+      // Use correct backend URL
       const correctBackendUrl = 'https://quran-acadamy-crm-production.up.railway.app/api/zoom/signature-test';
-      console.log('FRONTEND DEBUG: Using corrected URL =', correctBackendUrl);
       
       const response = await fetch(correctBackendUrl, {
         method: 'POST',
@@ -95,8 +99,8 @@ export default function JoinClassButtonClean({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          meetingNumber,
-          role: 1, // Participant role
+          meetingNumber: meetingNumber,
+          role: role,
         }),
       });
 
@@ -104,31 +108,27 @@ export default function JoinClassButtonClean({
         const data = await response.json();
         console.log('Backend signature generated successfully');
         
-        // Use the provided meeting number or a real test meeting number
-        // This should be a real Zoom meeting ID that exists
-        const validMeetingNumber = meetingNumber || '86543219876'; // REAL TEST MEETING NUMBER - 2026-04-13 17:20
-        console.log('MEETING NUMBER DEBUG: Using meeting number', validMeetingNumber, 'provided:', meetingNumber);
-        
-        if (!validMeetingNumber) {
-          throw new Error('No meeting number provided');
+        if (!data.signature) {
+          throw new Error('No signature returned from backend');
         }
         
         const config: MeetingConfig = {
-          meetingNumber: validMeetingNumber,
-          userName: currentUser?.name || 'Admin',
-          role: 1,
-          signature: data.signature || 'test-signature',
-          sdkKey: 'YNdDIn95StmFL25wVBoGQ'
+          meetingNumber: meetingNumber,
+          userName: currentUser?.name || 'User',
+          role: role,
+          signature: data.signature,
+          sdkKey: process.env.VITE_ZOOM_SDK_KEY || 'YOUR_SDK_KEY_HERE'
         };
         
         setMeetingConfig(config);
         console.log('Zoom meeting config prepared:', config);
       } else {
-        throw new Error(`Backend responded with ${response.status}: ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(`Signature generation failed: ${errorData.error || response.statusText}`);
       }
     } catch (err) {
       console.error('Error generating signature:', err);
-      setError('Failed to generate meeting signature. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to generate meeting signature. Please try again.');
       toast.error('Failed to join meeting');
     } finally {
       setIsLoading(false);
@@ -210,108 +210,87 @@ export default function JoinClassButtonClean({
   };
 
   return (
-    <>
-      <Button
-        onClick={() => setIsOpen(true)}
-        className={className}
-        disabled={!meetingNumber}
-      >
-        <Video className="w-4 h-4 mr-2" />
-        Join Class
-      </Button>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Zoom Meeting</h1>
+              <p className="text-gray-600">Meeting ID: {meetingNumber || 'N/A'}</p>
+            </div>
+            <Button 
+              onClick={() => navigate('/dashboard')} 
+              variant="outline"
+            >
+              Back to Dashboard
+            </Button>
+          </div>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Zoom Meeting</DialogTitle>
-            <DialogDescription>
-              Join your Quran Academy class via Zoom Meeting
-            </DialogDescription>
-          </DialogHeader>
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-          <div className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
+          <div className="space-y-6">
             <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>{isJoined ? 'Meeting in Progress' : 'Meeting Details'}</span>
-                    <Badge variant={isJoined ? 'default' : 'outline'}>
-                      {isJoined ? 'Connected' : 'Ready'}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Always render the Zoom container */}
-                  <div
-                    ref={zoomContainerRef}
-                    className={`w-full h-[600px] rounded-lg ${isJoined ? 'bg-gray-100' : 'bg-gray-50 border-2 border-dashed border-gray-300'}`}
-                    id="zoomContainer"
-                  >
-                    {!isJoined && (
-                      <div className="flex items-center justify-center h-full text-gray-500">
-                        <div className="text-center">
-                          <Video className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                          <p>Zoom meeting will appear here</p>
-                        </div>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Video className="w-5 h-5" />
+                  Meeting Room
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div
+                  ref={zoomContainerRef}
+                  className={`w-full h-[600px] rounded-lg ${isJoined ? 'bg-gray-100' : 'bg-gray-50 border-2 border-dashed border-gray-300'}`}
+                  id="zoomContainer"
+                >
+                  {!isJoined && (
+                    <div className="flex items-center justify-center h-full text-gray-500">
+                      <div className="text-center">
+                        <Video className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                        <p>Zoom meeting will appear here</p>
+                        <p className="text-sm mt-2">Meeting Number: {meetingNumber}</p>
+                        <p className="text-sm">User: {currentUser?.name || 'Guest'}</p>
+                        <p className="text-sm">SDK Status: {sdkLoaded ? 'Loaded' : 'Loading...'}</p>
                       </div>
-                    )}
-                  </div>
-                  
-                  {!isJoined ? (
-                    <>
-                      <div className="space-y-2">
-                        <div>
-                          <Badge variant="outline">
-                            Meeting Number: {meetingNumber || 'N/A'}
-                          </Badge>
-                        </div>
-                        <div>
-                          <Badge variant="outline">
-                            User: {currentUser?.name || 'Guest'}
-                          </Badge>
-                        </div>
-                        <div>
-                          <Badge variant="outline">
-                            SDK Status: {sdkLoaded ? 'Loaded' : 'Loading...'}
-                          </Badge>
-                        </div>
-                      </div>
-                      <Button
-                        onClick={joinMeeting}
-                        disabled={isLoading || !sdkLoaded || !meetingConfig}
-                        className="w-full"
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Joining...
-                          </>
-                        ) : (
-                          <>
-                            <Video className="w-4 h-4 mr-2" />
-                            Join Meeting
-                          </>
-                        )}
-                      </Button>
-                    </>
-                  ) : (
-                    <div className="flex justify-center">
-                      <Button onClick={leaveMeeting} variant="destructive">
-                        <Phone className="w-4 h-4 mr-2" />
-                        Leave Meeting
-                      </Button>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+                
+                {!isJoined ? (
+                  <Button
+                    onClick={joinMeeting}
+                    disabled={isLoading || !sdkLoaded || !meetingConfig}
+                    className="w-full"
+                    size="lg"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Joining Meeting...
+                      </>
+                    ) : (
+                      <>
+                        <Video className="w-4 h-4 mr-2" />
+                        Join Meeting
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <div className="flex justify-center">
+                    <Button onClick={leaveMeeting} variant="destructive" size="lg">
+                      <Phone className="w-4 h-4 mr-2" />
+                      Leave Meeting
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
-        </DialogContent>
-      </Dialog>
-    </>
+        </div>
+      </div>
+    </div>
   );
 }
