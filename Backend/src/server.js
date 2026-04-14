@@ -12,9 +12,9 @@ const connectDB = require("./config/database");
 const app = express();
 
 /* =========================
-   MIDDLEWARE
+   SECURITY + MIDDLEWARE
 ========================= */
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "*" }));
 app.use(helmet());
@@ -67,24 +67,34 @@ loadRoute("homeworkRoutes.js", "/api/homework");
 loadRoute("meetingRoutes.js", "/api/meetings");
 
 /* =========================
-   ✅ FIXED ZOOM ROUTE (IMPORTANT)
+   ZOOM ROUTE (IMPORTANT FIXED)
 ========================= */
-const zoomRoutes = require("./routes/zoom.js");
-app.use("/api/zoom", zoomRoutes);
+try {
+  const zoomRoutes = require("./routes/zoom.js");
+  app.use("/api/zoom", zoomRoutes);
+  console.log("🚀 Zoom route loaded");
+} catch (err) {
+  console.error("❌ Zoom route failed:", err.message);
+}
 
 /* =========================
    404 HANDLER
 ========================= */
 app.use((req, res) => {
-  res.status(404).json({ message: "Route not found" });
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+    path: req.originalUrl,
+  });
 });
 
 /* =========================
-   ERROR HANDLER
+   GLOBAL ERROR HANDLER
 ========================= */
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error("❌ Server Error:", err);
   res.status(500).json({
+    success: false,
     message: "Server Error",
     error: err.message,
   });
@@ -96,6 +106,12 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
-  console.log("Server running on port:", PORT);
-  await connectDB();
+  console.log("🚀 Server running on port:", PORT);
+
+  try {
+    await connectDB();
+    console.log("🟢 MongoDB Connected");
+  } catch (err) {
+    console.error("❌ DB Connection Failed:", err.message);
+  }
 });
