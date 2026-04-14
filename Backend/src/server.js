@@ -41,13 +41,11 @@ app.get("/api/health", (req, res) => {
 ========================= */
 const loadRoute = (routePath, urlPath) => {
   try {
-    console.log("Loading route:", routePath);
     const route = require(path.join(__dirname, "routes", routePath));
     app.use(urlPath, route);
-    console.log("Successfully loaded:", urlPath);
+    console.log("Loaded:", urlPath);
   } catch (err) {
-    console.error("FAILED to load route:", urlPath, "-", err.message);
-    console.error("Full error:", err);
+    console.log("Skipped:", urlPath, "-", err.message);
   }
 };
 
