@@ -16,9 +16,8 @@ const meetingSchema = new mongoose.Schema({
     default: ''
   },
   teacherId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Teacher',
-    required: true
+    type: mongoose.Schema.Types.Mixed,
+    required: false
   },
   teacherName: {
     type: String,
@@ -34,11 +33,11 @@ const meetingSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    required: true
+    default: Date.now
   },
   startTime: {
     type: String,
-    required: true
+    default: () => new Date().toLocaleTimeString()
   },
   endTime: {
     type: String
@@ -61,8 +60,7 @@ const meetingSchema = new mongoose.Schema({
   },
   participants: [{
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      type: mongoose.Schema.Types.Mixed
     },
     name: String,
     role: {
