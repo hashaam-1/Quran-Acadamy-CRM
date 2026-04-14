@@ -1,14 +1,15 @@
 const express = require("express");
 const crypto = require("crypto");
+
 const router = express.Router();
 
-console.log("ZOOM FILE UPDATED - FORCE DEPLOY CHECK - " + new Date().toISOString());
-console.log("zoom.js FILE LOADED - STEP 2 DEBUG");
-console.log("Zoom.js route file loaded - POST /signature-test endpoint available (mounted at /api/zoom)");
-console.log("ACTIVE ZOOM ROUTER LOADED - SINGLE SYSTEM");
+console.log("🚀 ZOOM ROUTER LOADED");
 
+
+// ===============================
+// WEB SDK SIGNATURE (OK - FIXED STYLE)
+// ===============================
 router.post("/signature-test", (req, res) => {
-  console.log("SIGNATURE ROUTE HIT - STEP 2 DEBUG");
   try {
     const { meetingNumber, role = 0 } = req.body;
 
@@ -22,20 +23,21 @@ router.post("/signature-test", (req, res) => {
     const iat = Math.floor(Date.now() / 1000) - 30;
     const exp = iat + 60 * 60 * 2;
 
-    const header = Buffer.from(JSON.stringify({
-      alg: "HS256",
-      typ: "JWT"
-    })).toString("base64url");
+    const header = Buffer.from(
+      JSON.stringify({ alg: "HS256", typ: "JWT" })
+    ).toString("base64url");
 
-    const payload = Buffer.from(JSON.stringify({
-      sdkKey,
-      mn: meetingNumber,
-      role,
-      iat,
-      exp,
-      appKey: sdkKey,
-      tokenExp: exp
-    })).toString("base64url");
+    const payload = Buffer.from(
+      JSON.stringify({
+        sdkKey,
+        mn: meetingNumber,
+        role,
+        iat,
+        exp,
+        appKey: sdkKey,
+        tokenExp: exp,
+      })
+    ).toString("base64url");
 
     const msg = `${header}.${payload}`;
 
@@ -46,9 +48,66 @@ router.post("/signature-test", (req, res) => {
 
     const signature = `${msg}.${hash}`;
 
-    res.json({ signature });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.json({ signature });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ===============================
+// WEBHOOK (FIXED 100%)
+// ===============================
+router.post("/webhook", (req, res) => {
+  try {
+    const body = req.body;
+
+    console.log("📩 FULL WEBHOOK BODY:", JSON.stringify(body, null, 2));
+
+    // ===============================
+    // URL VALIDATION (FIXED)
+    // ===============================
+    if (body.event === "endpoint.url_validation") {
+      const plainToken = body.payload?.plainToken;
+
+      const hash = crypto
+        .createHmac("sha256", process.env.ZOOM_SECRET_TOKEN)
+        .update(plainToken)
+        .digest("hex"); // ✅ MUST BE HEX
+
+      console.log("✅ ZOOM URL VERIFIED");
+
+      return res.json({
+        plainToken,
+        encryptedToken: hash,
+      });
+    }
+
+    // ===============================
+    // EVENTS
+    // ===============================
+    switch (body.event) {
+      case "meeting.started":
+        console.log("🎥 Meeting Started");
+        break;
+
+      case "meeting.ended":
+        console.log("🛑 Meeting Ended");
+        break;
+
+      case "meeting.participant_joined":
+        console.log("👤 Participant Joined");
+        break;
+
+      case "meeting.participant_left":
+        console.log("👤 Participant Left");
+        break;
+    }
+
+    return res.sendStatus(200);
+  } catch (err) {
+    console.error("Webhook Error:", err.message);
+    return res.sendStatus(500);
   }
 });
 

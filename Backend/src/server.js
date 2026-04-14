@@ -22,7 +22,7 @@ app.use(compression());
 app.use(morgan("dev"));
 
 /* =========================
-   HEALTH CHECK (RAILWAY)
+   HEALTH CHECK
 ========================= */
 app.get("/api/health", (req, res) => {
   res.json({
@@ -34,7 +34,7 @@ app.get("/api/health", (req, res) => {
 });
 
 /* =========================
-   SAFE ROUTE LOADER
+   ROUTE LOADER
 ========================= */
 const loadRoute = (routePath, urlPath) => {
   try {
@@ -65,10 +65,15 @@ loadRoute("settingRoutes.js", "/api/settings");
 loadRoute("syllabusRoutes.js", "/api/syllabus");
 loadRoute("homeworkRoutes.js", "/api/homework");
 loadRoute("meetingRoutes.js", "/api/meetings");
-loadRoute("zoom.js", "/api/zoom");
 
 /* =========================
-   404
+   ✅ FIXED ZOOM ROUTE (IMPORTANT)
+========================= */
+const zoomRoutes = require("./routes/zoom.js");
+app.use("/api/zoom", zoomRoutes);
+
+/* =========================
+   404 HANDLER
 ========================= */
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
@@ -86,13 +91,11 @@ app.use((err, req, res, next) => {
 });
 
 /* =========================
-   START SERVER (RAILWAY SAFE)
+   START SERVER
 ========================= */
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
   console.log("Server running on port:", PORT);
-
-  // DB connects AFTER server starts (IMPORTANT FOR RAILWAY)
   await connectDB();
 });
