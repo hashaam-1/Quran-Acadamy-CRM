@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,7 @@ export default function StartClassButton({
   time = "",
   disabled = false
 }: StartClassButtonProps) {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [meeting, setMeeting] = useState<any>(null);
@@ -79,10 +81,7 @@ export default function StartClassButton({
       toast.success("Class started successfully!");
 
       if (data.meeting?.meetingNumber) {
-        window.open(
-          `/zoom-join?meetingNumber=${data.meeting.meetingNumber}&role=1`,
-          "_blank"
-        );
+        navigate(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}&role=1`);
       }
     } catch (err: any) {
       console.error("Error starting class:", err);
@@ -248,7 +247,7 @@ export default function StartClassButton({
               ) : (
                 <>
                   <Button
-                    onClick={() => window.open(`/zoom-join?meetingNumber=${meeting.meetingNumber}&role=1`, '_blank')}
+                    onClick={() => navigate(`/zoom-join?meetingNumber=${meeting.meetingNumber}&role=1`)}
                     variant="outline"
                     className="flex-1"
                   >
