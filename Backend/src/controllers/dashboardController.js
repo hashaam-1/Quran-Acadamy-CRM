@@ -81,7 +81,7 @@ exports.getDashboardStats = async (req, res) => {
 };
 
 // Get teacher performance data for charts
-module.exports. getTeacherPerformanceData = async (req, res) => {
+exports.getTeacherPerformanceData = async (req, res) => {
   try {
     const teachers = await Teacher.find()
       .select('name performance punctuality completionRate rating students')
@@ -94,7 +94,7 @@ module.exports. getTeacherPerformanceData = async (req, res) => {
 };
 
 // Get invoice report data for charts
-module.exports. getInvoiceReportData = async (req, res) => {
+exports.getInvoiceReportData = async (req, res) => {
   try {
     const monthlyData = await Invoice.aggregate([
       {
@@ -115,7 +115,7 @@ module.exports. getInvoiceReportData = async (req, res) => {
 };
 
 // Get student leave analytics
-module.exports. getStudentLeaveAnalytics = async (req, res) => {
+exports.getStudentLeaveAnalytics = async (req, res) => {
   try {
     const leavesByReason = await StudentLeave.aggregate([
       {
