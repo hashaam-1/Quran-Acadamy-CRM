@@ -7,7 +7,8 @@ const {
   getTeacherMeetings,
   getStudentMeetings,
   endClass,
-  getMeetingDetails
+  getMeetingDetails,
+  createScheduledMeeting
 } = require("../controllers/meetingController");
 
 /* Test */
@@ -38,5 +39,6 @@ router.get("/teacher/meetings", getTeacherMeetings);
 router.get("/student/meetings", getStudentMeetings);
 router.put("/end-class/:meetingNumber", endClass);
 router.get("/:meetingNumber", getMeetingDetails);
+router.post("/schedule/:scheduleId/create-meeting", createScheduledMeeting);
 
 module.exports = router;

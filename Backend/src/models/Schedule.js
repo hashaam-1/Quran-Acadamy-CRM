@@ -63,7 +63,26 @@ const scheduleSchema = new mongoose.Schema({
     required: true,
     enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
   },
-  rescheduleRequest: rescheduleRequestSchema
+  rescheduleRequest: rescheduleRequestSchema,
+  // Zoom meeting fields for scheduled classes
+  zoomMeetingId: {
+    type: String
+  },
+  zoomPassword: {
+    type: String,
+    default: ''
+  },
+  zoomJoinUrl: {
+    type: String
+  },
+  zoomStartUrl: {
+    type: String
+  },
+  meetingStatus: {
+    type: String,
+    enum: ['not_created', 'created', 'started', 'ended'],
+    default: 'not_created'
+  }
 }, {
   timestamps: true
 });

@@ -55,6 +55,16 @@ const meetingSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  zoomPassword: {
+    type: String,
+    default: ''
+  },
+  zoomJoinUrl: {
+    type: String
+  },
+  zoomStartUrl: {
+    type: String
+  },
   zoomHostKey: {
     type: String
   },

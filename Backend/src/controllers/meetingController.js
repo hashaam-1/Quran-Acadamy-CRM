@@ -1,4 +1,5 @@
 const Meeting = require("../models/Meeting");
+const Schedule = require("../models/Schedule");
 
 let axios = null;
 try {
@@ -75,15 +76,28 @@ const startClass = async (req, res) => {
 
     const meetingNumber = generateMeetingNumber();
 
-    // SAFE ZOOM CALL
-    let zoom = null;
+    // REQUIRE REAL ZOOM MEETING
+    let zoom;
     try {
       zoom = await createZoomMeeting({
         topic: `${className} - ${course}`,
         startTime: new Date().toISOString(),
       });
     } catch (zErr) {
-      console.log("Zoom skipped:", zErr.message);
+      console.error("Zoom meeting creation failed:", zErr.message);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to create Zoom meeting. Please check Zoom credentials.",
+        error: zErr.message,
+      });
+    }
+
+    // Validate Zoom meeting creation
+    if (!zoom || !zoom.id) {
+      return res.status(500).json({
+        success: false,
+        message: "Zoom meeting creation failed - no meeting ID returned",
+      });
     }
 
     let meeting;
@@ -95,9 +109,12 @@ const startClass = async (req, res) => {
         scheduleId,
         teacherId,
         teacherName,
-        meetingNumber,
+        meetingNumber: zoom.id, // Use real Zoom meeting ID
         status: "live",
-        zoomMeetingId: zoom?.id || meetingNumber,
+        zoomMeetingId: zoom.id, // Use real Zoom meeting ID
+        zoomPassword: zoom.password || "",
+        zoomJoinUrl: zoom.join_url,
+        zoomStartUrl: zoom.start_url,
         participants: [
           {
             userId: teacherId,
@@ -107,7 +124,7 @@ const startClass = async (req, res) => {
         ],
       });
     } catch (createErr) {
-      console.log("Meeting create error:", createErr.message);
+      console.error("Meeting create error:", createErr.message);
 
       return res.status(500).json({
         success: false,
@@ -217,6 +234,84 @@ const endClass = async (req, res) => {
   }
 };
 
+const createScheduledMeeting = async (req, res) => {
+  try {
+    const { scheduleId } = req.params;
+    
+    const schedule = await Schedule.findById(scheduleId);
+    if (!schedule) {
+      return res.status(404).json({
+        success: false,
+        message: "Schedule not found"
+      });
+    }
+
+    // Check if meeting already exists
+    if (schedule.meetingStatus === 'created' || schedule.meetingStatus === 'started') {
+      return res.status(400).json({
+        success: false,
+        message: "Meeting already created for this schedule"
+      });
+    }
+
+    // Create Zoom meeting
+    let zoom;
+    try {
+      const meetingDateTime = new Date();
+      const [hours, minutes] = schedule.time.split(':');
+      meetingDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      
+      zoom = await createZoomMeeting({
+        topic: `${schedule.course} - ${schedule.studentName}`,
+        startTime: meetingDateTime.toISOString(),
+        duration: parseInt(schedule.duration) || 60
+      });
+    } catch (zErr) {
+      console.error("Zoom meeting creation failed:", zErr.message);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to create Zoom meeting. Please check Zoom credentials.",
+        error: zErr.message,
+      });
+    }
+
+    // Validate Zoom meeting creation
+    if (!zoom || !zoom.id) {
+      return res.status(500).json({
+        success: false,
+        message: "Zoom meeting creation failed - no meeting ID returned",
+      });
+    }
+
+    // Update schedule with Zoom meeting details
+    schedule.zoomMeetingId = zoom.id;
+    schedule.zoomPassword = zoom.password || "";
+    schedule.zoomJoinUrl = zoom.join_url;
+    schedule.zoomStartUrl = zoom.start_url;
+    schedule.meetingStatus = 'created';
+    
+    await schedule.save();
+
+    res.json({
+      success: true,
+      schedule,
+      zoomMeeting: {
+        meetingId: zoom.id,
+        password: zoom.password,
+        joinUrl: zoom.join_url,
+        startUrl: zoom.start_url
+      }
+    });
+
+  } catch (err) {
+    console.error("CREATE SCHEDULED MEETING ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message || "Failed to create scheduled meeting"
+    });
+  }
+};
+
 const getMeetingDetails = async (req, res) => {
   try {
     const meeting = await Meeting.findOne({
@@ -239,4 +334,5 @@ module.exports = {
   getStudentMeetings,
   endClass,
   getMeetingDetails,
+  createScheduledMeeting,
 };
