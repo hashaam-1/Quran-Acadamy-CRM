@@ -139,7 +139,3 @@ exports.getTeacherTodayAttendance = async (req, res) => {
   }
 };
 
-module.exports = {
-  teacherCheckout: exports.teacherCheckout,
-  getTeacherTodayAttendance: exports.getTeacherTodayAttendance
-};

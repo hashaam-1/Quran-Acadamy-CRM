@@ -144,8 +144,3 @@ exports.autoCheckoutStudents = async (req, res) => {
   }
 };
 
-module.exports = {
-  studentCheckout: exports.studentCheckout,
-  getStudentTodayAttendance: exports.getStudentTodayAttendance,
-  autoCheckoutStudents: exports.autoCheckoutStudents
-};
