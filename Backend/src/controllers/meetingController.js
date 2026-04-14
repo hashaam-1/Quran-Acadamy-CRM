@@ -427,6 +427,33 @@ const getMeetingDetails = async (req, res) => {
   }
 };
 
+const deleteMeeting = async (req, res) => {
+  try {
+    const meeting = await Meeting.findOneAndDelete({
+      meetingNumber: req.params.meetingNumber,
+    });
+
+    if (!meeting) {
+      return res.status(404).json({
+        success: false,
+        message: "Meeting not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Meeting deleted successfully",
+      meeting
+    });
+  } catch (err) {
+    console.error("Delete meeting error:", err);
+    res.status(500).json({ 
+      success: false,
+      error: err.message 
+    });
+  }
+};
+
 module.exports = {
   startClass,
   joinClass,
@@ -435,4 +462,5 @@ module.exports = {
   endClass,
   getMeetingDetails,
   createScheduledMeeting,
+  deleteMeeting,
 };
