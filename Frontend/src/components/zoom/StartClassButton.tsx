@@ -35,46 +35,59 @@ export default function StartClassButton({
 
   const handleStartClass = async () => {
     if (!currentUser) {
-      toast.error('Please login to start class');
+      toast.error("Please login to start class");
+      return;
+    }
+
+    if (!course?.trim()) {
+      toast.error("Course is missing");
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('https://quran-acadamy-crm-production.up.railway.app/api/meetings/start-class', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          scheduleId,
-          className: `${course} Class`,
-          course,
-          startTime: time || new Date().toLocaleTimeString(),
-          endTime: ''
-        })
-      });
+      const payload = {
+        scheduleId: scheduleId || null,
+        className: customClassName?.trim() || `${course} Class`,
+        course: course.trim()
+      };
+
+      console.log("Sending payload:", payload);
+
+      const response = await fetch(
+        "https://quran-acadamy-crm-production.up.railway.app/api/meetings/start-class",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token") || ""}` 
+          },
+          body: JSON.stringify(payload)
+        }
+      );
 
       const data = await response.json();
+      console.log("Response:", data);
 
-      if (response.ok) {
-        setMeeting(data.meeting);
-        toast.success('Class started successfully!');
-        
-        // Open Zoom meeting for teacher (role: 1)
-        if (data.meeting?.meetingNumber) {
-          window.open(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}&role=1`, '_blank');
-        }
-      } else {
-        throw new Error(data.error || 'Failed to start class');
+      if (!response.ok) {
+        throw new Error(data.message || data.error || "Failed to start class");
       }
-    } catch (err) {
-      console.error('Error starting class:', err);
-      setError(err instanceof Error ? err.message : 'Failed to start class');
-      toast.error('Failed to start class');
+
+      setMeeting(data.meeting);
+      toast.success("Class started successfully!");
+
+      if (data.meeting?.meetingNumber) {
+        window.open(
+          `/zoom-join?meetingNumber=${data.meeting.meetingNumber}&role=1`,
+          "_blank"
+        );
+      }
+    } catch (err: any) {
+      console.error("Error starting class:", err);
+      setError(err.message || "Failed to start class");
+      toast.error(err.message || "Failed to start class");
     } finally {
       setIsLoading(false);
     }
@@ -114,7 +127,7 @@ export default function StartClassButton({
       <Button
         onClick={() => setIsOpen(true)}
         disabled={disabled || isLoading}
-        className={`${customClassName}`}
+        className="w-full"
       >
         {isLoading ? (
           <>
