@@ -427,6 +427,66 @@ const getMeetingDetails = async (req, res) => {
   }
 };
 
+const testZoomCredentials = async (req, res) => {
+  try {
+    console.log("Testing Zoom OAuth credentials...");
+    
+    const accessToken = await getZoomAccessToken();
+    
+    if (!accessToken) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to get Zoom access token",
+        credentials: {
+          hasClientId: !!process.env.ZOOM_CLIENT_ID,
+          hasClientSecret: !!process.env.ZOOM_CLIENT_SECRET,
+          hasAccountId: !!process.env.ZOOM_ACCOUNT_ID,
+          hasSdkKey: !!process.env.ZOOM_SDK_KEY,
+          hasSdkSecret: !!process.env.ZOOM_SDK_SECRET
+        }
+      });
+    }
+
+    // Test creating a meeting
+    const testMeeting = await createZoomMeeting({
+      topic: "Test Meeting - " + new Date().toISOString(),
+      startTime: new Date().toISOString(),
+      duration: 30
+    });
+
+    if (!testMeeting || !testMeeting.id) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to create test Zoom meeting",
+        accessToken: accessToken ? "valid" : "invalid",
+        testResponse: testMeeting
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Zoom credentials working correctly",
+      accessToken: accessToken ? "valid" : "invalid",
+      testMeeting: {
+        id: testMeeting.id,
+        topic: testMeeting.topic,
+        join_url: testMeeting.join_url,
+        start_url: testMeeting.start_url,
+        password: testMeeting.password
+      }
+    });
+
+  } catch (err) {
+    console.error("Zoom credentials test error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Zoom credentials test failed",
+      error: err.message,
+      details: err.response?.data
+    });
+  }
+};
+
 const deleteMeeting = async (req, res) => {
   try {
     const meeting = await Meeting.findOneAndDelete({
@@ -463,4 +523,5 @@ module.exports = {
   getMeetingDetails,
   createScheduledMeeting,
   deleteMeeting,
+  testZoomCredentials,
 };

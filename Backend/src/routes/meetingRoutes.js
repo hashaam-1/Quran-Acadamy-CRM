@@ -9,7 +9,8 @@ const {
   endClass,
   getMeetingDetails,
   createScheduledMeeting,
-  deleteMeeting
+  deleteMeeting,
+  testZoomCredentials
 } = require("../controllers/meetingController");
 
 /* Test */
@@ -42,5 +43,6 @@ router.put("/end-class/:meetingNumber", endClass);
 router.get("/:meetingNumber", getMeetingDetails);
 router.post("/schedule/:scheduleId/create-meeting", createScheduledMeeting);
 router.delete("/:meetingNumber", deleteMeeting);
+router.get("/test-zoom", testZoomCredentials);
 
 module.exports = router;
