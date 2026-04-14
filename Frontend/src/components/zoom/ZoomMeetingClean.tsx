@@ -117,7 +117,7 @@ export default function ZoomMeetingClean() {
           userName: currentUser?.name || 'User',
           role: role,
           signature: data.signature,
-          sdkKey: process.env.VITE_ZOOM_SDK_KEY || 'YOUR_SDK_KEY_HERE'
+          sdkKey: process.env.VITE_ZOOM_SDK_KEY || 'YNdDIn95StmFL25wVBoGQ'
         };
         
         setMeetingConfig(config);
