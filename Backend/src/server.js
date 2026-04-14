@@ -25,13 +25,10 @@ app.use(morgan("dev"));
    HEALTH CHECK (RAILWAY)
 ========================= */
 app.get("/api/health", (req, res) => {
-  res.status(200).json({
+  res.json({
     success: true,
     message: "Backend Running",
-    db:
-      mongoose.connection.readyState === 1
-        ? "connected"
-        : "not connected",
+    db: mongoose.connection.readyState === 1 ? "connected" : "not connected",
     time: new Date().toISOString(),
   });
 });
