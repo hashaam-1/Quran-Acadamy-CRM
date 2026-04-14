@@ -158,6 +158,19 @@ const startClass = async (req, res) => {
   try {
     const { className, course, scheduleId } = req.body;
 
+    console.log("START CLASS REQUEST:", { className, course, scheduleId });
+
+    // CRITICAL DEBUG - Check Zoom environment variables
+    console.log("ZOOM ENV CHECK:", {
+      account: !!process.env.ZOOM_ACCOUNT_ID,
+      client: !!process.env.ZOOM_CLIENT_ID,
+      secret: !!process.env.ZOOM_CLIENT_SECRET,
+      token: !!process.env.ZOOM_ACCESS_TOKEN,
+      accountValue: process.env.ZOOM_ACCOUNT_ID?.substring(0, 10) + "...",
+      clientValue: process.env.ZOOM_CLIENT_ID?.substring(0, 10) + "...",
+      tokenValue: process.env.ZOOM_ACCESS_TOKEN?.substring(0, 20) + "..."
+    });
+
     // SAFE USER HANDLING (IMPORTANT FIX)
     const teacherId = req.user?.id || "guest";
     const teacherName = req.user?.name || "Guest";
@@ -173,20 +186,7 @@ const startClass = async (req, res) => {
       console.log("DB query error:", dbErr.message);
     }
 
-    // Auto-expire abandoned meetings (2+ hours old)
-    const twoHours = 2 * 60 * 60 * 1000;
-    if (
-      existing &&
-      existing.status === "live" &&
-      Date.now() - new Date(existing.createdAt).getTime() > twoHours
-    ) {
-      console.log("Meeting expired - marking as expired");
-      existing.status = "expired";
-      await existing.save();
-      existing = null; // Allow new meeting creation
-    }
-
-    // If meeting exists and is live, return it for rejoining
+    // Smart recovery instead of blocking
     if (existing) {
       console.log("Rejoining existing live meeting:", existing.meetingNumber);
       return res.json({
@@ -208,32 +208,75 @@ const startClass = async (req, res) => {
         scheduleId
       });
       
-      zoom = await createZoomMeeting({
-        topic: `${className} - ${course}`,
-        startTime: new Date().toISOString()
-      });
+      // Use the proper OAuth flow - get access token first
+      const accessToken = await getZoomAccessToken();
+      if (!accessToken) {
+        console.error("FAILED TO GET ZOOM ACCESS TOKEN");
+        return res.status(500).json({
+          success: false,
+          message: "Failed to get Zoom access token - check environment variables",
+          debug: {
+            hasClientId: !!process.env.ZOOM_CLIENT_ID,
+            hasClientSecret: !!process.env.ZOOM_CLIENT_SECRET,
+            hasAccountId: !!process.env.ZOOM_ACCOUNT_ID
+          }
+        });
+      }
+
+      console.log("GOT ACCESS TOKEN, creating Zoom meeting...");
       
-      console.log("ZOOM MEETING CREATION RESULT:", zoom);
+      // Direct Zoom API call with proper authentication
+      const zoomResponse = await axios.post(
+        "https://api.zoom.us/v2/users/me/meetings",
+        {
+          topic: `${className} - ${course}`,
+          type: 1,
+          settings: {
+            host_video: true,
+            participant_video: true,
+            join_before_host: true
+          }
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      console.log("ZOOM SUCCESS:", zoomResponse.data);
+      zoom = zoomResponse.data;
+      
     } catch (zErr) {
-      console.error("Zoom meeting creation failed:", zErr.message);
-      console.error("Zoom Error Details:", zErr.response?.data || zErr);
+      console.log("ZOOM ERROR FULL:", zErr.response?.data || zErr.message);
+      console.log("ZOOM ERROR STATUS:", zErr.response?.status);
+      console.log("ZOOM ERROR HEADERS:", zErr.response?.headers);
+      
       return res.status(500).json({
         success: false,
-        message: "Failed to create Zoom meeting. Please check Zoom credentials.",
-        error: zErr.message,
-        details: zErr.response?.data
+        message: "Zoom API failed",
+        error: zErr.response?.data || zErr.message,
+        status: zErr.response?.status,
+        debug: {
+          hasClientId: !!process.env.ZOOM_CLIENT_ID,
+          hasClientSecret: !!process.env.ZOOM_CLIENT_SECRET,
+          hasAccountId: !!process.env.ZOOM_ACCOUNT_ID
+        }
       });
     }
 
     // Validate Zoom meeting creation
-    if (!zoom || !zoom.id) {
+    if (!zoom?.id) {
       console.error("INVALID ZOOM RESPONSE:", zoom);
       return res.status(500).json({
         success: false,
-        message: "Zoom meeting creation failed - no meeting ID returned",
+        message: "Zoom returned no meeting ID",
         zoomResponse: zoom
       });
     }
+
+    console.log("ZOOM MEETING CREATED SUCCESSFULLY:", zoom.id);
 
     let meeting;
 
