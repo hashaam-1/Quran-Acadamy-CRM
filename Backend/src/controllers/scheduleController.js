@@ -169,3 +169,35 @@ exports.getScheduleStats = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Get schedules by student
+exports.getSchedulesByStudent = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    
+    const schedules = await Schedule.find({
+      $or: [
+        { studentId: studentId },
+        { 'students._id': studentId },
+        { 'students.id': studentId },
+        { 'students': studentId }
+      ]
+    })
+      .populate('studentId', 'name age')
+      .populate('teacherId', 'name email')
+      .sort({ day: 1, time: 1 });
+    
+    console.log('Student schedules found:', schedules.length, 'for student:', studentId);
+    console.log('Schedules:', schedules.map(s => ({
+      id: s._id,
+      className: s.className,
+      studentId: s.studentId,
+      students: s.students
+    })));
+    
+    res.json({ success: true, schedules });
+  } catch (error) {
+    console.error('Error fetching student schedules:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

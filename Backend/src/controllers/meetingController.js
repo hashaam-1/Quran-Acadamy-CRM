@@ -277,6 +277,10 @@ const startClass = async (req, res) => {
     }
 
     console.log("ZOOM MEETING CREATED SUCCESSFULLY:", zoom.id);
+      console.log("Zoom meeting password:", zoom.password);
+      console.log("Zoom meeting join_url:", zoom.join_url);
+      console.log("Zoom meeting start_url:", zoom.start_url);
+      console.log("Full Zoom response:", JSON.stringify(zoom, null, 2));
 
     let meeting;
 
@@ -475,20 +479,6 @@ const createScheduledMeeting = async (req, res) => {
     // Validate Zoom meeting creation
     if (!zoom || !zoom.id) {
       return res.status(500).json({
-        success: false,
-        message: "Zoom meeting creation failed - no meeting ID returned",
-      });
-    }
-
-    // Update schedule with Zoom meeting details
-    schedule.zoomMeetingId = zoom.id;
-    schedule.zoomPassword = zoom.password || "";
-    schedule.zoomJoinUrl = zoom.join_url;
-    schedule.zoomStartUrl = zoom.start_url;
-    schedule.meetingStatus = 'created';
-    
-    await schedule.save();
-
     res.json({
       success: true,
       schedule,
