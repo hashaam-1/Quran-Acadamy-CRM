@@ -9,8 +9,8 @@ import { Loader2, Video, Phone } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { toast } from 'sonner';
 
-// Import Zoom Meeting SDK from npm package
-import { ZoomMtg } from '@zoom/meetingsdk';
+// Import Zoom Meeting SDK from npm package - modern embedded client
+import { ZoomMtgEmbedded } from '@zoom/meetingsdk';
 
 interface MeetingConfig {
   meetingNumber: string;
@@ -23,11 +23,12 @@ interface MeetingConfig {
 export default function ZoomMeetingClean() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [sdkLoaded, setSdkLoaded] = useState(false);
+  const [clientLoaded, setClientLoaded] = useState(false);
   const [meetingConfig, setMeetingConfig] = useState<MeetingConfig | null>(null);
   const [isJoined, setIsJoined] = useState(false);
   const [meeting, setMeeting] = useState<any>(null);
   const zoomContainerRef = useRef<HTMLDivElement>(null);
+  const zoomClientRef = useRef<any>(null);
   const { currentUser } = useAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -36,87 +37,36 @@ export default function ZoomMeetingClean() {
   const meetingNumber = searchParams.get('meetingNumber');
   const role = parseInt(searchParams.get('role') || '1');
 
-  // Initialize Zoom Meeting SDK from npm package
+  // Initialize Zoom Embedded Client
   useEffect(() => {
-    const initializeZoomSDK = async () => {
+    const initializeZoomClient = async () => {
       try {
-        console.log('Initializing Zoom SDK v6.0.0...');
+        console.log('Initializing Zoom Embedded Client v6.0.0...');
         
-        // Check if ZoomMtg is available
-        if (typeof ZoomMtg !== 'undefined') {
-          console.log('Zoom SDK available from npm package');
-          
-          // Initialize Zoom SDK with correct API for v6.0.0
-          ZoomMtg.setZoomJSLib('https://source.zoom.us/3.11.2/lib', '/av');
-          
-          // Prepare SDK initialization options
-          const initOptions = {
-            leaveUrl: '/dashboard',
-            isSupportAV: true,
-            isSupportChat: true,
-            isSupportQA: true,
-            isSupportCC: true,
-            isSupportPolling: true,
-            isSupportBreakout: true,
-            showMeetingHeader: true,
-            showPureSharingContent: false,
-            videoDrag: true,
-            sharingMode: 'both',
-            isSupportNonverbal: true,
-            isShowJoiningErrorDialog: true,
-            disableJoinAudio: false,
-            audioPanelAlwaysOpen: false,
-            isEnableLiveTranscription: false,
-            rwcBackup: '',
-            isLockBottom: true,
-            disableCallOut: false,
-            disableRecord: false,
-            isSupportGallery: true,
-            isSupportVirtualBackground: true,
-            isSupportAnnotation: true,
-            isSupportWhiteboard: true,
-            isSupportRemoteControl: true,
-            isSupportLiveTranslation: true,
-            isSupportExternalLiveStream: true,
-          };
-          
-          console.log('Initializing Zoom SDK with options:', initOptions);
-          
-          // Initialize the SDK
-          ZoomMtg.init({
-            ...initOptions,
-            success: () => {
-              console.log('Zoom SDK initialized successfully');
-              setSdkLoaded(true);
-            },
-            error: (err: any) => {
-              console.error('Zoom SDK initialization error:', err);
-              setError(`Zoom SDK initialization failed: ${err.errorMessage || err}`);
-            }
-          });
-          
-          return;
-        }
+        // Create embedded client
+        const client = ZoomMtgEmbedded.createClient();
+        zoomClientRef.current = client;
         
-        console.error('Zoom SDK not available');
-        setError('Zoom SDK not loaded');
+        console.log('Zoom Embedded Client created successfully');
+        setClientLoaded(true);
+        
       } catch (err) {
-        console.error('Error initializing Zoom SDK:', err);
-        setError('Failed to initialize Zoom SDK');
+        console.error('Error creating Zoom client:', err);
+        setError('Failed to initialize Zoom client');
       }
     };
 
-    if (!sdkLoaded) {
-      initializeZoomSDK();
+    if (!clientLoaded) {
+      initializeZoomClient();
     }
-  }, [sdkLoaded]);
+  }, [clientLoaded]);
 
   // Generate signature when component loads
   useEffect(() => {
-    if (meetingNumber && sdkLoaded) {
+    if (meetingNumber && clientLoaded) {
       generateSignature();
     }
-  }, [meetingNumber, sdkLoaded]);
+  }, [meetingNumber, clientLoaded]);
 
   const generateSignature = async () => {
     try {
@@ -185,40 +135,44 @@ export default function ZoomMeetingClean() {
       return;
     }
 
+    if (!zoomClientRef.current) {
+      setError('Zoom client not initialized. Please refresh the page.');
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError('');
 
-      console.log('Joining Zoom meeting with v6.0.0 API...');
+      console.log('Joining Zoom meeting with modern embedded client...');
       
-      // Use the already initialized SDK from useEffect
-      if (!sdkLoaded) {
-        setError('Zoom SDK not initialized yet. Please wait...');
-        return;
-      }
-      
-      // Join meeting with correct v6.0.0 API
-      ZoomMtg.join({
-        meetingNumber: meetingConfig.meetingNumber,
-        userName: meetingConfig.userName,
-        signature: meetingConfig.signature,
-        sdkKey: meetingConfig.sdkKey,
-        passWord: '',
-        success: (success: any) => {
-          console.log('Successfully joined Zoom meeting:', success);
-          setIsJoined(true);
-          toast.success('Joined Zoom meeting successfully');
-        },
-        error: (error: any) => {
-          console.error('Error joining Zoom meeting:', error);
-          setError('Failed to join meeting: ' + (error.errorMessage || error.message || 'Unknown error'));
-          toast.error('Failed to join meeting');
-        }
+      // Initialize the embedded client with modern options
+      await zoomClientRef.current.init({
+        zoomAppRoot: zoomContainerRef.current,
+        language: 'en-US',
+        patchJsMedia: true,
+        leaveOnPageUnload: true
       });
+      
+      console.log('Zoom embedded client initialized, joining meeting...');
+      
+      // Join meeting with modern embedded client API
+      await zoomClientRef.current.join({
+        sdkKey: meetingConfig.sdkKey,
+        signature: meetingConfig.signature,
+        meetingNumber: meetingConfig.meetingNumber,
+        password: '',
+        userName: meetingConfig.userName,
+        userEmail: currentUser?.email || ''
+      });
+      
+      console.log('Successfully joined Zoom meeting');
+      setIsJoined(true);
+      toast.success('Joined Zoom meeting successfully');
       
     } catch (err) {
       console.error('Error joining meeting:', err);
-      setError('Failed to join meeting. Please try again.');
+      setError('Failed to join meeting: ' + (err instanceof Error ? err.message : 'Unknown error'));
       toast.error('Failed to join meeting');
     } finally {
       setIsLoading(false);
@@ -279,7 +233,7 @@ export default function ZoomMeetingClean() {
                         <p>Zoom meeting will appear here</p>
                         <p className="text-sm mt-2">Meeting Number: {meetingNumber}</p>
                         <p className="text-sm">User: {currentUser?.name || 'Guest'}</p>
-                        <p className="text-sm">SDK Status: {sdkLoaded ? 'Loaded' : 'Loading...'}</p>
+                        <p className="text-sm">SDK Status: {clientLoaded ? 'Loaded' : 'Loading...'}</p>
                       </div>
                     </div>
                   )}
@@ -288,7 +242,7 @@ export default function ZoomMeetingClean() {
                 {!isJoined ? (
                   <Button
                     onClick={joinMeeting}
-                    disabled={isLoading || !sdkLoaded || !meetingConfig}
+                    disabled={isLoading || !clientLoaded || !meetingConfig}
                     className="w-full"
                     size="lg"
                   >
