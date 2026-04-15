@@ -18,6 +18,7 @@ interface MeetingConfig {
   role: number;
   signature: string;
   sdkKey: string;
+  password: string;
 }
 
 export default function ZoomMeetingClean() {
@@ -80,10 +81,30 @@ export default function ZoomMeetingClean() {
 
       console.log('Generating signature for meeting:', meetingNumber, 'role:', role);
       
-      // Use correct backend URL
-      const correctBackendUrl = 'https://quran-acadamy-crm-production.up.railway.app/api/zoom/signature-test';
+      // First, get meeting details to extract password
+      const meetingDetailsUrl = `https://quran-acadamy-crm-production.up.railway.app/api/meetings/${meetingNumber}`;
       
-      const response = await fetch(correctBackendUrl, {
+      const meetingResponse = await fetch(meetingDetailsUrl);
+      if (!meetingResponse.ok) {
+        throw new Error('Failed to fetch meeting details');
+      }
+      
+      const meetingData = await meetingResponse.json();
+      console.log('Meeting details fetched:', meetingData);
+      
+      if (!meetingData.success || !meetingData.meeting) {
+        throw new Error('Meeting not found or invalid');
+      }
+      
+      const meeting = meetingData.meeting;
+      const meetingPassword = meeting.zoomPassword || meeting.password || '';
+      
+      console.log('Meeting password extracted:', meetingPassword);
+      
+      // Generate signature
+      const signatureUrl = 'https://quran-acadamy-crm-production.up.railway.app/api/zoom/signature-test';
+      
+      const signatureResponse = await fetch(signatureUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,11 +115,11 @@ export default function ZoomMeetingClean() {
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (signatureResponse.ok) {
+        const signatureData = await signatureResponse.json();
         console.log('Backend signature generated successfully');
         
-        if (!data.signature) {
+        if (!signatureData.signature) {
           throw new Error('No signature returned from backend');
         }
         
@@ -106,15 +127,16 @@ export default function ZoomMeetingClean() {
           meetingNumber: meetingNumber,
           userName: currentUser?.name || 'User',
           role: role,
-          signature: data.signature,
-          sdkKey: process.env.VITE_ZOOM_SDK_KEY || 'YNdDIn95StmFL25wVBoGQ'
+          signature: signatureData.signature,
+          sdkKey: process.env.VITE_ZOOM_SDK_KEY || 'YNdDIn95StmFL25wVBoGQ',
+          password: meetingPassword
         };
         
         setMeetingConfig(config);
         console.log('Zoom meeting config prepared:', config);
       } else {
-        const errorData = await response.json();
-        throw new Error(`Signature generation failed: ${errorData.error || response.statusText}`);
+        const errorData = await signatureResponse.json();
+        throw new Error(`Signature generation failed: ${errorData.error || signatureResponse.statusText}`);
       }
     } catch (err) {
       console.error('Error generating signature:', err);
@@ -154,7 +176,7 @@ export default function ZoomMeetingClean() {
             userName: meetingConfig.userName,
             signature: meetingConfig.signature,
             sdkKey: meetingConfig.sdkKey,
-            passWord: '',
+            password: meetingConfig.password,
             success: (success: any) => {
               console.log('Successfully joined Zoom meeting:', success);
               setIsJoined(true);
