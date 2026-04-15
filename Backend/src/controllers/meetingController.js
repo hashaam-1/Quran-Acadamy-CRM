@@ -330,9 +330,14 @@ const startClass = async (req, res) => {
 ===================== */
 const joinClass = async (req, res) => {
   try {
-    const { meetingNumber } = req.params;
+    const { meetingNumber, meetingId } = req.params;
+    const { userId: bodyUserId, userName: bodyUserName } = req.body;
 
-    const meeting = await Meeting.findOne({ meetingNumber });
+    // Support both meetingNumber and meetingId
+    const identifier = meetingNumber || meetingId;
+    const meeting = await Meeting.findOne(
+      meetingNumber ? { meetingNumber } : { _id: meetingId }
+    );
 
     if (!meeting) {
       return res.status(404).json({
@@ -341,8 +346,10 @@ const joinClass = async (req, res) => {
       });
     }
 
-    const userId = req.user?.id || "guest";
-    const userName = req.user?.name || "Guest";
+    // Use provided user info or fallback to req.user
+    const userId = bodyUserId || req.user?.id || "guest";
+    const userName = bodyUserName || req.user?.name || "Guest";
+    const userRole = req.user?.role || "student";
 
     const already = meeting.participants.find(
       (p) => String(p.userId) === String(userId)
@@ -377,8 +384,11 @@ const joinClass = async (req, res) => {
 ===================== */
 const getTeacherMeetings = async (req, res) => {
   try {
+    const { teacherId } = req.params;
+    const targetTeacherId = teacherId || req.user?.id;
+    
     const meetings = await Meeting.find({
-      teacherId: req.user?.id,
+      teacherId: targetTeacherId,
     }).sort({ createdAt: -1 });
 
     res.json({ success: true, meetings });
@@ -389,8 +399,9 @@ const getTeacherMeetings = async (req, res) => {
 
 const getStudentMeetings = async (req, res) => {
   try {
+    // Get meetings that are either live or scheduled (not ended)
     const meetings = await Meeting.find({
-      "participants.userId": req.user?.id,
+      status: { $in: ['live', 'scheduled'] },
     }).sort({ createdAt: -1 });
 
     res.json({ success: true, meetings });
@@ -401,14 +412,22 @@ const getStudentMeetings = async (req, res) => {
 
 const endClass = async (req, res) => {
   try {
+    const { meetingNumber, meetingId } = req.params;
+    
+    // Support both meetingNumber and meetingId
+    const filter = meetingNumber ? { meetingNumber } : { _id: meetingId };
+    
     await Meeting.updateOne(
-      { meetingNumber: req.params.meetingNumber },
-      { status: "ended" }
+      filter,
+      { 
+        status: "ended",
+        endedAt: new Date()
+      }
     );
 
-    res.json({ success: true });
+    res.json({ success: true, message: "Class ended successfully" });
   } catch (err) {
-    res.status(500).json({ success: false });
+    res.status(500).json({ success: false, message: "Failed to end class" });
   }
 };
 
