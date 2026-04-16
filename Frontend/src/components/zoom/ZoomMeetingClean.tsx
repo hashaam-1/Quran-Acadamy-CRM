@@ -97,16 +97,12 @@ export default function ZoomMeetingClean() {
       }
       
       const meeting = meetingData.meeting;
-      const meetingPassword = 
-        meetingData.password || 
-        meeting.zoomPassword || 
-        meeting.password || '';
+      const meetingPassword = meetingData.password || '';
       
       console.log('Meeting password extracted:', meetingPassword);
-      console.log('Password sources:', {
-        backendPassword: meetingData.password,
-        zoomPassword: meeting.zoomPassword,
-        password: meeting.password
+      console.log('Password debug:', {
+        apiPassword: meetingData.password,
+        debug: meetingData.debug
       });
       
       // Generate signature
