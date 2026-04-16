@@ -541,8 +541,9 @@ const getMeetingDetails = async (req, res) => {
 
     // Check if this is a real Zoom meeting
     const isRealZoomMeeting = meeting.zoomMeetingId && 
-      meeting.zoomMeetingId !== meeting.meetingNumber &&
-      meeting.zoomMeetingId.length > 10;
+      meeting.zoomMeetingId === meeting.meetingNumber &&
+      meeting.zoomMeetingId.length > 8 &&
+      meeting.zoomPassword;
 
     res.json({
       success: true,
