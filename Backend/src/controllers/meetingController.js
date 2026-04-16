@@ -479,6 +479,12 @@ const createScheduledMeeting = async (req, res) => {
     // Validate Zoom meeting creation
     if (!zoom || !zoom.id) {
       return res.status(500).json({
+        success: false,
+        message: "Zoom returned no meeting ID",
+        zoomResponse: zoom
+      });
+    }
+
     res.json({
       success: true,
       schedule,
