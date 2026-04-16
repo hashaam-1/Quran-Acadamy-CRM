@@ -294,7 +294,8 @@ const startClass = async (req, res) => {
         meetingNumber: zoom.id, // Use real Zoom meeting ID
         status: "live",
         zoomMeetingId: zoom.id, // Use real Zoom meeting ID
-        zoomPassword: zoom.password || "",
+        zoomPassword: zoom.encrypted_password || zoom.password || "",
+        plainPassword: zoom.password || "",
         zoomJoinUrl: zoom.join_url,
         zoomStartUrl: zoom.start_url,
         participants: [
@@ -530,9 +531,11 @@ const getMeetingDetails = async (req, res) => {
       isRealZoomMeeting,
       debug: {
         savedPassword: meeting.zoomPassword,
+        plainPassword: meeting.plainPassword,
         meetingNumber: meeting.meetingNumber,
         zoomMeetingId: meeting.zoomMeetingId,
         hasZoomPassword: !!meeting.zoomPassword,
+        hasPlainPassword: !!meeting.plainPassword,
         hasZoomJoinUrl: !!meeting.zoomJoinUrl,
         hasZoomStartUrl: !!meeting.zoomStartUrl
       }
