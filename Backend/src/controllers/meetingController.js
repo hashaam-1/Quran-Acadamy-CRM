@@ -230,11 +230,17 @@ const startClass = async (req, res) => {
         "https://api.zoom.us/v2/users/me/meetings",
         {
           topic: `${className} - ${course}`,
-          type: 1,
+          type: 2,
+          start_time: new Date().toISOString(),
+          duration: 60,
+          timezone: "Asia/Karachi",
+          password: "123456",
           settings: {
             host_video: true,
             participant_video: true,
-            join_before_host: true
+            join_before_host: true,
+            waiting_room: false,
+            mute_upon_entry: false
           }
         },
         {
@@ -294,8 +300,8 @@ const startClass = async (req, res) => {
         meetingNumber: zoom.id, // Use real Zoom meeting ID
         status: "live",
         zoomMeetingId: zoom.id, // Use real Zoom meeting ID
-        zoomPassword: zoom.encrypted_password || zoom.password || "",
-        plainPassword: zoom.password || "",
+        zoomPassword: zoom.password || "123456",
+        plainPassword: zoom.password || "123456",
         zoomJoinUrl: zoom.join_url,
         zoomStartUrl: zoom.start_url,
         participants: [
