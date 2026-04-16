@@ -97,10 +97,11 @@ export default function ZoomMeetingClean() {
       }
       
       const meeting = meetingData.meeting;
-      const meetingPassword = meetingData.password || '';
+      const meetingPassword = meetingData.meeting.plainPassword || "123456";
       
       console.log('Meeting password extracted:', meetingPassword);
       console.log('Password debug:', {
+        plainPassword: meetingData.meeting.plainPassword,
         apiPassword: meetingData.password,
         debug: meetingData.debug
       });
