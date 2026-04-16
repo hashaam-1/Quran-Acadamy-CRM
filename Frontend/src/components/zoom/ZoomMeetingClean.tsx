@@ -173,7 +173,8 @@ export default function ZoomMeetingClean() {
       
       // Initialize Zoom SDK with correct v6.0.0 options
       ZoomMtg.init({
-        leaveUrl: '/dashboard',
+        leaveUrl: '/',
+        disablePreview: true,
         success: () => {
           console.log('Zoom SDK initialized successfully');
           

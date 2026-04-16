@@ -220,7 +220,7 @@ export default function StudentZoomJoiner({
         <Button
           onClick={() => handleJoinClass(scheduleId)}
           disabled={disabled || isLoading}
-          className={`${buttonClassName} w-full sm:w-auto`}
+          className={`${buttonClassName} bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 w-full sm:w-auto`}
           size="lg"
         >
           {isLoading ? (
@@ -344,10 +344,10 @@ export default function StudentZoomJoiner({
                           size="sm"
                           onClick={() => handleJoinClass(schedule._id)}
                           disabled={isLoading}
-                          className="hover:bg-blue-600"
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
                         >
                           <Play className="w-4 h-4 mr-1" />
-                          Join
+                          Join Class
                         </Button>
                       </div>
                     ))}
@@ -401,12 +401,15 @@ export default function StudentZoomJoiner({
                           size="sm"
                           onClick={() => handleJoinClass(undefined, meeting._id)}
                           disabled={!canJoinMeeting(meeting) || isLoading}
-                          className={meeting.status === 'live' ? "hover:bg-green-600" : "hover:bg-blue-600"}
+                          className={meeting.status === 'live' ? 
+                            "bg-green-600 hover:bg-green-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105" : 
+                            "bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                          }
                         >
                           {meeting.status === 'live' ? (
                             <>
                               <Video className="w-4 h-4 mr-1" />
-                              Join Live
+                              Join Live Now
                             </>
                           ) : (
                             <>
