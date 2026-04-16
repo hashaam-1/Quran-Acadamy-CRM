@@ -27,7 +27,7 @@ export default function StartClassButton({
   const { currentUser } = useAuthStore();
 
   // Render different components based on user role
-  if (currentUser?.role === 'teacher') {
+  if (currentUser?.role === 'teacher' || currentUser?.role === 'admin') {
     return (
       <TeacherZoomManager
         scheduleId={scheduleId}
@@ -56,7 +56,7 @@ export default function StartClassButton({
   return (
     <div className="p-4 border rounded-lg bg-gray-50">
       <p className="text-gray-600 text-center">
-        Please login as a teacher or student to access Zoom meetings.
+        Please login as a teacher, student, or admin to access Zoom meetings.
       </p>
     </div>
   );

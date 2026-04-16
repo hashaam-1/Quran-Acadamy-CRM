@@ -65,9 +65,9 @@ export default function StudentZoomJoiner({
   const [error, setError] = useState('');
   const { currentUser } = useAuthStore();
 
-  // Fetch student's schedules and available meetings on component mount
+  // Fetch schedules and available meetings on component mount
   useEffect(() => {
-    if (currentUser?.role === 'student') {
+    if (currentUser) {
       fetchStudentSchedules();
       fetchAvailableMeetings();
     }
@@ -75,15 +75,26 @@ export default function StudentZoomJoiner({
 
   const fetchStudentSchedules = async () => {
     try {
-      const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/schedules/student/${currentUser?.id}`);
+      // Use different endpoint based on user role
+      let endpoint;
+      if (currentUser?.role === 'student') {
+        endpoint = `https://quran-acadamy-crm-production.up.railway.app/api/schedules/student/${currentUser?.id}`;
+      } else if (currentUser?.role === 'teacher') {
+        endpoint = `https://quran-acadamy-crm-production.up.railway.app/api/schedules/teacher/${currentUser?.id}`;
+      } else {
+        endpoint = `https://quran-acadamy-crm-production.up.railway.app/api/schedules`;
+      }
+
+      const response = await fetch(endpoint);
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
           setMySchedules(data.schedules || []);
+          console.log(`Fetched ${data.schedules?.length || 0} schedules for ${currentUser?.role}`);
         }
       }
     } catch (err) {
-      console.error('Error fetching student schedules:', err);
+      console.error('Error fetching schedules:', err);
     }
   };
 
@@ -226,8 +237,8 @@ export default function StudentZoomJoiner({
         </Button>
       </div>
 
-      {/* Student Dashboard */}
-      {currentUser?.role === 'student' && (
+      {/* User Dashboard */}
+      {currentUser && (
         <div className="space-y-6">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
