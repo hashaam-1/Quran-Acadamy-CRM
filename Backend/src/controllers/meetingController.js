@@ -509,7 +509,7 @@ const getMeetingDetails = async (req, res) => {
   try {
     const meeting = await Meeting.findOne({
       meetingNumber: req.params.meetingNumber,
-    });
+    }).sort({ createdAt: -1 });
 
     if (!meeting) {
       return res.status(404).json({
@@ -526,8 +526,10 @@ const getMeetingDetails = async (req, res) => {
     res.json({
       success: true,
       meeting,
+      password: meeting.zoomPassword,
       isRealZoomMeeting,
       debug: {
+        savedPassword: meeting.zoomPassword,
         meetingNumber: meeting.meetingNumber,
         zoomMeetingId: meeting.zoomMeetingId,
         hasZoomPassword: !!meeting.zoomPassword,
