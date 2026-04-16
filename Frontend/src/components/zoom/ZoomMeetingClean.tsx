@@ -97,12 +97,14 @@ export default function ZoomMeetingClean() {
       }
       
       const meeting = meetingData.meeting;
-      const meetingPassword = meetingData.meeting.plainPassword || "123456";
+      // Use the password from API response first, then meeting plainPassword, then fallback
+      const meetingPassword = meetingData.password || meetingData.meeting.plainPassword || meetingData.meeting.zoomPassword || "123456";
       
       console.log('Meeting password extracted:', meetingPassword);
       console.log('Password debug:', {
-        plainPassword: meetingData.meeting.plainPassword,
         apiPassword: meetingData.password,
+        plainPassword: meetingData.meeting.plainPassword,
+        zoomPassword: meetingData.meeting.zoomPassword,
         debug: meetingData.debug
       });
       
