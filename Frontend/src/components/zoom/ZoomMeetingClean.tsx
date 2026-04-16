@@ -183,7 +183,7 @@ export default function ZoomMeetingClean() {
             userName: meetingConfig.userName,
             signature: meetingConfig.signature,
             sdkKey: meetingConfig.sdkKey,
-            password: meetingConfig.password,
+            passWord: meetingConfig.password,
             success: (success: any) => {
               console.log('Successfully joined Zoom meeting:', success);
               setIsJoined(true);
