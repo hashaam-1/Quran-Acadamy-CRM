@@ -97,9 +97,17 @@ export default function ZoomMeetingClean() {
       }
       
       const meeting = meetingData.meeting;
-      const meetingPassword = meeting.zoomPassword || meeting.password || '';
+      const meetingPassword = 
+        meetingData.password || 
+        meeting.zoomPassword || 
+        meeting.password || '';
       
       console.log('Meeting password extracted:', meetingPassword);
+      console.log('Password sources:', {
+        backendPassword: meetingData.password,
+        zoomPassword: meeting.zoomPassword,
+        password: meeting.password
+      });
       
       // Generate signature
       const signatureUrl = 'https://quran-acadamy-crm-production.up.railway.app/api/zoom/signature-test';
