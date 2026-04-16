@@ -254,6 +254,15 @@ const startClass = async (req, res) => {
       console.log("ZOOM SUCCESS:", zoomResponse.data);
       zoom = zoomResponse.data;
       
+      // Debug password fields from Zoom API
+      console.log("ZOOM PASSWORD DEBUG:", {
+        password: zoom.password,
+        encrypted_password: zoom.encrypted_password,
+        join_url_pwd: zoom.join_url?.match(/pwd=([^&]+)/)?.[1],
+        h323_password: zoom.h323_password,
+        pstn_password: zoom.pstn_password
+      });
+      
     } catch (zErr) {
       console.log("ZOOM ERROR FULL:", zErr.response?.data || zErr.message);
       console.log("ZOOM ERROR STATUS:", zErr.response?.status);
@@ -311,6 +320,11 @@ const startClass = async (req, res) => {
             role: 1,
           },
         ],
+      });
+
+      console.log("MEETING CREATED WITH PASSWORDS:", {
+        zoomPassword: meeting.zoomPassword,
+        plainPassword: meeting.plainPassword
       });
     } catch (createErr) {
       console.error("Meeting create error:", createErr.message);
