@@ -186,9 +186,24 @@ const startClass = async (req, res) => {
       console.log("DB query error:", dbErr.message);
     }
 
-    // Smart recovery instead of blocking
+    // Smart recovery instead of blocking - allow multiple hosts
     if (existing) {
       console.log("Rejoining existing live meeting:", existing.meetingNumber);
+      
+      // Add current user as participant if not already added
+      const alreadyParticipant = existing.participants.find(
+        (p) => String(p.userId) === String(teacherId)
+      );
+      
+      if (!alreadyParticipant) {
+        existing.participants.push({
+          userId: teacherId,
+          name: teacherName,
+          role: 1, // Teacher/admin as host
+        });
+        await existing.save();
+      }
+      
       return res.json({
         success: true,
         message: "Rejoining existing class",
@@ -380,11 +395,14 @@ const joinClass = async (req, res) => {
       (p) => String(p.userId) === String(userId)
     );
 
+    // Set role based on user type - admins and teachers can be hosts
+    const participantRole = (userRole === 'admin' || userRole === 'teacher') ? 1 : 0;
+
     if (!already) {
       meeting.participants.push({
         userId,
         name: userName,
-        role: 0,
+        role: participantRole,
       });
 
       await meeting.save();
