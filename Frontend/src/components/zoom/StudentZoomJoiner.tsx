@@ -307,7 +307,14 @@ export default function StudentZoomJoiner({
           <p className="text-sm text-gray-600">Click the button below to enter your Zoom classroom</p>
         </div>
         <Button
-          onClick={() => {
+          type="button"
+          className={`${buttonClassName} bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-lg px-8 py-3`}
+          size="lg"
+          disabled={isLoading}
+          title={isLoading ? "Joining..." : "Click to join class"}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
             console.log('=== STUDENT JOIN BUTTON CLICKED ===');
             console.log('StudentZoomJoiner - Button state:', {
               scheduleId,
@@ -335,10 +342,6 @@ export default function StudentZoomJoiner({
               toast.error("No available classes to join");
             }
           }}
-          disabled={isLoading}
-          title={isLoading ? "Joining..." : "Click to join class"}
-          className={`${buttonClassName} bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-lg px-8 py-3`}
-          size="lg"
         >
           {isLoading ? (
             <>
@@ -465,10 +468,15 @@ export default function StudentZoomJoiner({
                           </Badge>
                         </div>
                         <Button
+                          type="button"
                           size="sm"
-                          onClick={() => handleJoinClass(schedule._id)}
                           disabled={isLoading}
                           className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleJoinClass(schedule._id);
+                          }}
                         >
                           <Play className="w-4 h-4 mr-2" />
                           Join Class
@@ -529,13 +537,18 @@ export default function StudentZoomJoiner({
                           </div>
                         </div>
                         <Button
+                          type="button"
                           size="sm"
-                          onClick={() => handleJoinClass(undefined, meeting._id)}
                           disabled={!canJoinMeeting(meeting) || isLoading}
                           className={meeting.status === 'live' ? 
                             "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2" : 
                             "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2"
                           }
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleJoinClass(undefined, meeting._id);
+                          }}
                         >
                           {meeting.status === 'live' ? (
                             <>
@@ -561,7 +574,15 @@ export default function StudentZoomJoiner({
 
       {/* Error Dialog */}
       {error && (
-        <Dialog open={!!error} onOpenChange={() => setError('')}>
+        <Dialog 
+          open={!!error} 
+          onOpenChange={(value) => {
+            setError('');
+            if (!value) {
+              document.body.style.pointerEvents = "auto";
+            }
+          }}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Error</DialogTitle>
