@@ -310,37 +310,44 @@ export default function StudentZoomJoiner({
           {/* Classes Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* My Scheduled Classes */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100">
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-blue-600" />
+            <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-white to-blue-50 border-blue-200">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Calendar className="w-5 h-5 text-white" />
                   My Scheduled Classes
-                  <Badge variant="secondary" className="bg-blue-200 text-blue-800">
+                  <Badge variant="secondary" className="bg-white text-blue-600 font-semibold">
                     {mySchedules.length}
                   </Badge>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4">
+              <CardContent className="p-6">
                 {mySchedules.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No scheduled classes</p>
-                    <p className="text-sm mt-2">Your scheduled classes will appear here</p>
+                  <div className="text-center py-12 text-gray-500">
+                    <Calendar className="w-16 h-16 mx-auto mb-4 text-blue-300" />
+                    <p className="text-lg font-medium text-gray-700">No scheduled classes</p>
+                    <p className="text-sm mt-2 text-gray-500">Your scheduled classes will appear here</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {mySchedules.map((schedule) => (
-                      <div key={schedule._id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <h4 className="font-semibold text-gray-900">{schedule.className}</h4>
-                            <p className="text-sm text-gray-600">{schedule.course}</p>
-                            <p className="text-sm text-gray-600">Teacher: {schedule.teacherName}</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {schedule.day} at {schedule.time}
-                            </p>
+                      <div key={schedule._id} className="bg-white rounded-xl border border-blue-200 p-4 hover:shadow-lg transition-all duration-300 hover:border-blue-300">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex-1">
+                            <h4 className="font-bold text-lg text-gray-900 mb-2">{schedule.className}</h4>
+                            <div className="space-y-1">
+                              <p className="text-sm text-gray-600 flex items-center gap-2">
+                                <span className="font-medium">Course:</span> {schedule.course}
+                              </p>
+                              <p className="text-sm text-gray-600 flex items-center gap-2">
+                                <span className="font-medium">Teacher:</span> {schedule.teacherName}
+                              </p>
+                              <p className="text-xs text-gray-500 flex items-center gap-2 mt-2">
+                                <Calendar className="w-3 h-3" />
+                                {schedule.day} at {schedule.time}
+                              </p>
+                            </div>
                           </div>
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                          <Badge className="bg-blue-100 text-blue-700 font-medium px-3 py-1">
                             {schedule.status}
                           </Badge>
                         </div>
@@ -348,9 +355,9 @@ export default function StudentZoomJoiner({
                           size="sm"
                           onClick={() => handleJoinClass(schedule._id)}
                           disabled={isLoading || !currentUser}
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2"
                         >
-                          <Play className="w-4 h-4 mr-1" />
+                          <Play className="w-4 h-4 mr-2" />
                           Join Class
                         </Button>
                       </div>
@@ -361,38 +368,45 @@ export default function StudentZoomJoiner({
             </Card>
 
             {/* Available Live Classes */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader className="bg-gradient-to-r from-green-50 to-green-100">
-                <CardTitle className="flex items-center gap-2">
-                  <Video className="w-5 h-5 text-green-600" />
+            <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-white to-green-50 border-green-200">
+              <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Video className="w-5 h-5 text-white" />
                   Available Classes
-                  <Badge variant="secondary" className="bg-green-200 text-green-800">
+                  <Badge variant="secondary" className="bg-white text-green-600 font-semibold">
                     {availableMeetings.length}
                   </Badge>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4">
+              <CardContent className="p-6">
                 {availableMeetings.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Video className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No available classes</p>
-                    <p className="text-sm mt-2">Check back later for available classes</p>
+                  <div className="text-center py-12 text-gray-500">
+                    <Video className="w-16 h-16 mx-auto mb-4 text-green-300" />
+                    <p className="text-lg font-medium text-gray-700">No available classes</p>
+                    <p className="text-sm mt-2 text-gray-500">Check back later for available classes</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {availableMeetings.map((meeting) => (
-                      <div key={meeting._id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <h4 className="font-semibold text-gray-900">{meeting.className}</h4>
-                            <p className="text-sm text-gray-600">{meeting.course}</p>
-                            <p className="text-sm text-gray-600">Teacher: {meeting.teacherName}</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {meeting.startedAt ? `Started: ${formatTime(meeting.startedAt)}` : `Created: ${formatTime(meeting.createdAt)}`}
-                            </p>
+                      <div key={meeting._id} className="bg-white rounded-xl border border-green-200 p-4 hover:shadow-lg transition-all duration-300 hover:border-green-300">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex-1">
+                            <h4 className="font-bold text-lg text-gray-900 mb-2">{meeting.className}</h4>
+                            <div className="space-y-1">
+                              <p className="text-sm text-gray-600 flex items-center gap-2">
+                                <span className="font-medium">Course:</span> {meeting.course}
+                              </p>
+                              <p className="text-sm text-gray-600 flex items-center gap-2">
+                                <span className="font-medium">Teacher:</span> {meeting.teacherName}
+                              </p>
+                              <p className="text-xs text-gray-500 flex items-center gap-2 mt-2">
+                                <Video className="w-3 h-3" />
+                                {meeting.startedAt ? `Started: ${formatTime(meeting.startedAt)}` : `Created: ${formatTime(meeting.createdAt)}`}
+                              </p>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge className={`${getStatusColor(meeting.status)} text-white`}>
+                          <div className="flex flex-col gap-2">
+                            <Badge className={`${getStatusColor(meeting.status)} text-white font-medium px-3 py-1`}>
                               {meeting.status}
                             </Badge>
                             <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
@@ -406,18 +420,18 @@ export default function StudentZoomJoiner({
                           onClick={() => handleJoinClass(undefined, meeting._id)}
                           disabled={!canJoinMeeting(meeting) || isLoading}
                           className={meeting.status === 'live' ? 
-                            "bg-green-600 hover:bg-green-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105" : 
-                            "bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                            "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2" : 
+                            "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2"
                           }
                         >
                           {meeting.status === 'live' ? (
                             <>
-                              <Video className="w-4 h-4 mr-1" />
+                              <Video className="w-4 h-4 mr-2" />
                               Join Live Now
                             </>
                           ) : (
                             <>
-                              <Calendar className="w-4 h-4 mr-1" />
+                              <Calendar className="w-4 h-4 mr-2" />
                               Join Scheduled
                             </>
                           )}

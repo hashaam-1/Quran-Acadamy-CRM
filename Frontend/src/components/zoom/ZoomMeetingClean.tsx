@@ -33,9 +33,33 @@ export default function ZoomMeetingClean() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  // Preserve user session to prevent logout when other users join
+  const [preservedUser] = useState(() => {
+    // Check if there's a preserved user session in localStorage
+    const savedUser = localStorage.getItem('zoomMeetingUser');
+    if (savedUser) {
+      return JSON.parse(savedUser);
+    }
+    // If no preserved session, use current user and save it
+    if (currentUser) {
+      localStorage.setItem('zoomMeetingUser', JSON.stringify(currentUser));
+    }
+    return currentUser;
+  });
+
   // Get meeting details from URL
   const meetingNumber = searchParams.get('meetingNumber');
-  const role = parseInt(searchParams.get('role') || '1');
+  const role = searchParams.get('role') ? parseInt(searchParams.get('role')!) : 0;
+
+  // Cleanup function to remove preserved session when leaving meeting
+  const cleanupSession = () => {
+    localStorage.removeItem('zoomMeetingUser');
+  };
+
+  // Add cleanup on unmount
+  useEffect(() => {
+    return cleanupSession;
+  }, []);
 
   // Initialize Zoom Meeting SDK
   useEffect(() => {
@@ -79,7 +103,13 @@ export default function ZoomMeetingClean() {
         throw new Error('No meeting number provided in URL');
       }
 
-      console.log('Generating signature for meeting:', meetingNumber, 'role:', role);
+      // Use preserved user session instead of current user to prevent logout
+      const activeUser = preservedUser || currentUser;
+      console.log('Generating signature for meeting:', meetingNumber, 'role:', role, 'user:', activeUser?.name);
+      
+      if (!activeUser) {
+        throw new Error('No user session found');
+      }
       
       // First, get meeting details to extract password
       const meetingDetailsUrl = `https://quran-acadamy-crm-production.up.railway.app/api/meetings/${meetingNumber}`;
@@ -132,7 +162,7 @@ export default function ZoomMeetingClean() {
         
         const config: MeetingConfig = {
           meetingNumber: meetingNumber,
-          userName: currentUser?.name || 'User',
+          userName: activeUser?.name || 'User',
           role: role,
           signature: signatureData.signature,
           sdkKey: process.env.VITE_ZOOM_SDK_KEY || 'YNdDIn95StmFL25wVBoGQ',
