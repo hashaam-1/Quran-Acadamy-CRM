@@ -216,11 +216,15 @@ export default function StudentZoomJoiner({
   return (
     <div className="space-y-6">
       {/* Join Class Button */}
-      <div className="bg-white rounded-lg shadow-sm border p-4">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-lg border border-blue-200 p-6">
+        <div className="text-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Ready to Join Your Class?</h3>
+          <p className="text-sm text-gray-600">Click the button below to enter your Zoom classroom</p>
+        </div>
         <Button
           onClick={() => handleJoinClass(scheduleId)}
-          disabled={disabled || isLoading}
-          className={`${buttonClassName} bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 w-full sm:w-auto`}
+          disabled={isLoading || !currentUser}
+          className={`${buttonClassName} bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-lg px-8 py-3`}
           size="lg"
         >
           {isLoading ? (
@@ -242,61 +246,61 @@ export default function StudentZoomJoiner({
         <div className="space-y-6">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">My Classes</p>
-                    <p className="text-2xl font-bold text-blue-600">{mySchedules.length}</p>
+                    <p className="text-sm font-semibold text-blue-700">My Classes</p>
+                    <p className="text-3xl font-bold text-blue-800">{mySchedules.length}</p>
                   </div>
-                  <div className="bg-blue-100 p-3 rounded-full">
-                    <Calendar className="w-6 h-6 text-blue-600" />
+                  <div className="bg-blue-200 p-3 rounded-full shadow-md">
+                    <Calendar className="w-6 h-6 text-blue-800" />
                   </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 bg-gradient-to-br from-green-50 to-green-100 border-green-200">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Available</p>
-                    <p className="text-2xl font-bold text-green-600">{availableMeetings.length}</p>
+                    <p className="text-sm font-semibold text-green-700">Available</p>
+                    <p className="text-3xl font-bold text-green-800">{availableMeetings.length}</p>
                   </div>
-                  <div className="bg-green-100 p-3 rounded-full">
-                    <Video className="w-6 h-6 text-green-600" />
+                  <div className="bg-green-200 p-3 rounded-full shadow-md">
+                    <Video className="w-6 h-6 text-green-800" />
                   </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 bg-gradient-to-br from-red-50 to-red-100 border-red-200">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Live Now</p>
-                    <p className="text-2xl font-bold text-red-600">
+                    <p className="text-sm font-semibold text-red-700">Live Now</p>
+                    <p className="text-3xl font-bold text-red-800">
                       {availableMeetings.filter(m => m.status === 'live').length}
                     </p>
                   </div>
-                  <div className="bg-red-100 p-3 rounded-full">
-                    <Users className="w-6 h-6 text-red-600" />
+                  <div className="bg-red-200 p-3 rounded-full shadow-md">
+                    <Users className="w-6 h-6 text-red-800" />
                   </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Teachers</p>
-                    <p className="text-2xl font-bold text-purple-600">
+                    <p className="text-sm font-semibold text-purple-700">Teachers</p>
+                    <p className="text-3xl font-bold text-purple-800">
                       {new Set(availableMeetings.map(m => m.teacherName)).size}
                     </p>
                   </div>
-                  <div className="bg-purple-100 p-3 rounded-full">
-                    <User className="w-6 h-6 text-purple-600" />
+                  <div className="bg-purple-200 p-3 rounded-full shadow-md">
+                    <User className="w-6 h-6 text-purple-800" />
                   </div>
                 </div>
               </CardContent>
@@ -343,7 +347,7 @@ export default function StudentZoomJoiner({
                         <Button
                           size="sm"
                           onClick={() => handleJoinClass(schedule._id)}
-                          disabled={isLoading}
+                          disabled={isLoading || !currentUser}
                           className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
                         >
                           <Play className="w-4 h-4 mr-1" />

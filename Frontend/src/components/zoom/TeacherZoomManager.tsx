@@ -193,7 +193,7 @@ export default function TeacherZoomManager({
         <Button
           onClick={handleStartClass}
           disabled={disabled || isLoading}
-          className={`${buttonClassName} w-full sm:w-auto`}
+          className={`${buttonClassName} bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 w-full sm:w-auto`}
           size="lg"
         >
           {isLoading ? (
@@ -321,22 +321,20 @@ export default function TeacherZoomManager({
                         <div className="flex gap-2">
                           <Button
                             size="sm"
-                            variant="outline"
                             onClick={() => handleJoinMeeting(meeting)}
-                            className="hover:bg-green-50 hover:border-green-300"
+                            className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
                           >
                             <Eye className="w-4 h-4 mr-1" />
-                            Join
+                            Join Live
                           </Button>
                           <Button
                             size="sm"
-                            variant="destructive"
                             onClick={() => handleEndClass(meeting._id)}
                             disabled={isLoading}
-                            className="hover:bg-red-600"
+                            className="bg-red-600 hover:bg-red-700 text-white font-medium shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
                           >
                             <Square className="w-4 h-4 mr-1" />
-                            End
+                            End Class
                           </Button>
                         </div>
                       </div>
