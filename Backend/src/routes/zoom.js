@@ -11,7 +11,17 @@ console.log("🚀 ZOOM ROUTER LOADED");
 // ===============================
 router.post("/signature-test", (req, res) => {
   try {
-    const { meetingNumber, role = 0 } = req.body;
+    const { meetingNumber, role = 0, userRole } = req.body;
+    
+    // Assign proper Zoom role based on user role
+    let zoomRole = role;
+    if (userRole) {
+      if (userRole === 'teacher') {
+        zoomRole = 1; // Teacher is host
+      } else if (userRole === 'admin' || userRole === 'student') {
+        zoomRole = 0; // Admin and student are participants
+      }
+    }
 
     const sdkKey = process.env.ZOOM_SDK_KEY;
     const sdkSecret = process.env.ZOOM_SDK_SECRET;
@@ -31,7 +41,7 @@ router.post("/signature-test", (req, res) => {
       JSON.stringify({
         sdkKey,
         mn: meetingNumber,
-        role,
+        role: zoomRole,
         iat,
         exp,
         appKey: sdkKey,
