@@ -455,7 +455,7 @@ export default function Schedule() {
                                           <Pencil className="h-3 w-3" />
                                         </Button>
                                       </div>
-                                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 bg-black/50 rounded-lg" onClick={(e) => e.stopPropagation()}>
+                                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 bg-black/50 rounded-lg">
                                         {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
                                           <StartClassButton 
                                             scheduleId={schedule.id || schedule._id}

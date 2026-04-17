@@ -170,7 +170,8 @@ export function QuickActions() {
         setWhatsappFormOpen(true);
         break;
       case 'join_class':
-        toast.info("Opening class session...", { description: "Connecting to your scheduled class" });
+        // Navigate to student Zoom interface
+        window.location.href = '/zoom-student';
         break;
     }
   };
