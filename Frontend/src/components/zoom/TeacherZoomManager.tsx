@@ -188,244 +188,106 @@ export default function TeacherZoomManager({
 
   return (
     <div className="space-y-6">
-      {/* Start Class Button */}
-      <div className="bg-white rounded-lg shadow-sm border p-4">
-        <Button
-          onClick={handleStartClass}
-          disabled={disabled || isLoading}
-          className={`${buttonClassName} bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 w-full sm:w-auto`}
-          size="lg"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Starting Class...
-            </>
-          ) : (
-            <>
-              <Play className="w-4 h-4 mr-2" />
-              Start Class
-            </>
-          )}
-        </Button>
-      </div>
-
-      {/* Teacher Dashboard */}
-      {currentUser?.role === 'teacher' && (
-        <div className="space-y-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Live Classes</p>
-                    <p className="text-2xl font-bold text-green-600">{liveMeetings.length}</p>
-                  </div>
-                  <div className="bg-green-100 p-3 rounded-full">
-                    <Video className="w-6 h-6 text-green-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Scheduled</p>
-                    <p className="text-2xl font-bold text-blue-600">{scheduledMeetings.length}</p>
-                  </div>
-                  <div className="bg-blue-100 p-3 rounded-full">
-                    <Calendar className="w-6 h-6 text-blue-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total Students</p>
-                    <p className="text-2xl font-bold text-purple-600">
-                      {liveMeetings.reduce((sum, m) => sum + m.participants.length, 0)}
-                    </p>
-                  </div>
-                  <div className="bg-purple-100 p-3 rounded-full">
-                    <Users className="w-6 h-6 text-purple-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Today's Classes</p>
-                    <p className="text-2xl font-bold text-orange-600">
-                      {liveMeetings.length + scheduledMeetings.length}
-                    </p>
-                  </div>
-                  <div className="bg-orange-100 p-3 rounded-full">
-                    <Clock className="w-6 h-6 text-orange-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Meetings Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Live Meetings */}
-            <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-white to-green-50 border-green-200">
-              <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <Video className="w-5 h-5 text-white" />
-                  Live Classes
-                  <Badge variant="secondary" className="bg-white text-green-600 font-semibold">
-                    {liveMeetings.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                {liveMeetings.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <Video className="w-16 h-16 mx-auto mb-4 text-green-300" />
-                    <p className="text-lg font-medium text-gray-700">No live classes</p>
-                    <p className="text-sm mt-2 text-gray-500">Start a class to see it here</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {liveMeetings.map((meeting) => (
-                      <div key={meeting._id} className="bg-white rounded-xl border border-green-200 p-4 hover:shadow-lg transition-all duration-300 hover:border-green-300">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex-1">
-                            <h4 className="font-bold text-lg text-gray-900 mb-2">{meeting.className}</h4>
-                            <div className="space-y-1">
-                              <p className="text-sm text-gray-600 flex items-center gap-2">
-                                <span className="font-medium">Course:</span> {meeting.course}
-                              </p>
-                              <p className="text-xs text-gray-500 flex items-center gap-2 mt-2">
-                                <Video className="w-3 h-3" />
-                                Started: {meeting.startedAt ? formatTime(meeting.startedAt) : 'N/A'}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            <Badge className={`${getStatusColor(meeting.status)} text-white font-medium px-3 py-1`}>
-                              {meeting.status}
-                            </Badge>
-                            <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                              <Users className="w-4 h-4 text-gray-600" />
-                              <span className="text-sm font-medium">{meeting.participants.length}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => handleJoinMeeting(meeting)}
-                            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2"
-                          >
-                            <Eye className="w-4 h-4 mr-2" />
-                            Join Live
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handleEndClass(meeting._id)}
-                            disabled={isLoading}
-                            className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2"
-                          >
-                            <Square className="w-4 h-4 mr-2" />
-                            End Class
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Scheduled Meetings */}
-            <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-white to-blue-50 border-blue-200">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <Calendar className="w-5 h-5 text-white" />
-                  Scheduled Classes
-                  <Badge variant="secondary" className="bg-white text-blue-600 font-semibold">
-                    {scheduledMeetings.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                {scheduledMeetings.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <Calendar className="w-16 h-16 mx-auto mb-4 text-blue-300" />
-                    <p className="text-lg font-medium text-gray-700">No scheduled classes</p>
-                    <p className="text-sm mt-2 text-gray-500">Create schedules to see them here</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {scheduledMeetings.map((meeting) => (
-                      <div key={meeting._id} className="bg-white rounded-xl border border-blue-200 p-4 hover:shadow-lg transition-all duration-300 hover:border-blue-300">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex-1">
-                            <h4 className="font-bold text-lg text-gray-900 mb-2">{meeting.className}</h4>
-                            <div className="space-y-1">
-                              <p className="text-sm text-gray-600 flex items-center gap-2">
-                                <span className="font-medium">Course:</span> {meeting.course}
-                              </p>
-                              <p className="text-xs text-gray-500 flex items-center gap-2 mt-2">
-                                <Calendar className="w-3 h-3" />
-                                Created: {formatTime(meeting.createdAt)}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            <Badge className={`${getStatusColor(meeting.status)} text-white font-medium px-3 py-1`}>
-                              {meeting.status}
-                            </Badge>
-                            <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                              <Users className="w-4 h-4 text-gray-600" />
-                              <span className="text-sm font-medium">{meeting.participants.length}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => handleJoinMeeting(meeting)}
-                            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2"
-                          >
-                            <Play className="w-4 h-4 mr-2" />
-                            Start Class
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handleEndClass(meeting._id)}
-                            disabled={isLoading}
-                            className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2"
-                          >
-                            <Square className="w-4 h-4 mr-2" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+      {/* Only Scheduled Classes with Hover Join Button */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="p-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900">My Classes</h2>
+          <p className="text-sm text-gray-600 mt-1">Hover over classes to join or manage</p>
         </div>
-      )}
+        
+        <div className="p-6">
+          {scheduledMeetings.length === 0 ? (
+            <div className="text-center py-12">
+              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+              <p className="text-lg font-medium text-gray-700">No scheduled classes</p>
+              <p className="text-sm mt-2 text-gray-500">Your scheduled classes will appear here</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {scheduledMeetings.map((meeting) => (
+                <div
+                  key={meeting._id}
+                  className="group relative bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-lg transition-all duration-200 cursor-pointer"
+                >
+                  {/* Class Info */}
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-gray-900">{meeting.className}</h3>
+                    <p className="text-sm text-gray-600">{meeting.course}</p>
+                    <p className="text-sm text-gray-500">Created: {formatTime(meeting.createdAt)}</p>
+                    <Badge className={`${getStatusColor(meeting.status)} text-white text-xs`}>
+                      {meeting.status}
+                    </Badge>
+                  </div>
+                  
+                  {/* Hover Action Buttons */}
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="flex gap-2">
+                      {meeting.status === 'live' ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={isLoading}
+                          className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-lg"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleJoinMeeting(meeting);
+                          }}
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          Join
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={isLoading}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleJoinMeeting(meeting);
+                          }}
+                        >
+                          <Play className="w-4 h-4 mr-2" />
+                          Start
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={isLoading}
+                        className="bg-white hover:bg-gray-100 text-gray-700 border-white shadow-lg"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleEndClass(meeting._id);
+                        }}
+                      >
+                        <Square className="w-4 h-4 mr-2" />
+                        {meeting.status === 'live' ? 'End' : 'Cancel'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Error Dialog */}
       {error && (
-        <Dialog open={!!error} onOpenChange={() => setError('')}>
+        <Dialog 
+          open={!!error} 
+          onOpenChange={(value) => {
+            setError('');
+            if (!value) {
+              document.body.style.pointerEvents = "auto";
+            }
+          }}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Error</DialogTitle>

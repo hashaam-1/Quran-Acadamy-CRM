@@ -286,291 +286,70 @@ export default function StudentZoomJoiner({
 
   return (
     <div className="space-y-6">
-      {/* TEST BUTTON - Remove after debugging */}
-      <div className="bg-red-100 border border-red-300 rounded-lg p-4">
-        <h4 className="text-red-800 font-bold mb-2">DEBUG TEST BUTTON</h4>
-        <Button
-          onClick={() => {
-            console.log('TEST BUTTON CLICKED!');
-            alert('Test button clicked successfully!');
-          }}
-          className="bg-red-600 hover:bg-red-700 text-white"
-        >
-          Click Me For Test
-        </Button>
-      </div>
-
-      {/* Join Class Button */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-lg border border-blue-200 p-6">
-        <div className="text-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">Ready to Join Your Class?</h3>
-          <p className="text-sm text-gray-600">Click the button below to enter your Zoom classroom</p>
+      {/* Only Scheduled Classes with Hover Join Button */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="p-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900">My Classes</h2>
+          <p className="text-sm text-gray-600 mt-1">Hover over classes to join</p>
         </div>
-        <Button
-          type="button"
-          className={`${buttonClassName} bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-lg px-8 py-3`}
-          size="lg"
-          disabled={isLoading}
-          title={isLoading ? "Joining..." : "Click to join class"}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('=== STUDENT JOIN BUTTON CLICKED ===');
-            console.log('StudentZoomJoiner - Button state:', {
-              scheduleId,
-              availableMeetings: availableMeetings.length,
-              mySchedules: mySchedules.length,
-              currentUser: !!currentUser,
-              isLoading,
-              currentUserDetails: currentUser
-            });
-            
-            alert('Join button clicked! Check console for details.');
-            
-            // If no specific scheduleId, try to join first available meeting
-            if (scheduleId) {
-              console.log('StudentZoomJoiner - Joining with scheduleId:', scheduleId);
-              handleJoinClass(scheduleId);
-            } else if (availableMeetings.length > 0) {
-              console.log('StudentZoomJoiner - Joining first available meeting:', availableMeetings[0]);
-              handleJoinClass(undefined, availableMeetings[0]._id);
-            } else if (mySchedules.length > 0) {
-              console.log('StudentZoomJoiner - Joining first schedule:', mySchedules[0]);
-              handleJoinClass(mySchedules[0]._id);
-            } else {
-              console.log('StudentZoomJoiner - No classes available to join');
-              toast.error("No available classes to join");
-            }
-          }}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Joining Class...
-            </>
+        
+        <div className="p-6">
+          {mySchedules.length === 0 ? (
+            <div className="text-center py-12">
+              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+              <p className="text-lg font-medium text-gray-700">No scheduled classes</p>
+              <p className="text-sm mt-2 text-gray-500">Your scheduled classes will appear here</p>
+            </div>
           ) : (
-            <>
-              <Play className="w-4 h-4 mr-2" />
-              Join Class
-            </>
-          )}
-        </Button>
-      </div>
-
-      {/* User Dashboard */}
-      {currentUser && (
-        <div className="space-y-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-blue-700">My Classes</p>
-                    <p className="text-3xl font-bold text-blue-800">{mySchedules.length}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {mySchedules.map((schedule) => (
+                <div
+                  key={schedule._id}
+                  className="group relative bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-lg transition-all duration-200 cursor-pointer"
+                >
+                  {/* Class Info */}
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-gray-900">{schedule.className}</h3>
+                    <p className="text-sm text-gray-600">{schedule.course}</p>
+                    <p className="text-sm text-gray-500">Teacher: {schedule.teacherName}</p>
+                    <p className="text-xs text-gray-400">{schedule.day} at {schedule.time}</p>
+                    <Badge className="bg-blue-100 text-blue-700 text-xs">
+                      {schedule.status}
+                    </Badge>
                   </div>
-                  <div className="bg-blue-200 p-3 rounded-full shadow-md">
-                    <Calendar className="w-6 h-6 text-blue-800" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-green-700">Available</p>
-                    <p className="text-3xl font-bold text-green-800">{availableMeetings.length}</p>
-                  </div>
-                  <div className="bg-green-200 p-3 rounded-full shadow-md">
-                    <Video className="w-6 h-6 text-green-800" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 bg-gradient-to-br from-red-50 to-red-100 border-red-200">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-red-700">Live Now</p>
-                    <p className="text-3xl font-bold text-red-800">
-                      {availableMeetings.filter(m => m.status === 'live').length}
-                    </p>
-                  </div>
-                  <div className="bg-red-200 p-3 rounded-full shadow-md">
-                    <Users className="w-6 h-6 text-red-800" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-purple-700">Teachers</p>
-                    <p className="text-3xl font-bold text-purple-800">
-                      {new Set(availableMeetings.map(m => m.teacherName)).size}
-                    </p>
-                  </div>
-                  <div className="bg-purple-200 p-3 rounded-full shadow-md">
-                    <User className="w-6 h-6 text-purple-800" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Classes Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* My Scheduled Classes */}
-            <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-white to-blue-50 border-blue-200">
-              <CardHeader className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <Calendar className="w-5 h-5 text-white" />
-                  My Scheduled Classes
-                  <Badge variant="secondary" className="bg-white text-blue-600 font-semibold">
-                    {mySchedules.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                {mySchedules.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <Calendar className="w-16 h-16 mx-auto mb-4 text-blue-300" />
-                    <p className="text-lg font-medium text-gray-700">No scheduled classes</p>
-                    <p className="text-sm mt-2 text-gray-500">Your scheduled classes will appear here</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {mySchedules.map((schedule) => (
-                      <div key={schedule._id} className="bg-white rounded-xl border border-blue-200 p-4 hover:shadow-lg transition-all duration-300 hover:border-blue-300">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex-1">
-                            <h4 className="font-bold text-lg text-gray-900 mb-2">{schedule.className}</h4>
-                            <div className="space-y-1">
-                              <p className="text-sm text-gray-600 flex items-center gap-2">
-                                <span className="font-medium">Course:</span> {schedule.course}
-                              </p>
-                              <p className="text-sm text-gray-600 flex items-center gap-2">
-                                <span className="font-medium">Teacher:</span> {schedule.teacherName}
-                              </p>
-                              <p className="text-xs text-gray-500 flex items-center gap-2 mt-2">
-                                <Calendar className="w-3 h-3" />
-                                {schedule.day} at {schedule.time}
-                              </p>
-                            </div>
-                          </div>
-                          <Badge className="bg-blue-100 text-blue-700 font-medium px-3 py-1">
-                            {schedule.status}
-                          </Badge>
-                        </div>
-                        <Button
-                          type="button"
-                          size="sm"
-                          disabled={isLoading}
-                          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleJoinClass(schedule._id);
-                          }}
-                        >
-                          <Play className="w-4 h-4 mr-2" />
+                  
+                  {/* Hover Join Button */}
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={isLoading}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleJoinClass(schedule._id);
+                      }}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Joining...
+                        </>
+                      ) : (
+                        <>
+                          <Video className="w-4 h-4 mr-2" />
                           Join Class
-                        </Button>
-                      </div>
-                    ))}
+                        </>
+                      )}
+                    </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Available Live Classes */}
-            <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-white to-green-50 border-green-200">
-              <CardHeader className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <Video className="w-5 h-5 text-white" />
-                  Available Classes
-                  <Badge variant="secondary" className="bg-white text-green-600 font-semibold">
-                    {availableMeetings.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                {availableMeetings.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <Video className="w-16 h-16 mx-auto mb-4 text-green-300" />
-                    <p className="text-lg font-medium text-gray-700">No available classes</p>
-                    <p className="text-sm mt-2 text-gray-500">Check back later for available classes</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {availableMeetings.map((meeting) => (
-                      <div key={meeting._id} className="bg-white rounded-xl border border-green-200 p-4 hover:shadow-lg transition-all duration-300 hover:border-green-300">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex-1">
-                            <h4 className="font-bold text-lg text-gray-900 mb-2">{meeting.className}</h4>
-                            <div className="space-y-1">
-                              <p className="text-sm text-gray-600 flex items-center gap-2">
-                                <span className="font-medium">Course:</span> {meeting.course}
-                              </p>
-                              <p className="text-sm text-gray-600 flex items-center gap-2">
-                                <span className="font-medium">Teacher:</span> {meeting.teacherName}
-                              </p>
-                              <p className="text-xs text-gray-500 flex items-center gap-2 mt-2">
-                                <Video className="w-3 h-3" />
-                                {meeting.startedAt ? `Started: ${formatTime(meeting.startedAt)}` : `Created: ${formatTime(meeting.createdAt)}`}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            <Badge className={`${getStatusColor(meeting.status)} text-white font-medium px-3 py-1`}>
-                              {meeting.status}
-                            </Badge>
-                            <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                              <Users className="w-4 h-4 text-gray-600" />
-                              <span className="text-sm font-medium">{meeting.participants.length}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <Button
-                          type="button"
-                          size="sm"
-                          disabled={!canJoinMeeting(meeting) || isLoading}
-                          className={meeting.status === 'live' ? 
-                            "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2" : 
-                            "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2"
-                          }
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleJoinClass(undefined, meeting._id);
-                          }}
-                        >
-                          {meeting.status === 'live' ? (
-                            <>
-                              <Video className="w-4 h-4 mr-2" />
-                              Join Live Now
-                            </>
-                          ) : (
-                            <>
-                              <Calendar className="w-4 h-4 mr-2" />
-                              Join Scheduled
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Error Dialog */}
       {error && (
