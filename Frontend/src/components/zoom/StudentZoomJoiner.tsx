@@ -66,6 +66,15 @@ export default function StudentZoomJoiner({
     userRole: currentUser?.role,
     userName: currentUser?.name
   });
+  
+  // Debug: Log component props
+  console.log('StudentZoomJoiner - Component props:', {
+    scheduleId,
+    className: buttonClassName,
+    course,
+    time,
+    disabled
+  });
 
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -156,20 +165,29 @@ export default function StudentZoomJoiner({
   };
 
   const handleJoinClass = async (scheduleId?: string, meetingId?: string) => {
+    console.log('=== HANDLE JOIN CLASS CALLED ===');
+    console.log('StudentZoomJoiner - handleJoinClass called with:', {
+      scheduleId,
+      meetingId
+    });
+    
     // Get current user state
     const { currentUser: freshUser } = useAuthStore.getState();
     
+    console.log('StudentZoomJoiner - Fresh user state:', {
+      freshUser,
+      isLoggedIn: !!freshUser,
+      userName: freshUser?.name,
+      userRole: freshUser?.role
+    });
+    
     if (!freshUser) {
+      console.log('StudentZoomJoiner - No user found, showing login error');
       toast.error("Please login to join class");
       return;
     }
     
-    console.log('StudentZoomJoiner - handleJoinClass called with:', {
-      scheduleId,
-      meetingId,
-      user: freshUser?.name,
-      userRole: freshUser?.role
-    });
+    console.log('StudentZoomJoiner - User authenticated, proceeding with join');
 
     setIsLoading(true);
     setError('');
@@ -268,6 +286,20 @@ export default function StudentZoomJoiner({
 
   return (
     <div className="space-y-6">
+      {/* TEST BUTTON - Remove after debugging */}
+      <div className="bg-red-100 border border-red-300 rounded-lg p-4">
+        <h4 className="text-red-800 font-bold mb-2">DEBUG TEST BUTTON</h4>
+        <Button
+          onClick={() => {
+            console.log('TEST BUTTON CLICKED!');
+            alert('Test button clicked successfully!');
+          }}
+          className="bg-red-600 hover:bg-red-700 text-white"
+        >
+          Click Me For Test
+        </Button>
+      </div>
+
       {/* Join Class Button */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-lg border border-blue-200 p-6">
         <div className="text-center mb-4">
@@ -276,14 +308,17 @@ export default function StudentZoomJoiner({
         </div>
         <Button
           onClick={() => {
-            console.log('StudentZoomJoiner - Join button clicked');
+            console.log('=== STUDENT JOIN BUTTON CLICKED ===');
             console.log('StudentZoomJoiner - Button state:', {
               scheduleId,
               availableMeetings: availableMeetings.length,
               mySchedules: mySchedules.length,
               currentUser: !!currentUser,
-              isLoading
+              isLoading,
+              currentUserDetails: currentUser
             });
+            
+            alert('Join button clicked! Check console for details.');
             
             // If no specific scheduleId, try to join first available meeting
             if (scheduleId) {
