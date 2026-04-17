@@ -156,10 +156,20 @@ export default function StudentZoomJoiner({
   };
 
   const handleJoinClass = async (scheduleId?: string, meetingId?: string) => {
-    if (!currentUser) {
+    // Get current user state
+    const { currentUser: freshUser } = useAuthStore.getState();
+    
+    if (!freshUser) {
       toast.error("Please login to join class");
       return;
     }
+    
+    console.log('StudentZoomJoiner - handleJoinClass called with:', {
+      scheduleId,
+      meetingId,
+      user: freshUser?.name,
+      userRole: freshUser?.role
+    });
 
     setIsLoading(true);
     setError('');
@@ -173,8 +183,8 @@ export default function StudentZoomJoiner({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            userId: currentUser.id,
-            userName: currentUser.name,
+            userId: freshUser.id,
+            userName: freshUser.name,
           })
         });
 
@@ -198,8 +208,8 @@ export default function StudentZoomJoiner({
           course: course,
           teacherId: '',
           teacherName: '',
-          studentId: currentUser.id,
-          studentName: currentUser.name,
+          studentId: freshUser.id,
+          studentName: freshUser.name,
           time: time || new Date().toISOString()
         };
 
@@ -290,8 +300,8 @@ export default function StudentZoomJoiner({
               toast.error("No available classes to join");
             }
           }}
-          disabled={isLoading || !currentUser}
-          title={!currentUser ? "Please login to join class" : isLoading ? "Joining..." : "Click to join class"}
+          disabled={isLoading}
+          title={isLoading ? "Joining..." : "Click to join class"}
           className={`${buttonClassName} bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-lg px-8 py-3`}
           size="lg"
         >
@@ -422,7 +432,7 @@ export default function StudentZoomJoiner({
                         <Button
                           size="sm"
                           onClick={() => handleJoinClass(schedule._id)}
-                          disabled={isLoading || !currentUser}
+                          disabled={isLoading}
                           className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 px-6 py-2"
                         >
                           <Play className="w-4 h-4 mr-2" />
