@@ -36,6 +36,7 @@ router.post("/signature-test", (req, res) => {
         exp,
         appKey: sdkKey,
         tokenExp: exp,
+        video_webrtc_mode: 1, // Enable WebRTC mode for multi-host support
       })
     ).toString("base64url");
 
