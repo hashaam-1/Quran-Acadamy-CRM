@@ -159,8 +159,8 @@ export default function StudentZoomJoiner({
           setMeeting(data.meeting);
           toast.success('Joined class successfully');
           
-          // Navigate to Zoom meeting with student role (0 = participant)
-          navigate(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}&role=0`);
+          // Navigate to Zoom meeting - role will be determined by user type in ZoomMeetingClean component
+          navigate(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}`);
         } else {
           setError(data.message || 'Failed to join class');
           toast.error(data.message || 'Failed to join class');
@@ -196,8 +196,8 @@ export default function StudentZoomJoiner({
           setMeeting(data.meeting);
           toast.success(data.rejoin ? "Rejoined existing class" : "Joined class successfully");
           
-          // Navigate to Zoom meeting with student role (0 = participant)
-          navigate(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}&role=0`);
+          // Navigate to Zoom meeting - role will be determined by user type in ZoomMeetingClean component
+          navigate(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}`);
         } else {
           setError(data.message || 'Failed to join class');
           toast.error(data.message || 'Failed to join class');

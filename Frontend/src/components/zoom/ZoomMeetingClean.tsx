@@ -49,7 +49,18 @@ export default function ZoomMeetingClean() {
 
   // Get meeting details from URL
   const meetingNumber = searchParams.get('meetingNumber');
-  const role = searchParams.get('role') ? parseInt(searchParams.get('role')!) : 0;
+  
+  // Determine role based on user type, not URL parameter
+  const getRoleFromUser = (userRole: string | undefined) => {
+    if (userRole === 'teacher') {
+      return 1; // Teacher is host
+    } else if (userRole === 'admin' || userRole === 'student') {
+      return 0; // Admin and student are participants
+    }
+    return 0; // Default to participant
+  };
+  
+  const role = getRoleFromUser(preservedUser?.role || currentUser?.role);
 
   // Cleanup function to remove preserved session when leaving meeting
   const cleanupSession = () => {
@@ -180,6 +191,7 @@ export default function ZoomMeetingClean() {
         body: JSON.stringify({
           meetingNumber: meetingNumber,
           role: role,
+          userRole: activeUser?.role, // Send user role for proper Zoom role assignment
         }),
       });
 

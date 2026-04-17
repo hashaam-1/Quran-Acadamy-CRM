@@ -166,8 +166,8 @@ export default function TeacherZoomManager({
   };
 
   const handleJoinMeeting = (meeting: Meeting) => {
-    // Navigate to Zoom meeting with teacher role (1 = host)
-    navigate(`/zoom-join?meetingNumber=${meeting.meetingNumber}&role=1`);
+    // Navigate to Zoom meeting - role will be determined by user type in ZoomMeetingClean component
+    navigate(`/zoom-join?meetingNumber=${meeting.meetingNumber}`);
   };
 
   const formatTime = (dateString: string) => {
