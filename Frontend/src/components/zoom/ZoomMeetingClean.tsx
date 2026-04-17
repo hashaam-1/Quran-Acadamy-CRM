@@ -53,12 +53,43 @@ export default function ZoomMeetingClean() {
 
   // Cleanup function to remove preserved session when leaving meeting
   const cleanupSession = () => {
+    console.log('Cleaning up Zoom meeting session...');
+    
+    // Remove preserved user session
     localStorage.removeItem('zoomMeetingUser');
+    
+    // Clean up Zoom SDK if available
+    if (typeof ZoomMtg !== 'undefined') {
+      try {
+        // Use correct ZoomMtg API methods
+        (ZoomMtg as any).leave();
+        console.log('Left Zoom meeting successfully');
+      } catch (error) {
+        console.log('Error leaving Zoom meeting:', error);
+      }
+      
+      try {
+        // Use correct ZoomMtg API methods
+        (ZoomMtg as any).destroy();
+        console.log('Destroyed Zoom SDK instance');
+      } catch (error) {
+        console.log('Error destroying Zoom SDK:', error);
+      }
+    }
   };
 
-  // Add cleanup on unmount
+  // Add cleanup on unmount and page unload
   useEffect(() => {
-    return cleanupSession;
+    const handleBeforeUnload = () => {
+      cleanupSession();
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      cleanupSession();
+    };
   }, []);
 
   // Initialize Zoom Meeting SDK
@@ -222,8 +253,25 @@ export default function ZoomMeetingClean() {
             },
             error: (error: any) => {
               console.error('Error joining Zoom meeting:', error);
-              setError('Failed to join meeting: ' + (error.errorMessage || error.message || 'Unknown error'));
-              toast.error('Failed to join meeting');
+              
+              // Handle specific multi-host error
+              if (error.errorCode === 3000 && error.errorMessage?.includes('Already has other meetings in progress')) {
+                setError('Another meeting is already in progress in this browser. Please close other Zoom meetings and try again.');
+                toast.error('Please close other Zoom meetings first');
+                
+                // Try to leave any existing meetings
+                try {
+                  ZoomMtg.leave();
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 1000);
+                } catch (leaveError) {
+                  console.log('Error leaving meeting:', leaveError);
+                }
+              } else {
+                setError('Failed to join meeting: ' + (error.errorMessage || error.message || 'Unknown error'));
+                toast.error('Failed to join meeting');
+              }
             }
           });
         },

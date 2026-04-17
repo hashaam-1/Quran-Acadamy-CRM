@@ -79,10 +79,16 @@ export default function StudentZoomJoiner({
       let endpoint;
       if (currentUser?.role === 'student') {
         endpoint = `https://quran-acadamy-crm-production.up.railway.app/api/schedules/student/${currentUser?.id}`;
+        console.log('Fetching schedules for student:', currentUser?.name);
       } else if (currentUser?.role === 'teacher') {
         endpoint = `https://quran-acadamy-crm-production.up.railway.app/api/schedules/teacher/${currentUser?.id}`;
+        console.log('Fetching schedules for teacher:', currentUser?.name);
+      } else if (currentUser?.role === 'admin') {
+        endpoint = `https://quran-acadamy-crm-production.up.railway.app/api/schedules`;
+        console.log('Fetching schedules for admin:', currentUser?.name);
       } else {
         endpoint = `https://quran-acadamy-crm-production.up.railway.app/api/schedules`;
+        console.log('Fetching schedules for user:', currentUser?.role);
       }
 
       const response = await fetch(endpoint);
@@ -90,7 +96,7 @@ export default function StudentZoomJoiner({
         const data = await response.json();
         if (data.success) {
           setMySchedules(data.schedules || []);
-          console.log(`Fetched ${data.schedules?.length || 0} schedules for ${currentUser?.role}`);
+          console.log(`Fetched ${data.schedules?.length || 0} schedules for ${currentUser?.role} (${currentUser?.name})`);
         }
       }
     } catch (err) {
@@ -100,11 +106,24 @@ export default function StudentZoomJoiner({
 
   const fetchAvailableMeetings = async () => {
     try {
-      const response = await fetch('https://quran-acadamy-crm-production.up.railway.app/api/meetings/student/available');
+      // Use role-specific endpoint for available meetings
+      let endpoint;
+      if (currentUser?.role === 'student') {
+        endpoint = 'https://quran-acadamy-crm-production.up.railway.app/api/meetings/student/available';
+      } else if (currentUser?.role === 'teacher') {
+        endpoint = 'https://quran-acadamy-crm-production.up.railway.app/api/meetings/teacher/available';
+      } else if (currentUser?.role === 'admin') {
+        endpoint = 'https://quran-acadamy-crm-production.up.railway.app/api/meetings/available';
+      } else {
+        endpoint = 'https://quran-acadamy-crm-production.up.railway.app/api/meetings/available';
+      }
+
+      const response = await fetch(endpoint);
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
           setAvailableMeetings(data.meetings || []);
+          console.log(`Fetched ${data.meetings?.length || 0} available meetings for ${currentUser?.role}`);
         }
       }
     } catch (err) {
