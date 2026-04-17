@@ -57,19 +57,31 @@ export default function StudentZoomJoiner({
   disabled = false
 }: StudentZoomJoinerProps) {
   const navigate = useNavigate();
+  const { currentUser } = useAuthStore();
+  
+  // Debug: Log user state
+  console.log('StudentZoomJoiner - User state:', {
+    currentUser: currentUser,
+    isLoggedIn: !!currentUser,
+    userRole: currentUser?.role,
+    userName: currentUser?.name
+  });
+
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [availableMeetings, setAvailableMeetings] = useState<Meeting[]>([]);
   const [mySchedules, setMySchedules] = useState<Schedule[]>([]);
   const [error, setError] = useState('');
-  const { currentUser } = useAuthStore();
 
   // Fetch schedules and available meetings on component mount
   useEffect(() => {
     if (currentUser) {
+      console.log('StudentZoomJoiner - Fetching data for user:', currentUser.name);
       fetchStudentSchedules();
       fetchAvailableMeetings();
+    } else {
+      console.log('StudentZoomJoiner - No currentUser available');
     }
   }, [currentUser]);
 
@@ -94,10 +106,16 @@ export default function StudentZoomJoiner({
       const response = await fetch(endpoint);
       if (response.ok) {
         const data = await response.json();
+        console.log('StudentZoomJoiner - Schedules response:', data);
         if (data.success) {
           setMySchedules(data.schedules || []);
           console.log(`Fetched ${data.schedules?.length || 0} schedules for ${currentUser?.role} (${currentUser?.name})`);
+          console.log('StudentZoomJoiner - Schedules data:', data.schedules);
+        } else {
+          console.log('StudentZoomJoiner - Failed to fetch schedules:', data.message);
         }
+      } else {
+        console.log('StudentZoomJoiner - Failed to fetch schedules, status:', response.status);
       }
     } catch (err) {
       console.error('Error fetching schedules:', err);
@@ -121,10 +139,16 @@ export default function StudentZoomJoiner({
       const response = await fetch(endpoint);
       if (response.ok) {
         const data = await response.json();
+        console.log('StudentZoomJoiner - Available meetings response:', data);
         if (data.success) {
           setAvailableMeetings(data.meetings || []);
           console.log(`Fetched ${data.meetings?.length || 0} available meetings for ${currentUser?.role}`);
+          console.log('StudentZoomJoiner - Available meetings data:', data.meetings);
+        } else {
+          console.log('StudentZoomJoiner - Failed to fetch available meetings:', data.message);
         }
+      } else {
+        console.log('StudentZoomJoiner - Failed to fetch available meetings, status:', response.status);
       }
     } catch (err) {
       console.error('Error fetching available meetings:', err);
@@ -241,8 +265,33 @@ export default function StudentZoomJoiner({
           <p className="text-sm text-gray-600">Click the button below to enter your Zoom classroom</p>
         </div>
         <Button
-          onClick={() => handleJoinClass(scheduleId)}
+          onClick={() => {
+            console.log('StudentZoomJoiner - Join button clicked');
+            console.log('StudentZoomJoiner - Button state:', {
+              scheduleId,
+              availableMeetings: availableMeetings.length,
+              mySchedules: mySchedules.length,
+              currentUser: !!currentUser,
+              isLoading
+            });
+            
+            // If no specific scheduleId, try to join first available meeting
+            if (scheduleId) {
+              console.log('StudentZoomJoiner - Joining with scheduleId:', scheduleId);
+              handleJoinClass(scheduleId);
+            } else if (availableMeetings.length > 0) {
+              console.log('StudentZoomJoiner - Joining first available meeting:', availableMeetings[0]);
+              handleJoinClass(undefined, availableMeetings[0]._id);
+            } else if (mySchedules.length > 0) {
+              console.log('StudentZoomJoiner - Joining first schedule:', mySchedules[0]);
+              handleJoinClass(mySchedules[0]._id);
+            } else {
+              console.log('StudentZoomJoiner - No classes available to join');
+              toast.error("No available classes to join");
+            }
+          }}
           disabled={isLoading || !currentUser}
+          title={!currentUser ? "Please login to join class" : isLoading ? "Joining..." : "Click to join class"}
           className={`${buttonClassName} bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-lg px-8 py-3`}
           size="lg"
         >
