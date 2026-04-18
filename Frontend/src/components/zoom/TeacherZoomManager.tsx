@@ -207,7 +207,7 @@ export default function TeacherZoomManager({
               {scheduledMeetings.map((meeting) => (
                 <div
                   key={meeting._id}
-                  className="group relative bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-lg transition-all duration-200 cursor-pointer"
+                  className="group relative bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-lg transition-all duration-200 relative overflow-hidden"
                 >
                   {/* Class Info */}
                   <div className="space-y-2">
@@ -220,14 +220,14 @@ export default function TeacherZoomManager({
                   </div>
                   
                   {/* Hover Action Buttons */}
-                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                     <div className="flex gap-2">
                       {meeting.status === 'live' ? (
                         <Button
                           type="button"
                           size="sm"
                           disabled={isLoading}
-                          className="bg-green-600 hover:bg-green-700 text-white font-medium shadow-lg"
+                          className="pointer-events-auto bg-green-600 hover:bg-green-700 text-white font-medium shadow-lg z-10"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -242,7 +242,7 @@ export default function TeacherZoomManager({
                           type="button"
                           size="sm"
                           disabled={isLoading}
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg"
+                          className="pointer-events-auto bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg z-10"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -258,7 +258,7 @@ export default function TeacherZoomManager({
                         size="sm"
                         variant="outline"
                         disabled={isLoading}
-                        className="bg-white hover:bg-gray-100 text-gray-700 border-white shadow-lg"
+                        className="pointer-events-auto bg-white hover:bg-gray-100 text-gray-700 border-white shadow-lg z-10"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
