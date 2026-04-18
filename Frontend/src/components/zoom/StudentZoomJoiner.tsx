@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Video, Users, Calendar, Clock, Play, BookOpen, User, Edit, Settings } from 'lucide-react';
+import { Loader2, Video, Users, Calendar, Clock, Play, BookOpen, User, Edit, Settings, Eye } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { toast } from 'sonner';
 
