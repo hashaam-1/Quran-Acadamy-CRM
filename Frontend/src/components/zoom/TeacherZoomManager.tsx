@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Video, Users, User, Calendar, Clock, Play, Square, Eye, Settings, Edit, BookOpen, Pencil, Phone } from 'lucide-react';
+import { Loader2, Video, Users, User, Clock, Play, Square, Eye, Settings, Edit, BookOpen, Pencil, Phone } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { toast } from 'sonner';
 
@@ -258,8 +258,7 @@ export default function TeacherZoomManager({
           </div>
           
           {[...scheduledMeetings, ...liveMeetings].length === 0 ? (
-            <div className="text-center py-12">
-              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+            <div className="text-center py-8">
               <p className="text-lg font-medium text-gray-700">No scheduled classes</p>
               <p className="text-sm mt-2 text-gray-500">Your scheduled classes will appear here</p>
             </div>
@@ -303,7 +302,7 @@ export default function TeacherZoomManager({
                       </div>
                     )}
                     <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Calendar className="w-4 h-4" />
+                      <Clock className="w-4 h-4" />
                       <span>Created: {formatTime(meeting.createdAt)}</span>
                     </div>
                   </div>
@@ -312,8 +311,41 @@ export default function TeacherZoomManager({
                   <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out rounded-xl z-50 flex items-center justify-center pointer-events-none">
                     <div className="flex gap-3 p-4 bg-white/20 rounded-xl backdrop-blur-sm border border-white/30 pointer-events-auto">
                       
-                      {/* Scheduled Meeting */}
-                      {meeting.status === "scheduled" && (
+                      {/* Debug status */}
+                      <div className="absolute top-2 left-2 text-xs text-white bg-black/50 px-2 py-1 rounded">
+                        Status: {meeting.status}
+                      </div>
+                      
+                      {/* Always show both buttons for any status */}
+                      <>
+                        <Button
+                          className="bg-green-600 hover:bg-green-700 text-white shadow-2xl px-6 py-3 font-semibold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-green-600/50"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleJoinMeeting(meeting);
+                          }}
+                        >
+                          <Video className="w-4 h-4 mr-2" />
+                          Join Class
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          className="bg-white hover:bg-gray-50 text-gray-800 shadow-2xl px-6 py-3 font-semibold rounded-xl border-2 border-gray-300 transition-all duration-200 hover:scale-105 hover:shadow-gray-400/50"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleEditMeeting(meeting);
+                          }}
+                        >
+                          <Pencil className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                      </>
+
+                      {/* Original conditional buttons - kept as backup */}
+                      {false && meeting.status === "scheduled" && (
                         <>
                           <Button
                             className="bg-green-600 hover:bg-green-700 text-white shadow-2xl px-6 py-3 font-semibold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-green-600/50"
