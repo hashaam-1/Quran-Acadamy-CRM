@@ -258,7 +258,7 @@ export default function TeacherZoomManager({
                   </div>
                   
                   {/* Perfect Right-Side Hover Panel */}
-                  <div className="absolute top-0 right-0 h-full w-80 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 shadow-2xl transform translate-x-full group-hover:translate-x-0 transition-all duration-500 ease-out pointer-events-none rounded-r-lg z-50">
+                  <div className="absolute top-0 right-0 h-full w-80 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 shadow-2xl transform translate-x-full group-hover:translate-x-0 transition-all duration-500 ease-out rounded-r-lg z-50">
                     <div className="p-6 h-full flex flex-col justify-between">
                       {/* Header Section */}
                       <div className="space-y-4">
@@ -308,7 +308,7 @@ export default function TeacherZoomManager({
                             type="button"
                             size="lg"
                             disabled={isLoading}
-                            className="pointer-events-auto w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold shadow-xl hover:shadow-green-500/30 transform hover:scale-105 transition-all duration-300 border-0"
+                            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold shadow-xl hover:shadow-green-500/30 transform hover:scale-105 transition-all duration-300 border-0"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -323,7 +323,7 @@ export default function TeacherZoomManager({
                             type="button"
                             size="lg"
                             disabled={isLoading}
-                            className="pointer-events-auto w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold shadow-xl hover:shadow-blue-500/30 transform hover:scale-105 transition-all duration-300 border-0"
+                            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold shadow-xl hover:shadow-blue-500/30 transform hover:scale-105 transition-all duration-300 border-0"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -341,7 +341,7 @@ export default function TeacherZoomManager({
                             size="lg"
                             variant="outline"
                             disabled={isLoading}
-                            className="pointer-events-auto bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 font-medium shadow-lg hover:shadow-white/20 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
+                            className="bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 font-medium shadow-lg hover:shadow-white/20 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -356,7 +356,7 @@ export default function TeacherZoomManager({
                             size="lg"
                             variant="outline"
                             disabled={isLoading}
-                            className="pointer-events-auto bg-red-500/20 hover:bg-red-500/30 text-red-300 border-red-500/30 hover:border-red-500/50 font-medium shadow-lg hover:shadow-red-500/20 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
+                            className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border-red-500/30 hover:border-red-500/50 font-medium shadow-lg hover:shadow-red-500/20 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
