@@ -356,47 +356,70 @@ export default function StudentZoomJoiner({
                     </Badge>
                   </div>
                   
-                  {/* Hover Action Buttons */}
-                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        disabled={isLoading}
-                        className="pointer-events-auto bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg z-10"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleJoinClass(schedule._id);
-                        }}
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Joining...
-                          </>
-                        ) : (
-                          <>
-                            <Video className="w-4 h-4 mr-2" />
-                            Join
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={isLoading}
-                        className="pointer-events-auto bg-white hover:bg-gray-100 text-gray-700 border-white shadow-lg z-10"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleEditSchedule(schedule);
-                        }}
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
+                  {/* Enhanced Hover Action Buttons */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-900/90 to-purple-900/90 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:scale-105">
+                    <div className="flex flex-col gap-3 p-4">
+                      <div className="text-center mb-2">
+                        <h4 className="text-white font-bold text-lg mb-1">{schedule.className}</h4>
+                        <p className="text-blue-200 text-sm">{schedule.course}</p>
+                      </div>
+                      
+                      <div className="flex gap-3">
+                        <Button
+                          type="button"
+                          size="lg"
+                          disabled={isLoading}
+                          className="pointer-events-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold shadow-2xl hover:shadow-green-500/25 transform hover:scale-105 transition-all duration-200 z-10 px-6"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleJoinClass(schedule._id);
+                          }}
+                        >
+                          {isLoading ? (
+                            <>
+                              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                              Joining...
+                            </>
+                          ) : (
+                            <>
+                              <Video className="w-5 h-5 mr-2" />
+                              Join Class
+                            </>
+                          )}
+                        </Button>
+                        
+                        <Button
+                          type="button"
+                          size="lg"
+                          variant="outline"
+                          disabled={isLoading}
+                          className="pointer-events-auto bg-white/90 hover:bg-white text-gray-800 border-white/50 shadow-2xl hover:shadow-white/25 transform hover:scale-105 transition-all duration-200 z-10 px-6"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleEditSchedule(schedule);
+                          }}
+                        >
+                          <Edit className="w-5 h-5 mr-2" />
+                          Edit
+                        </Button>
+                      </div>
+                      
+                      <div className="flex items-center justify-center gap-4 text-white/80 text-xs">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {schedule.day}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {schedule.time}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <User className="w-3 h-3" />
+                          {schedule.teacherName}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -434,7 +457,7 @@ export default function StudentZoomJoiner({
         </Dialog>
       )}
 
-      {/* Edit Schedule Dialog */}
+      {/* Enhanced Edit Schedule Dialog */}
       {editingSchedule && (
         <Dialog 
           open={editDialogOpen}
@@ -450,71 +473,99 @@ export default function StudentZoomJoiner({
           }}
         >
           <DialogContent
-            className="sm:max-w-[500px] z-[9999]"
+            className="sm:max-w-[600px] z-[9999] bg-gradient-to-br from-white to-blue-50 border-blue-200"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
-            <DialogHeader>
-              <DialogTitle>Edit Class Schedule</DialogTitle>
-              <DialogDescription>
+            <DialogHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg -m-6 mb-6 p-6">
+              <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
+                <Edit className="w-5 h-5" />
+                Edit Class Schedule
+              </DialogTitle>
+              <DialogDescription className="text-blue-100">
                 Update the details for your {editingSchedule.course} class
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Class Name</label>
-                <input
-                  type="text"
-                  className="w-full p-2 border rounded-md"
-                  value={editingSchedule.className}
-                  onChange={(e) => setEditingSchedule({...editingSchedule, className: e.target.value})}
-                />
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-blue-600" />
+                    Class Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                    value={editingSchedule.className}
+                    onChange={(e) => setEditingSchedule({...editingSchedule, className: e.target.value})}
+                    placeholder="Enter class name"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-purple-600" />
+                    Course
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                    value={editingSchedule.course}
+                    onChange={(e) => setEditingSchedule({...editingSchedule, course: e.target.value})}
+                    placeholder="Enter course name"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Course</label>
-                <input
-                  type="text"
-                  className="w-full p-2 border rounded-md"
-                  value={editingSchedule.course}
-                  onChange={(e) => setEditingSchedule({...editingSchedule, course: e.target.value})}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-green-600" />
+                    Day
+                  </label>
+                  <select
+                    className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                    value={editingSchedule.day}
+                    onChange={(e) => setEditingSchedule({...editingSchedule, day: e.target.value})}
+                  >
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-orange-600" />
+                    Time
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                    value={editingSchedule.time}
+                    onChange={(e) => setEditingSchedule({...editingSchedule, time: e.target.value})}
+                    placeholder="e.g., 2:00 PM"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Day</label>
-                <select
-                  className="w-full p-2 border rounded-md"
-                  value={editingSchedule.day}
-                  onChange={(e) => setEditingSchedule({...editingSchedule, day: e.target.value})}
-                >
-                  <option value="Monday">Monday</option>
-                  <option value="Tuesday">Tuesday</option>
-                  <option value="Wednesday">Wednesday</option>
-                  <option value="Thursday">Thursday</option>
-                  <option value="Friday">Friday</option>
-                  <option value="Saturday">Saturday</option>
-                  <option value="Sunday">Sunday</option>
-                </select>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 text-blue-700">
+                  <User className="w-4 h-4" />
+                  <span className="text-sm font-medium">Teacher: {editingSchedule.teacherName}</span>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Time</label>
-                <input
-                  type="text"
-                  className="w-full p-2 border rounded-md"
-                  value={editingSchedule.time}
-                  onChange={(e) => setEditingSchedule({...editingSchedule, time: e.target.value})}
-                  placeholder="e.g., 2:00 PM"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-4">
+              <div className="flex gap-3 pt-4">
                 <Button
                   type="button"
                   onClick={handleSaveEdit}
                   disabled={isLoading}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                 >
                   {isLoading ? (
                     <>
@@ -522,7 +573,10 @@ export default function StudentZoomJoiner({
                       Saving...
                     </>
                   ) : (
-                    'Save Changes'
+                    <>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </>
                   )}
                 </Button>
                 <Button
@@ -532,7 +586,7 @@ export default function StudentZoomJoiner({
                     setEditDialogOpen(false);
                     setEditingSchedule(null);
                   }}
-                  className="flex-1"
+                  className="flex-1 border-gray-300 hover:bg-gray-50 text-gray-700 font-medium"
                 >
                   Cancel
                 </Button>

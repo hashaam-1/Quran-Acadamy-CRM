@@ -219,55 +219,79 @@ export default function TeacherZoomManager({
                     </Badge>
                   </div>
                   
-                  {/* Hover Action Buttons */}
-                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                    <div className="flex gap-2">
-                      {meeting.status === 'live' ? (
+                  {/* Enhanced Hover Action Buttons */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-900/90 to-purple-900/90 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:scale-105">
+                    <div className="flex flex-col gap-3 p-4">
+                      <div className="text-center mb-2">
+                        <h4 className="text-white font-bold text-lg mb-1">{meeting.className}</h4>
+                        <p className="text-blue-200 text-sm">{meeting.course}</p>
+                      </div>
+                      
+                      <div className="flex gap-3">
+                        {meeting.status === 'live' ? (
+                          <Button
+                            type="button"
+                            size="lg"
+                            disabled={isLoading}
+                            className="pointer-events-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold shadow-2xl hover:shadow-green-500/25 transform hover:scale-105 transition-all duration-200 z-10 px-6"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleJoinMeeting(meeting);
+                            }}
+                          >
+                            <Eye className="w-5 h-5 mr-2" />
+                            Join Live
+                          </Button>
+                        ) : (
+                          <Button
+                            type="button"
+                            size="lg"
+                            disabled={isLoading}
+                            className="pointer-events-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 transition-all duration-200 z-10 px-6"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleJoinMeeting(meeting);
+                            }}
+                          >
+                            <Play className="w-5 h-5 mr-2" />
+                            Start Class
+                          </Button>
+                        )}
+                        
                         <Button
                           type="button"
-                          size="sm"
+                          size="lg"
+                          variant="outline"
                           disabled={isLoading}
-                          className="pointer-events-auto bg-green-600 hover:bg-green-700 text-white font-medium shadow-lg z-10"
+                          className="pointer-events-auto bg-white/90 hover:bg-white text-gray-800 border-white/50 shadow-2xl hover:shadow-white/25 transform hover:scale-105 transition-all duration-200 z-10 px-6"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            handleJoinMeeting(meeting);
+                            handleEndClass(meeting._id);
                           }}
                         >
-                          <Eye className="w-4 h-4 mr-2" />
-                          Join
+                          <Square className="w-5 h-5 mr-2" />
+                          {meeting.status === 'live' ? 'End' : 'Cancel'}
                         </Button>
-                      ) : (
-                        <Button
-                          type="button"
-                          size="sm"
-                          disabled={isLoading}
-                          className="pointer-events-auto bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg z-10"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleJoinMeeting(meeting);
-                          }}
-                        >
-                          <Play className="w-4 h-4 mr-2" />
-                          Start
-                        </Button>
-                      )}
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={isLoading}
-                        className="pointer-events-auto bg-white hover:bg-gray-100 text-gray-700 border-white shadow-lg z-10"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleEndClass(meeting._id);
-                        }}
-                      >
-                        <Square className="w-4 h-4 mr-2" />
-                        {meeting.status === 'live' ? 'End' : 'Cancel'}
-                      </Button>
+                      </div>
+                      
+                      <div className="flex items-center justify-center gap-4 text-white/80 text-xs">
+                        <div className="flex items-center gap-1">
+                          <Badge className={`${getStatusColor(meeting.status)} text-white text-xs px-2 py-1`}>
+                            {meeting.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          {meeting.participants.length} students
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {formatTime(meeting.createdAt)}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
