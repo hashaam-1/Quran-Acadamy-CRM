@@ -350,6 +350,11 @@ export default function StudentZoomJoiner({
         </div>
         
         <div className="p-6">
+          {/* Debug info */}
+          <div className="mb-4 text-xs text-gray-500">
+            Debug: Schedules: {mySchedules.length}
+          </div>
+          
           {mySchedules.length === 0 ? (
             <div className="text-center py-12">
               <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
@@ -361,7 +366,7 @@ export default function StudentZoomJoiner({
               {mySchedules.map((schedule) => (
                 <div
                   key={schedule._id}
-                  className="group relative bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-visible"
+                  className="group relative bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-visible cursor-pointer"
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between mb-4">
@@ -393,11 +398,11 @@ export default function StudentZoomJoiner({
                     </div>
                   </div>
 
-                  {/* Hover Buttons */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out rounded-xl z-50 flex items-center justify-center">
-                    <div className="flex gap-3 p-4 bg-white/10 rounded-lg backdrop-blur-md">
+                  {/* Hover Buttons - Improved */}
+                  <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out rounded-xl z-50 flex items-center justify-center pointer-events-none">
+                    <div className="flex gap-3 p-4 bg-white/20 rounded-xl backdrop-blur-sm border border-white/30 pointer-events-auto">
                       <Button
-                        className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-6 py-3 font-medium rounded-lg transition-all duration-200 hover:scale-105"
+                        className="bg-green-600 hover:bg-green-700 text-white shadow-2xl px-6 py-3 font-semibold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-green-600/50"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -419,7 +424,7 @@ export default function StudentZoomJoiner({
 
                       <Button
                         variant="outline"
-                        className="bg-white/90 hover:bg-white text-gray-800 shadow-xl px-6 py-3 font-medium rounded-lg border-2 border-gray-300 transition-all duration-200 hover:scale-105"
+                        className="bg-white hover:bg-gray-50 text-gray-800 shadow-2xl px-6 py-3 font-semibold rounded-xl border-2 border-gray-300 transition-all duration-200 hover:scale-105 hover:shadow-gray-400/50"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
