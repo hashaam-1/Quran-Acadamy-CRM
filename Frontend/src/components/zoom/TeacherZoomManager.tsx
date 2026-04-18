@@ -94,7 +94,7 @@ export default function TeacherZoomManager({
           if (scheduledMeetings.length === 0) {
             // Use sample data for demonstration when no meetings exist
             console.log('Using sample data for TeacherZoomManager');
-            const sampleMeetings = [
+            const sampleMeetings: Meeting[] = [
               {
                 _id: 'sample-1',
                 className: 'Qaida Lesson',
@@ -105,7 +105,7 @@ export default function TeacherZoomManager({
                 studentName: 'Ahmed',
                 time: '02:00 PM',
                 duration: '45 min',
-                status: 'scheduled',
+                status: 'scheduled' as const,
                 meetingNumber: '1234567890',
                 createdAt: new Date().toISOString(),
                 zoomMeetingId: '',
@@ -124,7 +124,7 @@ export default function TeacherZoomManager({
                 studentName: 'Fatima',
                 time: '03:00 PM',
                 duration: '45 min',
-                status: 'scheduled',
+                status: 'scheduled' as const,
                 meetingNumber: '0987654321',
                 createdAt: new Date().toISOString(),
                 zoomMeetingId: '',
@@ -154,7 +154,7 @@ export default function TeacherZoomManager({
           studentName: 'Ahmed',
           time: '02:30 PM',
           duration: '30 min',
-          status: 'scheduled',
+          status: 'scheduled' as const,
           meetingNumber: '1234567890',
           createdAt: new Date().toISOString(),
           zoomMeetingId: '',
@@ -173,7 +173,7 @@ export default function TeacherZoomManager({
           studentName: 'Fatima',
           time: '03:00 PM',
           duration: '45 min',
-          status: 'scheduled',
+          status: 'scheduled' as const,
           meetingNumber: '0987654321',
           createdAt: new Date().toISOString(),
           zoomMeetingId: '',
