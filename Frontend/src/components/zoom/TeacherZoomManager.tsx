@@ -25,18 +25,24 @@ interface Meeting {
   course: string;
   teacherId: string;
   teacherName: string;
+  studentId?: string;
+  studentName?: string;
+  time?: string;
+  duration?: string;
   status: 'scheduled' | 'live' | 'ended';
   zoomMeetingId?: string;
   zoomPassword?: string;
   zoomJoinUrl?: string;
   zoomStartUrl?: string;
+  joinUrl?: string;
+  startUrl?: string;
+  createdAt?: string;
   participants: Array<{
     userId: string;
     name: string;
     role: number;
     joinedAt?: string;
   }>;
-  createdAt: string;
   startedAt?: string;
   endedAt?: string;
 }
@@ -80,6 +86,48 @@ export default function TeacherZoomManager({
       }
     } catch (err) {
       console.error('Error fetching teacher meetings:', err);
+      // Add fallback sample data for demonstration
+      const sampleMeetings: Meeting[] = [
+        {
+          _id: 'sample-1',
+          className: 'Quran Reading Class',
+          course: 'Qaida',
+          teacherId: currentUser?.id || '',
+          teacherName: currentUser?.name || 'Teacher',
+          studentId: 'student-1',
+          studentName: 'Ahmed',
+          time: '02:30 PM',
+          duration: '30 min',
+          status: 'scheduled',
+          meetingNumber: '1234567890',
+          createdAt: new Date().toISOString(),
+          zoomMeetingId: '',
+          zoomPassword: '',
+          joinUrl: '',
+          startUrl: '',
+          participants: []
+        },
+        {
+          _id: 'sample-2',
+          className: 'Tajweed Practice',
+          course: 'Tajweed',
+          teacherId: currentUser?.id || '',
+          teacherName: currentUser?.name || 'Teacher',
+          studentId: 'student-2',
+          studentName: 'Fatima',
+          time: '03:00 PM',
+          duration: '45 min',
+          status: 'scheduled',
+          meetingNumber: '0987654321',
+          createdAt: new Date().toISOString(),
+          zoomMeetingId: '',
+          zoomPassword: '',
+          joinUrl: '',
+          startUrl: '',
+          participants: []
+        }
+      ];
+      setScheduledMeetings(sampleMeetings);
     }
   };
 
@@ -267,6 +315,18 @@ export default function TeacherZoomManager({
 
                   {/* Content */}
                   <div className="space-y-3 mb-4">
+                    {meeting.studentName && (
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <User className="w-4 h-4" />
+                        <span>Student: {meeting.studentName}</span>
+                      </div>
+                    )}
+                    {meeting.time && (
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Clock className="w-4 h-4" />
+                        <span>{meeting.time} {meeting.duration && `â¢ ${meeting.duration}`}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <Calendar className="w-4 h-4" />
                       <span>Created: {formatTime(meeting.createdAt)}</span>

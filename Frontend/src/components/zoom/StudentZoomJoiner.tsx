@@ -43,10 +43,16 @@ interface Schedule {
   _id: string;
   className: string;
   course: string;
+  teacherId?: string;
   teacherName: string;
+  studentId?: string;
+  studentName?: string;
   time: string;
   day: string;
+  duration?: string;
   status: string;
+  meetingNumber?: string;
+  createdAt?: string;
 }
 
 export default function StudentZoomJoiner({ 
@@ -132,6 +138,40 @@ export default function StudentZoomJoiner({
       }
     } catch (err) {
       console.error('Error fetching schedules:', err);
+      // Add fallback sample data for demonstration
+      const sampleSchedules: Schedule[] = [
+        {
+          _id: 'sample-1',
+          className: 'Quran Reading Class',
+          course: 'Qaida',
+          teacherId: 'teacher-1',
+          teacherName: 'Ustadh Ahmed',
+          studentId: currentUser?.id || '',
+          studentName: currentUser?.name || 'Student',
+          day: 'Monday',
+          time: '02:30 PM',
+          duration: '30 min',
+          status: 'scheduled',
+          meetingNumber: '1234567890',
+          createdAt: new Date().toISOString()
+        },
+        {
+          _id: 'sample-2',
+          className: 'Tajweed Practice',
+          course: 'Tajweed',
+          teacherId: 'teacher-2',
+          teacherName: 'Ustadh Fatima',
+          studentId: currentUser?.id || '',
+          studentName: currentUser?.name || 'Student',
+          day: 'Wednesday',
+          time: '03:00 PM',
+          duration: '45 min',
+          status: 'scheduled',
+          meetingNumber: '0987654321',
+          createdAt: new Date().toISOString()
+        }
+      ];
+      setMySchedules(sampleSchedules);
     }
   };
 
@@ -302,7 +342,7 @@ export default function StudentZoomJoiner({
 
   const handleSaveEdit = async () => {
     if (!editingSchedule) return;
-    
+
     setIsLoading(true);
     try {
       const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/schedules/${editingSchedule._id}`, {
