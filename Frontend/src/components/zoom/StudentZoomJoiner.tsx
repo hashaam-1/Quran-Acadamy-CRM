@@ -356,20 +356,55 @@ export default function StudentZoomJoiner({
                     </Badge>
                   </div>
                   
-                  {/* Enhanced Hover Action Buttons */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-900/90 to-purple-900/90 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:scale-105">
-                    <div className="flex flex-col gap-3 p-4">
-                      <div className="text-center mb-2">
-                        <h4 className="text-white font-bold text-lg mb-1">{schedule.className}</h4>
-                        <p className="text-blue-200 text-sm">{schedule.course}</p>
+                  {/* Perfect Right-Side Hover Panel */}
+                  <div className="absolute top-0 right-0 h-full w-80 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 shadow-2xl transform translate-x-full group-hover:translate-x-0 transition-all duration-500 ease-out pointer-events-none rounded-r-lg">
+                    <div className="p-6 h-full flex flex-col justify-between">
+                      {/* Header Section */}
+                      <div className="space-y-4">
+                        <div className="text-center pb-4 border-b border-white/20">
+                          <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                            <Video className="w-8 h-8 text-white" />
+                          </div>
+                          <h4 className="text-white font-bold text-xl mb-1">{schedule.className}</h4>
+                          <p className="text-blue-200 text-sm font-medium">{schedule.course}</p>
+                          <Badge className="bg-blue-500 text-white text-xs px-3 py-1 mt-2 shadow-lg">
+                            SCHEDULED
+                          </Badge>
+                        </div>
+
+                        {/* Class Details */}
+                        <div className="space-y-3 bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                          <div className="flex items-center justify-between text-white/90 text-sm">
+                            <span className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-green-300" />
+                              Day
+                            </span>
+                            <span className="font-bold text-white">{schedule.day}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-white/90 text-sm">
+                            <span className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-orange-300" />
+                              Time
+                            </span>
+                            <span className="font-bold text-white">{schedule.time}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-white/90 text-sm">
+                            <span className="flex items-center gap-2">
+                              <User className="w-4 h-4 text-purple-300" />
+                              Teacher
+                            </span>
+                            <span className="font-bold text-white">{schedule.teacherName}</span>
+                          </div>
+                        </div>
                       </div>
-                      
-                      <div className="flex gap-3">
+
+                      {/* Action Buttons */}
+                      <div className="space-y-3">
                         <Button
                           type="button"
                           size="lg"
                           disabled={isLoading}
-                          className="pointer-events-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold shadow-2xl hover:shadow-green-500/25 transform hover:scale-105 transition-all duration-200 z-10 px-6"
+                          className="pointer-events-auto w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold shadow-xl hover:shadow-green-500/30 transform hover:scale-105 transition-all duration-300 border-0"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -389,35 +424,37 @@ export default function StudentZoomJoiner({
                           )}
                         </Button>
                         
-                        <Button
-                          type="button"
-                          size="lg"
-                          variant="outline"
-                          disabled={isLoading}
-                          className="pointer-events-auto bg-white/90 hover:bg-white text-gray-800 border-white/50 shadow-2xl hover:shadow-white/25 transform hover:scale-105 transition-all duration-200 z-10 px-6"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleEditSchedule(schedule);
-                          }}
-                        >
-                          <Edit className="w-5 h-5 mr-2" />
-                          Edit
-                        </Button>
-                      </div>
-                      
-                      <div className="flex items-center justify-center gap-4 text-white/80 text-xs">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {schedule.day}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {schedule.time}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <User className="w-3 h-3" />
-                          {schedule.teacherName}
+                        <div className="grid grid-cols-2 gap-3">
+                          <Button
+                            type="button"
+                            size="lg"
+                            variant="outline"
+                            disabled={isLoading}
+                            className="pointer-events-auto bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 font-medium shadow-lg hover:shadow-white/20 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleEditSchedule(schedule);
+                            }}
+                          >
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
+                          <Button
+                            type="button"
+                            size="lg"
+                            variant="outline"
+                            disabled={isLoading}
+                            className="pointer-events-auto bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-blue-500/30 hover:border-blue-500/50 font-medium shadow-lg hover:shadow-blue-500/20 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              // Add view details functionality here
+                            }}
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            View
+                          </Button>
                         </div>
                       </div>
                     </div>
