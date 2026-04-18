@@ -341,7 +341,7 @@ export default function TeacherZoomManager({
               {scheduledMeetings.map((meeting) => (
                 <div
                   key={meeting._id}
-                  className="group relative bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300"
+                  className="group relative bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-visible"
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between mb-4">
@@ -382,9 +382,9 @@ export default function TeacherZoomManager({
                   </div>
 
                   {/* Hover Buttons */}
-                  <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col gap-2 z-50">
+                  <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 transition-all duration-300 ease-out flex flex-col gap-2 z-50 pointer-events-none">
                     <Button
-                      className="bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-green-500/30 transform hover:scale-105 transition-all duration-300 border-0"
+                      className="bg-green-600 hover:bg-green-700 text-white shadow-xl hover:shadow-green-500/40 transform hover:scale-105 transition-all duration-200 border-0 pointer-events-auto"
                       size="sm"
                       onClick={(e) => {
                         e.preventDefault();
@@ -397,7 +397,7 @@ export default function TeacherZoomManager({
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
-                        className="bg-white hover:bg-gray-50 shadow-lg hover:shadow-gray-500/20 transform hover:scale-105 transition-all duration-300"
+                        className="bg-white hover:bg-gray-50 text-gray-700 border-gray-300 shadow-xl hover:shadow-gray-500/40 transform hover:scale-105 transition-all duration-200 pointer-events-auto"
                         size="sm"
                         onClick={(e) => {
                           e.preventDefault();
@@ -408,7 +408,7 @@ export default function TeacherZoomManager({
                         Edit
                       </Button>
                       <Button
-                        className="bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-red-500/20 transform hover:scale-105 transition-all duration-300"
+                        className="bg-red-600 hover:bg-red-700 text-white shadow-xl hover:shadow-red-500/40 transform hover:scale-105 transition-all duration-200 pointer-events-auto"
                         size="sm"
                         onClick={(e) => {
                           e.preventDefault();

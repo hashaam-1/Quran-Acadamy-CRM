@@ -459,7 +459,7 @@ export default function Schedule() {
                                         </div>
 
                                         {/* Hover Buttons */}
-                                        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col gap-1 z-50">
+                                        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 transition-all duration-300 ease-out flex flex-col gap-1 z-50 pointer-events-none">
                                           {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
                                             <StartClassButton 
                                               scheduleId={schedule.id || schedule._id}
@@ -467,7 +467,7 @@ export default function Schedule() {
                                               studentName={schedule.studentName}
                                               course={schedule.course}
                                               time={schedule.time}
-                                              className="h-7 px-2 bg-blue-600 hover:bg-blue-700 text-white text-xs shadow-lg hover:shadow-blue-500/20 transform hover:scale-105 transition-all duration-300 border-0"
+                                              className="h-7 px-2 bg-blue-600 hover:bg-blue-700 text-white text-xs shadow-xl hover:shadow-blue-500/40 transform hover:scale-105 transition-all duration-200 border-0 pointer-events-auto"
                                             />
                                           ) : (
                                             <JoinClassButton 
@@ -475,7 +475,7 @@ export default function Schedule() {
                                               teacherName={schedule.teacherName}
                                               course={schedule.course}
                                               time={schedule.time}
-                                              className="h-7 px-2 bg-green-600 hover:bg-green-700 text-white text-xs shadow-lg hover:shadow-green-500/20 transform hover:scale-105 transition-all duration-300 border-0"
+                                              className="h-7 px-2 bg-green-600 hover:bg-green-700 text-white text-xs shadow-xl hover:shadow-green-500/40 transform hover:scale-105 transition-all duration-200 border-0 pointer-events-auto"
                                             />
                                           )}
                                           <div className="flex gap-1">
@@ -488,7 +488,7 @@ export default function Schedule() {
                                                 setCurrent(schedule);
                                                 setIsEditOpen(true);
                                               }}
-                                              className="bg-white hover:bg-gray-50 text-gray-700 text-xs h-6 shadow-lg hover:shadow-gray-500/20 transform hover:scale-105 transition-all duration-300"
+                                              className="bg-white hover:bg-gray-50 text-gray-700 border-gray-300 text-xs h-6 shadow-xl hover:shadow-gray-500/40 transform hover:scale-105 transition-all duration-200 pointer-events-auto"
                                             >
                                               Edit
                                             </Button>
@@ -500,7 +500,7 @@ export default function Schedule() {
                                                 e.stopPropagation();
                                                 // Add view functionality if needed
                                               }}
-                                              className="bg-white hover:bg-gray-50 text-gray-700 text-xs h-6 shadow-lg hover:shadow-gray-500/20 transform hover:scale-105 transition-all duration-300"
+                                              className="bg-white hover:bg-gray-50 text-gray-700 border-gray-300 text-xs h-6 shadow-xl hover:shadow-gray-500/40 transform hover:scale-105 transition-all duration-200 pointer-events-auto"
                                             >
                                               View
                                             </Button>
