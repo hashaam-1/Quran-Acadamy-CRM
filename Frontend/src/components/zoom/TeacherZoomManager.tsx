@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Video, Users, User, Calendar, Clock, Play, Square, Eye, Settings, Edit, BookOpen } from 'lucide-react';
+import { Loader2, Video, Users, User, Calendar, Clock, Play, Square, Eye, Settings, Edit, BookOpen, Pencil, Phone } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { toast } from 'sonner';
 
@@ -64,8 +64,7 @@ export default function TeacherZoomManager({
   const [error, setError] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
-  const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
-  const { currentUser } = useAuthStore();
+    const { currentUser } = useAuthStore();
 
   // Fetch teacher's meetings on component mount
   useEffect(() => {
@@ -272,10 +271,7 @@ export default function TeacherZoomManager({
     }
   };
 
-  const handleMeetingClick = (meeting: Meeting) => {
-    setSelectedMeeting(selectedMeeting?._id === meeting._id ? null : meeting);
-  };
-
+  
   const handleJoinMeeting = (meeting: Meeting) => {
     // Navigate to Zoom meeting - role will be determined by user type in ZoomMeetingClean component
     navigate(`/zoom-join?meetingNumber=${meeting.meetingNumber}`);
@@ -354,8 +350,7 @@ export default function TeacherZoomManager({
               {[...scheduledMeetings, ...liveMeetings].map((meeting) => (
                 <div
                   key={meeting._id}
-                  className="relative bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-visible cursor-pointer"
-                  onClick={() => handleMeetingClick(meeting)}
+                  className="group relative bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-visible"
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between mb-4">
@@ -395,68 +390,70 @@ export default function TeacherZoomManager({
                     </div>
                   </div>
 
-                  {/* Click Buttons */}
-                  {selectedMeeting?._id === meeting._id && (
-                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-xl z-50 backdrop-blur-sm">
-                      <div className="flex gap-4 p-4 bg-white/10 rounded-lg backdrop-blur-md">
+                  {/* Hover Buttons */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out rounded-xl z-50">
+                    <div className="absolute bottom-4 left-4 right-4 flex gap-3">
+                      
+                      {/* Scheduled Meeting */}
+                      {meeting.status === "scheduled" && (
+                        <>
+                          <Button
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105 flex-1"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleJoinMeeting(meeting);
+                            }}
+                          >
+                            <Video className="w-4 h-4 mr-2" />
+                            Join Class
+                          </Button>
 
-                        {/* Scheduled Meeting */}
-                        {meeting.status === "scheduled" && (
-                          <>
-                            <Button
-                              className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-6 py-3 font-medium rounded-lg transition-all duration-200 hover:scale-105"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleJoinMeeting(meeting);
-                              }}
-                            >
-                              Join Class
-                            </Button>
+                          <Button
+                            variant="outline"
+                            className="bg-white/90 hover:bg-white text-gray-800 shadow-xl px-4 py-2 text-sm font-medium rounded-lg border-2 border-gray-300 transition-all duration-200 hover:scale-105"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleEditMeeting(meeting);
+                            }}
+                          >
+                            <Pencil className="w-4 h-4 mr-2" />
+                            Edit
+                          </Button>
+                        </>
+                      )}
 
-                            <Button
-                              variant="outline"
-                              className="bg-white hover:bg-gray-100 text-gray-800 shadow-xl px-6 py-3 font-medium rounded-lg border-2 border-gray-300 transition-all duration-200 hover:scale-105"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleEditMeeting(meeting);
-                              }}
-                            >
-                              Edit
-                            </Button>
-                          </>
-                        )}
+                      {/* Live Meeting */}
+                      {meeting.status === "live" && (
+                        <>
+                          <Button
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105 flex-1"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleJoinMeeting(meeting);
+                            }}
+                          >
+                            <Video className="w-4 h-4 mr-2" />
+                            Join Live
+                          </Button>
 
-                        {/* Live Meeting */}
-                        {meeting.status === "live" && (
-                          <>
-                            <Button
-                              className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-6 py-3 font-medium rounded-lg transition-all duration-200 hover:scale-105"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleJoinMeeting(meeting);
-                              }}
-                            >
-                              Join Live
-                            </Button>
-
-                            <Button
-                              className="bg-red-600 hover:bg-red-700 text-white shadow-xl px-6 py-3 font-medium rounded-lg transition-all duration-200 hover:scale-105"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleEndClass(meeting._id);
-                              }}
-                            >
-                              End
-                            </Button>
-                          </>
-                        )}
-                      </div>
+                          <Button
+                            className="bg-red-600 hover:bg-red-700 text-white shadow-xl px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleEndClass(meeting._id);
+                            }}
+                          >
+                            <Phone className="w-4 h-4 mr-2" />
+                            End
+                          </Button>
+                        </>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
               ))}
             </div>
