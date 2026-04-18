@@ -390,7 +390,6 @@ export default function TeacherZoomManager({
                   </div>
 
                   {/* Hover Buttons */}
-                  {/* Hover Buttons */}
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-xl z-50">
                     <div className="flex gap-3">
 
