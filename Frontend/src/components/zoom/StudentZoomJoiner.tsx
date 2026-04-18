@@ -472,10 +472,10 @@ export default function StudentZoomJoiner({
 
                   {/* Click Buttons */}
                   {selectedSchedule?._id === schedule._id && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-xl z-50">
-                      <div className="flex gap-3">
+                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-xl z-50 backdrop-blur-sm">
+                      <div className="flex gap-4 p-4 bg-white/10 rounded-lg backdrop-blur-md">
                         <Button
-                          className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-2 font-medium"
+                          className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-6 py-3 font-medium rounded-lg transition-all duration-200 hover:scale-105"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -494,7 +494,7 @@ export default function StudentZoomJoiner({
 
                         <Button
                           variant="outline"
-                          className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-6 py-2 font-medium border-gray-300"
+                          className="bg-white hover:bg-gray-100 text-gray-800 shadow-xl px-6 py-3 font-medium rounded-lg border-2 border-gray-300 transition-all duration-200 hover:scale-105"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();

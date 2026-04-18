@@ -91,54 +91,53 @@ export default function TeacherZoomManager({
           );
 
           setLiveMeetings(liveMeetings);
-          setScheduledMeetings(scheduledMeetings); // IMPORTANT FIX
-
-          // If no scheduled meetings, load sample data for demonstration
-          // if (scheduledMeetings.length === 0) {
-          //   const sampleMeetings: Meeting[] = [
-          //     {
-          //       _id: 'sample-1',
-          //       className: 'Quran Reading Class',
-          //       course: 'Qaida',
-          //       teacherId: currentUser?.id || '',
-          //       teacherName: currentUser?.name || 'Teacher',
-          //       studentId: 'student-1',
-          //       studentName: 'Ahmed',
-          //       time: '02:30 PM',
-          //       duration: '30 min',
-          //       status: 'scheduled',
-          //       meetingNumber: '1234567890',
-          //       createdAt: new Date().toISOString(),
-          //       zoomMeetingId: '',
-          //       zoomPassword: '',
-          //       joinUrl: '',
-          //       startUrl: '',
-          //       participants: []
-          //     },
-          //     {
-          //       _id: 'sample-2',
-          //       className: 'Tajweed Practice',
-          //       course: 'Tajweed',
-          //       teacherId: currentUser?.id || '',
-          //       teacherName: currentUser?.name || 'Teacher',
-          //       studentId: 'student-2',
-          //       studentName: 'Fatima',
-          //       time: '03:00 PM',
-          //       duration: '45 min',
-          //       status: 'scheduled',
-          //       meetingNumber: '0987654321',
-          //       createdAt: new Date().toISOString(),
-          //       zoomMeetingId: '',
-          //       zoomPassword: '',
-          //       joinUrl: '',
-          //       startUrl: '',
-          //       participants: []
-          //     }
-          //   ];
-          //   setScheduledMeetings(sampleMeetings);
-          // } else {
-          //   setScheduledMeetings(scheduledMeetings);
-          // }
+          if (scheduledMeetings.length === 0) {
+            // Use sample data for demonstration when no meetings exist
+            console.log('Using sample data for TeacherZoomManager');
+            const sampleMeetings = [
+              {
+                _id: 'sample-1',
+                className: 'Qaida Lesson',
+                course: 'Qaida',
+                teacherId: currentUser?.id || '',
+                teacherName: currentUser?.name || 'Teacher',
+                studentId: 'student-1',
+                studentName: 'Ahmed',
+                time: '02:00 PM',
+                duration: '45 min',
+                status: 'scheduled',
+                meetingNumber: '1234567890',
+                createdAt: new Date().toISOString(),
+                zoomMeetingId: '',
+                zoomPassword: '',
+                joinUrl: '',
+                startUrl: '',
+                participants: []
+              },
+              {
+                _id: 'sample-2',
+                className: 'Tajweed Practice',
+                course: 'Tajweed',
+                teacherId: currentUser?.id || '',
+                teacherName: currentUser?.name || 'Teacher',
+                studentId: 'student-2',
+                studentName: 'Fatima',
+                time: '03:00 PM',
+                duration: '45 min',
+                status: 'scheduled',
+                meetingNumber: '0987654321',
+                createdAt: new Date().toISOString(),
+                zoomMeetingId: '',
+                zoomPassword: '',
+                joinUrl: '',
+                startUrl: '',
+                participants: []
+              }
+            ];
+            setScheduledMeetings(sampleMeetings);
+          } else {
+            setScheduledMeetings(scheduledMeetings);
+          }
         }
       }
     } catch (err) {
@@ -398,14 +397,14 @@ export default function TeacherZoomManager({
 
                   {/* Click Buttons */}
                   {selectedMeeting?._id === meeting._id && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-xl z-50">
-                      <div className="flex gap-3">
+                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-xl z-50 backdrop-blur-sm">
+                      <div className="flex gap-4 p-4 bg-white/10 rounded-lg backdrop-blur-md">
 
                         {/* Scheduled Meeting */}
                         {meeting.status === "scheduled" && (
                           <>
                             <Button
-                              className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-2 font-medium"
+                              className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-6 py-3 font-medium rounded-lg transition-all duration-200 hover:scale-105"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -417,7 +416,7 @@ export default function TeacherZoomManager({
 
                             <Button
                               variant="outline"
-                              className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-6 py-2 font-medium border-gray-300"
+                              className="bg-white hover:bg-gray-100 text-gray-800 shadow-xl px-6 py-3 font-medium rounded-lg border-2 border-gray-300 transition-all duration-200 hover:scale-105"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -433,7 +432,7 @@ export default function TeacherZoomManager({
                         {meeting.status === "live" && (
                           <>
                             <Button
-                              className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-2 font-medium"
+                              className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-6 py-3 font-medium rounded-lg transition-all duration-200 hover:scale-105"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -444,7 +443,7 @@ export default function TeacherZoomManager({
                             </Button>
 
                             <Button
-                              className="bg-red-600 hover:bg-red-700 text-white shadow-lg px-6 py-2 font-medium"
+                              className="bg-red-600 hover:bg-red-700 text-white shadow-xl px-6 py-3 font-medium rounded-lg transition-all duration-200 hover:scale-105"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
