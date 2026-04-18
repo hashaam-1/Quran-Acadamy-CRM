@@ -264,7 +264,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       // Try team member login (sales_team, team_leader)
       try {
-        const teamResponse = await fetch(`${API_BASE_URL}/team/login`, {
+        const teamResponse = await fetch(`${API_BASE_URL}/team-members/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
