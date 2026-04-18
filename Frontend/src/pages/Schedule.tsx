@@ -459,61 +459,51 @@ export default function Schedule() {
                                         </div>
 
                                         {/* Hover Buttons */}
-                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/95 to-purple-900/95 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-50">
-                                          <div className="text-center space-y-3 p-4">
-                                            <div className="w-12 h-12 mx-auto mb-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                                              <Video className="w-6 h-6 text-white" />
-                                            </div>
-                                            <h4 className="text-white font-bold text-sm mb-1">{schedule.studentName}</h4>
-                                            <p className="text-blue-200 text-xs font-medium">{schedule.course}</p>
-                                            
-                                            <div className="space-y-2 pt-3">
-                                              {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
-                                                <StartClassButton 
-                                                  scheduleId={schedule.id || schedule._id}
-                                                  studentId={typeof schedule.studentId === 'object' ? schedule.studentId._id : schedule.studentId}
-                                                  studentName={schedule.studentName}
-                                                  course={schedule.course}
-                                                  time={schedule.time}
-                                                  className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xl hover:shadow-blue-500/30 transform hover:scale-105 transition-all duration-300 border-0 w-full"
-                                                />
-                                              ) : (
-                                                <JoinClassButton 
-                                                  meetingNumber={schedule.meetingNumber}
-                                                  teacherName={schedule.teacherName}
-                                                  course={schedule.course}
-                                                  time={schedule.time}
-                                                  className="h-8 px-3 bg-green-600 hover:bg-green-700 text-white text-xs font-bold shadow-xl hover:shadow-green-500/30 transform hover:scale-105 transition-all duration-300 border-0 w-full"
-                                                />
-                                              )}
-                                              <div className="grid grid-cols-2 gap-2">
-                                                <Button
-                                                  size="sm"
-                                                  variant="outline"
-                                                  onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    setCurrent(schedule);
-                                                    setIsEditOpen(true);
-                                                  }}
-                                                  className="bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 text-xs h-7 font-medium shadow-lg hover:shadow-white/20 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
-                                                >
-                                                  Edit
-                                                </Button>
-                                                <Button
-                                                  size="sm"
-                                                  variant="outline"
-                                                  onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    // Add view functionality if needed
-                                                  }}
-                                                  className="bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 text-xs h-7 font-medium shadow-lg hover:shadow-white/20 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
-                                                >
-                                                  View
-                                                </Button>
-                                              </div>
-                                            </div>
+                                        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col gap-1 z-50">
+                                          {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
+                                            <StartClassButton 
+                                              scheduleId={schedule.id || schedule._id}
+                                              studentId={typeof schedule.studentId === 'object' ? schedule.studentId._id : schedule.studentId}
+                                              studentName={schedule.studentName}
+                                              course={schedule.course}
+                                              time={schedule.time}
+                                              className="h-7 px-2 bg-blue-600 hover:bg-blue-700 text-white text-xs shadow-lg hover:shadow-blue-500/20 transform hover:scale-105 transition-all duration-300 border-0"
+                                            />
+                                          ) : (
+                                            <JoinClassButton 
+                                              meetingNumber={schedule.meetingNumber}
+                                              teacherName={schedule.teacherName}
+                                              course={schedule.course}
+                                              time={schedule.time}
+                                              className="h-7 px-2 bg-green-600 hover:bg-green-700 text-white text-xs shadow-lg hover:shadow-green-500/20 transform hover:scale-105 transition-all duration-300 border-0"
+                                            />
+                                          )}
+                                          <div className="flex gap-1">
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setCurrent(schedule);
+                                                setIsEditOpen(true);
+                                              }}
+                                              className="bg-white hover:bg-gray-50 text-gray-700 text-xs h-6 shadow-lg hover:shadow-gray-500/20 transform hover:scale-105 transition-all duration-300"
+                                            >
+                                              Edit
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                // Add view functionality if needed
+                                              }}
+                                              className="bg-white hover:bg-gray-50 text-gray-700 text-xs h-6 shadow-lg hover:shadow-gray-500/20 transform hover:scale-105 transition-all duration-300"
+                                            >
+                                              View
+                                            </Button>
                                           </div>
                                         </div>
                                       </div>
