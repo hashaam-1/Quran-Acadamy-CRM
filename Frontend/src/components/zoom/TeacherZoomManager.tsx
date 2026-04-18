@@ -47,8 +47,8 @@ interface Meeting {
   endedAt?: string;
 }
 
-export default function TeacherZoomManager({ 
-  scheduleId, 
+export default function TeacherZoomManager({
+  scheduleId,
   className: buttonClassName = "",
   meetingClassName = "",
   course = "",
@@ -83,53 +83,53 @@ export default function TeacherZoomManager({
           const liveMeetings = meetings.filter((m: Meeting) => m.status === 'live');
           const scheduledMeetings = meetings.filter((m: Meeting) => m.status === 'scheduled');
           setLiveMeetings(liveMeetings);
-          
+
           // If no scheduled meetings, load sample data for demonstration
-          if (scheduledMeetings.length === 0) {
-            const sampleMeetings: Meeting[] = [
-              {
-                _id: 'sample-1',
-                className: 'Quran Reading Class',
-                course: 'Qaida',
-                teacherId: currentUser?.id || '',
-                teacherName: currentUser?.name || 'Teacher',
-                studentId: 'student-1',
-                studentName: 'Ahmed',
-                time: '02:30 PM',
-                duration: '30 min',
-                status: 'scheduled',
-                meetingNumber: '1234567890',
-                createdAt: new Date().toISOString(),
-                zoomMeetingId: '',
-                zoomPassword: '',
-                joinUrl: '',
-                startUrl: '',
-                participants: []
-              },
-              {
-                _id: 'sample-2',
-                className: 'Tajweed Practice',
-                course: 'Tajweed',
-                teacherId: currentUser?.id || '',
-                teacherName: currentUser?.name || 'Teacher',
-                studentId: 'student-2',
-                studentName: 'Fatima',
-                time: '03:00 PM',
-                duration: '45 min',
-                status: 'scheduled',
-                meetingNumber: '0987654321',
-                createdAt: new Date().toISOString(),
-                zoomMeetingId: '',
-                zoomPassword: '',
-                joinUrl: '',
-                startUrl: '',
-                participants: []
-              }
-            ];
-            setScheduledMeetings(sampleMeetings);
-          } else {
-            setScheduledMeetings(scheduledMeetings);
-          }
+          // if (scheduledMeetings.length === 0) {
+          //   const sampleMeetings: Meeting[] = [
+          //     {
+          //       _id: 'sample-1',
+          //       className: 'Quran Reading Class',
+          //       course: 'Qaida',
+          //       teacherId: currentUser?.id || '',
+          //       teacherName: currentUser?.name || 'Teacher',
+          //       studentId: 'student-1',
+          //       studentName: 'Ahmed',
+          //       time: '02:30 PM',
+          //       duration: '30 min',
+          //       status: 'scheduled',
+          //       meetingNumber: '1234567890',
+          //       createdAt: new Date().toISOString(),
+          //       zoomMeetingId: '',
+          //       zoomPassword: '',
+          //       joinUrl: '',
+          //       startUrl: '',
+          //       participants: []
+          //     },
+          //     {
+          //       _id: 'sample-2',
+          //       className: 'Tajweed Practice',
+          //       course: 'Tajweed',
+          //       teacherId: currentUser?.id || '',
+          //       teacherName: currentUser?.name || 'Teacher',
+          //       studentId: 'student-2',
+          //       studentName: 'Fatima',
+          //       time: '03:00 PM',
+          //       duration: '45 min',
+          //       status: 'scheduled',
+          //       meetingNumber: '0987654321',
+          //       createdAt: new Date().toISOString(),
+          //       zoomMeetingId: '',
+          //       zoomPassword: '',
+          //       joinUrl: '',
+          //       startUrl: '',
+          //       participants: []
+          //     }
+          //   ];
+          //   setScheduledMeetings(sampleMeetings);
+          // } else {
+          //   setScheduledMeetings(scheduledMeetings);
+          // }
         }
       }
     } catch (err) {
@@ -221,11 +221,11 @@ export default function TeacherZoomManager({
       if (data.success) {
         setMeeting(data.meeting);
         toast.success(data.rejoin ? "Rejoined existing class" : "Class started successfully");
-        
+
         // Navigate to Zoom meeting with teacher role (1 = host)
         const meetingNumber = data.meeting.meetingNumber;
         navigate(`/zoom-join?meetingNumber=${meetingNumber}&role=1`);
-        
+
         // Refresh meetings list
         fetchTeacherMeetings();
       } else {
@@ -269,9 +269,9 @@ export default function TeacherZoomManager({
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(dateString).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -292,7 +292,7 @@ export default function TeacherZoomManager({
 
   const handleSaveEdit = async () => {
     if (!editingMeeting) return;
-    
+
     setIsLoading(true);
     try {
       const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/${editingMeeting._id}`, {
@@ -328,7 +328,7 @@ export default function TeacherZoomManager({
           {/* <h2 className="text-xl font-semibold text-gray-900">My Classes</h2>
           <p className="text-sm text-gray-600 mt-1">Hover over classes to join or manage</p> */}
         </div>
-        
+
         <div className="p-6">
           {scheduledMeetings.length === 0 ? (
             <div className="text-center py-12">
@@ -382,42 +382,64 @@ export default function TeacherZoomManager({
                   </div>
 
                   {/* Hover Buttons */}
-                  <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 transition-all duration-300 ease-out flex flex-col gap-2 z-50 pointer-events-none">
-                    <Button
-                      className="bg-green-600 hover:bg-green-700 text-white shadow-xl hover:shadow-green-500/40 transform hover:scale-105 transition-all duration-200 border-0 pointer-events-auto"
-                      size="sm"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleJoinMeeting(meeting);
-                      }}
-                    >
-                      {meeting.status === "live" ? "Join Live" : "Start Class"}
-                    </Button>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        className="bg-white hover:bg-gray-50 text-gray-700 border-gray-300 shadow-xl hover:shadow-gray-500/40 transform hover:scale-105 transition-all duration-200 pointer-events-auto"
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleEditMeeting(meeting);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        className="bg-red-600 hover:bg-red-700 text-white shadow-xl hover:shadow-red-500/40 transform hover:scale-105 transition-all duration-200 pointer-events-auto"
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleEndClass(meeting._id);
-                        }}
-                      >
-                        {meeting.status === "live" ? "End" : "Cancel"}
-                      </Button>
+                  {/* Hover Buttons */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-xl z-50">
+                    <div className="flex gap-3">
+
+                      {/* Scheduled Meeting */}
+                      {meeting.status === "scheduled" && (
+                        <>
+                          <Button
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-5"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleJoinMeeting(meeting);
+                            }}
+                          >
+                            Join Meeting
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-5"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleEditMeeting(meeting);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                        </>
+                      )}
+
+                      {/* Live Meeting */}
+                      {meeting.status === "live" && (
+                        <>
+                          <Button
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-5"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleJoinMeeting(meeting);
+                            }}
+                          >
+                            Join Live
+                          </Button>
+
+                          <Button
+                            className="bg-red-600 hover:bg-red-700 text-white shadow-lg px-5"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleEndClass(meeting._id);
+                            }}
+                          >
+                            End
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -429,7 +451,7 @@ export default function TeacherZoomManager({
 
       {/* Error Dialog */}
       {error && (
-        <Dialog 
+        <Dialog
           open={!!error}
           modal={true}
           onOpenChange={(open) => {
@@ -457,7 +479,7 @@ export default function TeacherZoomManager({
 
       {/* Edit Meeting Dialog */}
       {editingMeeting && (
-        <Dialog 
+        <Dialog
           open={editDialogOpen}
           modal={true}
           onOpenChange={(open) => {
@@ -495,7 +517,7 @@ export default function TeacherZoomManager({
                     type="text"
                     className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/80 backdrop-blur-sm"
                     value={editingMeeting.className}
-                    onChange={(e) => setEditingMeeting({...editingMeeting, className: e.target.value})}
+                    onChange={(e) => setEditingMeeting({ ...editingMeeting, className: e.target.value })}
                     placeholder="Enter class name"
                   />
                 </div>
@@ -509,7 +531,7 @@ export default function TeacherZoomManager({
                     type="text"
                     className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 bg-white/80 backdrop-blur-sm"
                     value={editingMeeting.course}
-                    onChange={(e) => setEditingMeeting({...editingMeeting, course: e.target.value})}
+                    onChange={(e) => setEditingMeeting({ ...editingMeeting, course: e.target.value })}
                     placeholder="Enter course name"
                   />
                 </div>
