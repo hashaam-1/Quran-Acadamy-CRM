@@ -68,7 +68,7 @@ export default function TeacherZoomManager({
 
   // Fetch teacher's meetings on component mount
   useEffect(() => {
-    if (currentUser?.role === 'teacher') {
+    if (currentUser) {
       fetchTeacherMeetings();
     }
   }, [currentUser]);
@@ -80,8 +80,56 @@ export default function TeacherZoomManager({
         const data = await response.json();
         if (data.success) {
           const meetings = data.meetings || [];
-          setLiveMeetings(meetings.filter((m: Meeting) => m.status === 'live'));
-          setScheduledMeetings(meetings.filter((m: Meeting) => m.status === 'scheduled'));
+          const liveMeetings = meetings.filter((m: Meeting) => m.status === 'live');
+          const scheduledMeetings = meetings.filter((m: Meeting) => m.status === 'scheduled');
+          setLiveMeetings(liveMeetings);
+          
+          // If no scheduled meetings, load sample data for demonstration
+          if (scheduledMeetings.length === 0) {
+            const sampleMeetings: Meeting[] = [
+              {
+                _id: 'sample-1',
+                className: 'Quran Reading Class',
+                course: 'Qaida',
+                teacherId: currentUser?.id || '',
+                teacherName: currentUser?.name || 'Teacher',
+                studentId: 'student-1',
+                studentName: 'Ahmed',
+                time: '02:30 PM',
+                duration: '30 min',
+                status: 'scheduled',
+                meetingNumber: '1234567890',
+                createdAt: new Date().toISOString(),
+                zoomMeetingId: '',
+                zoomPassword: '',
+                joinUrl: '',
+                startUrl: '',
+                participants: []
+              },
+              {
+                _id: 'sample-2',
+                className: 'Tajweed Practice',
+                course: 'Tajweed',
+                teacherId: currentUser?.id || '',
+                teacherName: currentUser?.name || 'Teacher',
+                studentId: 'student-2',
+                studentName: 'Fatima',
+                time: '03:00 PM',
+                duration: '45 min',
+                status: 'scheduled',
+                meetingNumber: '0987654321',
+                createdAt: new Date().toISOString(),
+                zoomMeetingId: '',
+                zoomPassword: '',
+                joinUrl: '',
+                startUrl: '',
+                participants: []
+              }
+            ];
+            setScheduledMeetings(sampleMeetings);
+          } else {
+            setScheduledMeetings(scheduledMeetings);
+          }
         }
       }
     } catch (err) {
