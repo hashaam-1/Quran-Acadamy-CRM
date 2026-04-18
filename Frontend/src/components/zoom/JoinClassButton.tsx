@@ -106,9 +106,15 @@ export default function JoinClassButton({
   return (
     <>
       <Button
-        onClick={() => setIsOpen(true)}
-        disabled={disabled || isLoading}
-        className={`${customClassName}`}
+        type="button"
+        disabled={disabled}
+        className={`${customClassName} bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 w-full sm:w-auto`}
+        size="lg"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
       >
         {isLoading ? (
           <>
@@ -123,8 +129,22 @@ export default function JoinClassButton({
         )}
       </Button>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+      <Dialog
+        open={isOpen}
+        modal={true}
+        onOpenChange={(open) => {
+          setIsOpen(open);
+          if (!open) {
+            setTimeout(() => {
+              document.body.style.pointerEvents = "auto";
+            }, 0);
+          }
+        }}
+      >
+        <DialogContent
+          className="sm:max-w-[500px] z-[9999]"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>Join Live Class</DialogTitle>
             <DialogDescription>

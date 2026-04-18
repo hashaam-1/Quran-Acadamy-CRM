@@ -354,15 +354,21 @@ export default function StudentZoomJoiner({
       {/* Error Dialog */}
       {error && (
         <Dialog 
-          open={!!error} 
-          onOpenChange={(value) => {
+          open={!!error}
+          modal={true}
+          onOpenChange={(open) => {
             setError('');
-            if (!value) {
-              document.body.style.pointerEvents = "auto";
+            if (!open) {
+              setTimeout(() => {
+                document.body.style.pointerEvents = "auto";
+              }, 0);
             }
           }}
         >
-          <DialogContent>
+          <DialogContent
+            className="sm:max-w-[500px] z-[9999]"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
             <DialogHeader>
               <DialogTitle>Error</DialogTitle>
             </DialogHeader>
