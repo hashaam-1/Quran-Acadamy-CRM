@@ -364,50 +364,16 @@ export default function StudentZoomJoiner({
                     </Badge>
                   </div>
                   
-                  {/* Perfect Right-Side Hover Panel */}
-                  <div className="absolute top-0 right-0 h-full w-80 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 shadow-2xl transform translate-x-full group-hover:translate-x-0 transition-all duration-500 ease-out rounded-r-lg z-50">
-                    <div className="p-6 h-full flex flex-col justify-between">
-                      {/* Header Section */}
-                      <div className="space-y-4">
-                        <div className="text-center pb-4 border-b border-white/20">
-                          <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                            <Video className="w-8 h-8 text-white" />
-                          </div>
-                          <h4 className="text-white font-bold text-xl mb-1">{schedule.className}</h4>
-                          <p className="text-blue-200 text-sm font-medium">{schedule.course}</p>
-                          <Badge className="bg-blue-500 text-white text-xs px-3 py-1 mt-2 shadow-lg">
-                            SCHEDULED
-                          </Badge>
-                        </div>
-
-                        {/* Class Details */}
-                        <div className="space-y-3 bg-white/10 rounded-lg p-4 backdrop-blur-sm">
-                          <div className="flex items-center justify-between text-white/90 text-sm">
-                            <span className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4 text-green-300" />
-                              Day
-                            </span>
-                            <span className="font-bold text-white">{schedule.day}</span>
-                          </div>
-                          <div className="flex items-center justify-between text-white/90 text-sm">
-                            <span className="flex items-center gap-2">
-                              <Clock className="w-4 h-4 text-orange-300" />
-                              Time
-                            </span>
-                            <span className="font-bold text-white">{schedule.time}</span>
-                          </div>
-                          <div className="flex items-center justify-between text-white/90 text-sm">
-                            <span className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-purple-300" />
-                              Teacher
-                            </span>
-                            <span className="font-bold text-white">{schedule.teacherName}</span>
-                          </div>
-                        </div>
+                  {/* Simple Hover Overlay with Buttons */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-900/95 to-purple-900/95 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-50">
+                    <div className="text-center space-y-4 p-6">
+                      <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                        <Video className="w-8 h-8 text-white" />
                       </div>
-
-                      {/* Action Buttons */}
-                      <div className="space-y-3">
+                      <h4 className="text-white font-bold text-xl mb-1">{schedule.className}</h4>
+                      <p className="text-blue-200 text-sm font-medium">{schedule.course}</p>
+                      
+                      <div className="space-y-3 pt-4">
                         <Button
                           type="button"
                           size="lg"
