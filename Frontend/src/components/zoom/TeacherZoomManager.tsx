@@ -252,17 +252,7 @@ export default function TeacherZoomManager({
         </div>
 
         <div className="p-6">
-          {/* Debug info */}
-          <div className="mb-4 text-xs text-gray-500">
-            Debug: Scheduled: {scheduledMeetings.length}, Live: {liveMeetings.length}, Total: {[...scheduledMeetings, ...liveMeetings].length}
-          </div>
-          
-          {[...scheduledMeetings, ...liveMeetings].length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-lg font-medium text-gray-700">No scheduled classes</p>
-              <p className="text-sm mt-2 text-gray-500">Your scheduled classes will appear here</p>
-            </div>
-          ) : (
+          {[...scheduledMeetings, ...liveMeetings].length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-visible">
               {[...scheduledMeetings, ...liveMeetings].map((meeting) => (
                 <div
@@ -310,11 +300,6 @@ export default function TeacherZoomManager({
                   {/* Hover Buttons - Improved */}
                   <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out rounded-xl z-50 flex items-center justify-center pointer-events-none">
                     <div className="flex gap-3 p-4 bg-white/20 rounded-xl backdrop-blur-sm border border-white/30 pointer-events-auto">
-                      
-                      {/* Debug status */}
-                      <div className="absolute top-2 left-2 text-xs text-white bg-black/50 px-2 py-1 rounded">
-                        Status: {meeting.status}
-                      </div>
                       
                       {/* Always show both buttons for any status */}
                       <>

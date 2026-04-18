@@ -350,17 +350,7 @@ export default function StudentZoomJoiner({
         </div>
         
         <div className="p-6">
-          {/* Debug info */}
-          <div className="mb-4 text-xs text-gray-500">
-            Debug: Schedules: {mySchedules.length}
-          </div>
-          
-          {mySchedules.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-lg font-medium text-gray-700">No scheduled classes</p>
-              <p className="text-sm mt-2 text-gray-500">Your scheduled classes will appear here</p>
-            </div>
-          ) : (
+          {mySchedules.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-visible">
               {mySchedules.map((schedule) => (
                 <div
@@ -400,11 +390,6 @@ export default function StudentZoomJoiner({
                   {/* Hover Buttons - Improved */}
                   <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out rounded-xl z-50 flex items-center justify-center pointer-events-none">
                     <div className="flex gap-3 p-4 bg-white/20 rounded-xl backdrop-blur-sm border border-white/30 pointer-events-auto">
-                      
-                      {/* Debug status */}
-                      <div className="absolute top-2 left-2 text-xs text-white bg-black/50 px-2 py-1 rounded">
-                        {schedule.status || 'scheduled'}
-                      </div>
                       
                       {/* Always show both buttons */}
                       <Button
