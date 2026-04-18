@@ -84,6 +84,8 @@ export default function StudentZoomJoiner({
   const [error, setError] = useState('');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [viewingSchedule, setViewingSchedule] = useState<Schedule | null>(null);
 
   // Fetch schedules and available meetings on component mount
   useEffect(() => {
@@ -292,6 +294,12 @@ export default function StudentZoomJoiner({
     setEditDialogOpen(true);
   };
 
+  const handleViewSchedule = (schedule: Schedule) => {
+    console.log('StudentZoomJoiner - Viewing schedule:', schedule);
+    setViewingSchedule(schedule);
+    setViewDialogOpen(true);
+  };
+
   const handleSaveEdit = async () => {
     if (!editingSchedule) return;
     
@@ -449,7 +457,7 @@ export default function StudentZoomJoiner({
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              // Add view details functionality here
+                              handleViewSchedule(schedule);
                             }}
                           >
                             <Eye className="w-4 h-4 mr-2" />
@@ -626,6 +634,132 @@ export default function StudentZoomJoiner({
                   className="flex-1 border-gray-300 hover:bg-gray-50 text-gray-700 font-medium"
                 >
                   Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* View Schedule Dialog */}
+      {viewingSchedule && (
+        <Dialog 
+          open={viewDialogOpen}
+          modal={true}
+          onOpenChange={(open) => {
+            setViewDialogOpen(open);
+            if (!open) {
+              setTimeout(() => {
+                document.body.style.pointerEvents = "auto";
+              }, 0);
+              setViewingSchedule(null);
+            }
+          }}
+        >
+          <DialogContent
+            className="sm:max-w-[600px] z-[9999] bg-gradient-to-br from-white to-blue-50 border-blue-200"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
+            <DialogHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg -m-6 mb-6 p-6">
+              <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
+                <Eye className="w-5 h-5" />
+                Class Details
+              </DialogTitle>
+              <DialogDescription className="text-blue-100">
+                View detailed information for your {viewingSchedule.course} class
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6">
+              <div className="text-center pb-4 border-b border-gray-200">
+                <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                  <Video className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{viewingSchedule.className}</h3>
+                <p className="text-lg text-gray-600 font-medium">{viewingSchedule.course}</p>
+                <Badge className="bg-blue-500 text-white text-sm px-4 py-2 mt-3 shadow-lg">
+                  {viewingSchedule.status.toUpperCase()}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3 text-blue-700">
+                      <Calendar className="w-5 h-5" />
+                      <div>
+                        <p className="text-sm font-medium text-blue-900">Day</p>
+                        <p className="text-lg font-bold text-blue-700">{viewingSchedule.day}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3 text-green-700">
+                      <Clock className="w-5 h-5" />
+                      <div>
+                        <p className="text-sm font-medium text-green-900">Time</p>
+                        <p className="text-lg font-bold text-green-700">{viewingSchedule.time}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3 text-purple-700">
+                      <User className="w-5 h-5" />
+                      <div>
+                        <p className="text-sm font-medium text-purple-900">Teacher</p>
+                        <p className="text-lg font-bold text-purple-700">{viewingSchedule.teacherName}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3 text-orange-700">
+                      <BookOpen className="w-5 h-5" />
+                      <div>
+                        <p className="text-sm font-medium text-orange-900">Course Type</p>
+                        <p className="text-lg font-bold text-orange-700">{viewingSchedule.course}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    handleJoinClass(viewingSchedule._id);
+                    setViewDialogOpen(false);
+                  }}
+                  disabled={isLoading}
+                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Joining...
+                    </>
+                  ) : (
+                    <>
+                      <Video className="w-4 h-4 mr-2" />
+                      Join Class
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setViewDialogOpen(false);
+                    setViewingSchedule(null);
+                  }}
+                  className="flex-1 border-gray-300 hover:bg-gray-50 text-gray-700 font-medium"
+                >
+                  Close
                 </Button>
               </div>
             </div>
