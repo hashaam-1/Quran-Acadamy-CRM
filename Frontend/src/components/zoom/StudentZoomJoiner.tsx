@@ -92,6 +92,7 @@ export default function StudentZoomJoiner({
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [viewingSchedule, setViewingSchedule] = useState<Schedule | null>(null);
+  const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
 
   // Fetch schedules and available meetings on component mount
   useEffect(() => {
@@ -381,6 +382,10 @@ export default function StudentZoomJoiner({
     setViewDialogOpen(true);
   };
 
+  const handleScheduleClick = (schedule: Schedule) => {
+    setSelectedSchedule(selectedSchedule?._id === schedule._id ? null : schedule);
+  };
+
   const handleSaveEdit = async () => {
     if (!editingSchedule) return;
 
@@ -432,7 +437,8 @@ export default function StudentZoomJoiner({
               {mySchedules.map((schedule) => (
                 <div
                   key={schedule._id}
-                  className="group relative bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-visible"
+                  className="relative bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-visible cursor-pointer"
+                  onClick={() => handleScheduleClick(schedule)}
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between mb-4">
@@ -464,40 +470,42 @@ export default function StudentZoomJoiner({
                     </div>
                   </div>
 
-                  {/* Hover Buttons */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-xl z-50">
-                    <div className="flex gap-3">
-                      <Button
-                        className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-2 font-medium"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleJoinClass(schedule._id);
-                        }}
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Joining...
-                          </>
-                        ) : (
-                          "Join Class"
-                        )}
-                      </Button>
+                  {/* Click Buttons */}
+                  {selectedSchedule?._id === schedule._id && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-xl z-50">
+                      <div className="flex gap-3">
+                        <Button
+                          className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-2 font-medium"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleJoinClass(schedule._id);
+                          }}
+                        >
+                          {isLoading ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Joining...
+                            </>
+                          ) : (
+                            "Join Class"
+                          )}
+                        </Button>
 
-                      <Button
-                        variant="outline"
-                        className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-6 py-2 font-medium border-gray-300"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleEditSchedule(schedule);
-                        }}
-                      >
-                        Edit
-                      </Button>
+                        <Button
+                          variant="outline"
+                          className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-6 py-2 font-medium border-gray-300"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleEditSchedule(schedule);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               ))}
             </div>

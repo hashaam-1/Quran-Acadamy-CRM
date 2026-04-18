@@ -61,9 +61,10 @@ export default function TeacherZoomManager({
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [liveMeetings, setLiveMeetings] = useState<Meeting[]>([]);
   const [scheduledMeetings, setScheduledMeetings] = useState<Meeting[]>([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
+  const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const { currentUser } = useAuthStore();
 
   // Fetch teacher's meetings on component mount
@@ -253,22 +254,27 @@ export default function TeacherZoomManager({
     try {
       setIsLoading(true);
       const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/${meetingId}/end`, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      const data = await response.json();
-      if (data.success) {
+      if (response.ok) {
         toast.success('Class ended successfully');
         fetchTeacherMeetings();
       } else {
-        toast.error(data.message || 'Failed to end class');
+        toast.error('Failed to end class');
       }
     } catch (err) {
-      console.error('Error ending class:', err);
-      toast.error('Failed to end class');
+      toast.error('Error ending class');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleMeetingClick = (meeting: Meeting) => {
+    setSelectedMeeting(selectedMeeting?._id === meeting._id ? null : meeting);
   };
 
   const handleJoinMeeting = (meeting: Meeting) => {
@@ -349,7 +355,8 @@ export default function TeacherZoomManager({
               {[...scheduledMeetings, ...liveMeetings].map((meeting) => (
                 <div
                   key={meeting._id}
-                  className="group relative bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-visible"
+                  className="relative bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-visible cursor-pointer"
+                  onClick={() => handleMeetingClick(meeting)}
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between mb-4">
@@ -389,66 +396,68 @@ export default function TeacherZoomManager({
                     </div>
                   </div>
 
-                  {/* Hover Buttons */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-xl z-50">
-                    <div className="flex gap-3">
+                  {/* Click Buttons */}
+                  {selectedMeeting?._id === meeting._id && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-xl z-50">
+                      <div className="flex gap-3">
 
-                      {/* Scheduled Meeting */}
-                      {meeting.status === "scheduled" && (
-                        <>
-                          <Button
-                            className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-2 font-medium"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleJoinMeeting(meeting);
-                            }}
-                          >
-                            Join Class
-                          </Button>
+                        {/* Scheduled Meeting */}
+                        {meeting.status === "scheduled" && (
+                          <>
+                            <Button
+                              className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-2 font-medium"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleJoinMeeting(meeting);
+                              }}
+                            >
+                              Join Class
+                            </Button>
 
-                          <Button
-                            variant="outline"
-                            className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-6 py-2 font-medium border-gray-300"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleEditMeeting(meeting);
-                            }}
-                          >
-                            Edit
-                          </Button>
-                        </>
-                      )}
+                            <Button
+                              variant="outline"
+                              className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-6 py-2 font-medium border-gray-300"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleEditMeeting(meeting);
+                              }}
+                            >
+                              Edit
+                            </Button>
+                          </>
+                        )}
 
-                      {/* Live Meeting */}
-                      {meeting.status === "live" && (
-                        <>
-                          <Button
-                            className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-2 font-medium"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleJoinMeeting(meeting);
-                            }}
-                          >
-                            Join Live
-                          </Button>
+                        {/* Live Meeting */}
+                        {meeting.status === "live" && (
+                          <>
+                            <Button
+                              className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-2 font-medium"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleJoinMeeting(meeting);
+                              }}
+                            >
+                              Join Live
+                            </Button>
 
-                          <Button
-                            className="bg-red-600 hover:bg-red-700 text-white shadow-lg px-6 py-2 font-medium"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleEndClass(meeting._id);
-                            }}
-                          >
-                            End
-                          </Button>
-                        </>
-                      )}
+                            <Button
+                              className="bg-red-600 hover:bg-red-700 text-white shadow-lg px-6 py-2 font-medium"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleEndClass(meeting._id);
+                              }}
+                            >
+                              End
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               ))}
             </div>

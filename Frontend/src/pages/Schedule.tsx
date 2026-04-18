@@ -126,6 +126,7 @@ export default function Schedule() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [current, setCurrent] = useState<ClassSchedule | null>(null);
+  const [selectedSchedule, setSelectedSchedule] = useState<ClassSchedule | null>(null);
 
   const getWeekDates = () => {
     const start = new Date(currentWeek);
@@ -230,6 +231,10 @@ export default function Schedule() {
         }
       });
     }
+  };
+
+  const handleScheduleClick = (schedule: ClassSchedule) => {
+    setSelectedSchedule(selectedSchedule?.id === schedule.id ? null : schedule);
   };
 
   // Get schedules for a specific day and time slot (for grid view)
@@ -417,7 +422,7 @@ export default function Schedule() {
                                     <div
                                       key={schedule.id || schedule._id || idx}
                                       className={cn(
-                                        "group border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer",
+                                        "border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer",
                                         courseBlockColors[schedule.course as keyof typeof courseBlockColors] && 
                                         `bg-opacity-20 border-l-4 border-l-[${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}]`,
                                         schedule.course === 'Qaida' && 'bg-blue-100',
@@ -425,7 +430,7 @@ export default function Schedule() {
                                         schedule.course === 'Hifz' && 'bg-yellow-100',
                                         schedule.course === 'Tajweed' && 'bg-purple-100'
                                       )}
-                                      onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
+                                      onClick={() => handleScheduleClick(schedule)}
                                     >
                                       <div className="p-4">
                                         {/* Header */}
@@ -458,42 +463,44 @@ export default function Schedule() {
                                           </div>
                                         </div>
 
-                                        {/* Hover Buttons */}
-                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-lg z-50">
-                                          <div className="flex gap-2">
-                                            {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
-                                              <StartClassButton 
-                                                scheduleId={schedule.id || schedule._id}
-                                                studentId={typeof schedule.studentId === 'object' ? schedule.studentId._id : schedule.studentId}
-                                                studentName={schedule.studentName}
-                                                course={schedule.course}
-                                                time={schedule.time}
-                                                className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-4 py-1 text-xs font-medium"
-                                              />
-                                            ) : (
-                                              <JoinClassButton 
-                                                meetingNumber={schedule.meetingNumber}
-                                                teacherName={schedule.teacherName}
-                                                course={schedule.course}
-                                                time={schedule.time}
-                                                className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-4 py-1 text-xs font-medium"
-                                              />
-                                            )}
-                                            <Button
-                                              size="sm"
-                                              variant="outline"
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setCurrent(schedule);
-                                                setIsEditOpen(true);
-                                              }}
-                                              className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-4 py-1 text-xs font-medium border-gray-300"
-                                            >
-                                              Edit
-                                            </Button>
+                                        {/* Click Buttons */}
+                                        {selectedSchedule?.id === schedule.id && (
+                                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-lg z-50">
+                                            <div className="flex gap-2">
+                                              {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
+                                                <StartClassButton 
+                                                  scheduleId={schedule.id || schedule._id}
+                                                  studentId={typeof schedule.studentId === 'object' ? schedule.studentId._id : schedule.studentId}
+                                                  studentName={schedule.studentName}
+                                                  course={schedule.course}
+                                                  time={schedule.time}
+                                                  className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-4 py-1 text-xs font-medium"
+                                                />
+                                              ) : (
+                                                <JoinClassButton 
+                                                  meetingNumber={schedule.meetingNumber}
+                                                  teacherName={schedule.teacherName}
+                                                  course={schedule.course}
+                                                  time={schedule.time}
+                                                  className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-4 py-1 text-xs font-medium"
+                                                />
+                                              )}
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  e.stopPropagation();
+                                                  setCurrent(schedule);
+                                                  setIsEditOpen(true);
+                                                }}
+                                                className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-4 py-1 text-xs font-medium border-gray-300"
+                                              >
+                                                Edit
+                                              </Button>
+                                            </div>
                                           </div>
-                                        </div>
+                                        )}
                                       </div>
                                     </div>
                                   ))}
