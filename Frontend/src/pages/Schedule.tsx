@@ -459,7 +459,7 @@ export default function Schedule() {
                                         </div>
 
                                         {/* Hover Buttons */}
-                                        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-1">
+                                        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-1 z-10">
                                           {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
                                             <StartClassButton 
                                               scheduleId={schedule.id || schedule._id}
@@ -467,7 +467,7 @@ export default function Schedule() {
                                               studentName={schedule.studentName}
                                               course={schedule.course}
                                               time={schedule.time}
-                                              className="h-7 px-2 bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                                              className="h-7 px-2 bg-blue-600 hover:bg-blue-700 text-white text-xs shadow-lg"
                                             />
                                           ) : (
                                             <JoinClassButton 
@@ -475,7 +475,7 @@ export default function Schedule() {
                                               teacherName={schedule.teacherName}
                                               course={schedule.course}
                                               time={schedule.time}
-                                              className="h-7 px-2 bg-green-600 hover:bg-green-700 text-white text-xs"
+                                              className="h-7 px-2 bg-green-600 hover:bg-green-700 text-white text-xs shadow-lg"
                                             />
                                           )}
                                           <Button
@@ -487,7 +487,7 @@ export default function Schedule() {
                                               setCurrent(schedule);
                                               setIsEditOpen(true);
                                             }}
-                                            className="h-7 px-2 text-xs"
+                                            className="h-7 px-2 text-xs bg-white hover:bg-gray-50 shadow-lg"
                                           >
                                             Edit
                                           </Button>

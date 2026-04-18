@@ -384,9 +384,9 @@ export default function StudentZoomJoiner({
                   </div>
 
                   {/* Hover Buttons */}
-                  <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
+                  <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2 z-10">
                     <Button
-                      className="bg-green-600 hover:bg-green-700 text-white"
+                      className="bg-green-600 hover:bg-green-700 text-white shadow-lg"
                       size="sm"
                       onClick={(e) => {
                         e.preventDefault();
@@ -406,6 +406,7 @@ export default function StudentZoomJoiner({
                     <Button
                       variant="outline"
                       size="sm"
+                      className="bg-white hover:bg-gray-50 shadow-lg"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
