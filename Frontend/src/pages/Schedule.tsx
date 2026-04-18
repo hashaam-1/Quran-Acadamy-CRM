@@ -435,11 +435,33 @@ export default function Schedule() {
                                         </div>
                                         <h4 className="font-semibold text-sm truncate mb-1">{schedule.studentName}</h4>
                                         <p className="text-xs text-muted-foreground truncate mb-2">{schedule.teacherName}</p>
-                                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
                                           <Clock className="h-3 w-3 shrink-0" />
                                           <span>{schedule.time}</span>
                                           <span className="shrink-0">â¢</span>
                                           <span className="shrink-0">{schedule.duration}</span>
+                                        </div>
+                                        
+                                        {/* Action Buttons */}
+                                        <div className="space-y-2">
+                                          {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
+                                            <StartClassButton 
+                                              scheduleId={schedule.id || schedule._id}
+                                              studentId={typeof schedule.studentId === 'object' ? schedule.studentId._id : schedule.studentId}
+                                              studentName={schedule.studentName}
+                                              course={schedule.course}
+                                              time={schedule.time}
+                                              className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white shadow-lg text-xs w-full"
+                                            />
+                                          ) : (
+                                            <JoinClassButton 
+                                              meetingNumber={schedule.meetingNumber}
+                                              teacherName={schedule.teacherName}
+                                              course={schedule.course}
+                                              time={schedule.time}
+                                              className="h-8 px-3 bg-green-600 hover:bg-green-700 text-white shadow-lg text-xs w-full"
+                                            />
+                                          )}
                                         </div>
                                       </div>
                                       <div className="absolute top-2 right-2 opacity-100 transition-all duration-200 z-20">
@@ -454,26 +476,6 @@ export default function Schedule() {
                                         >
                                           <Pencil className="h-3 w-3" />
                                         </Button>
-                                      </div>
-                                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 bg-black/50 rounded-lg">
-                                        {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
-                                          <StartClassButton 
-                                            scheduleId={schedule.id || schedule._id}
-                                            studentId={typeof schedule.studentId === 'object' ? schedule.studentId._id : schedule.studentId}
-                                            studentName={schedule.studentName}
-                                            course={schedule.course}
-                                            time={schedule.time}
-                                            className="h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
-                                          />
-                                        ) : (
-                                          <JoinClassButton 
-                                            meetingNumber={schedule.meetingNumber}
-                                            teacherName={schedule.teacherName}
-                                            course={schedule.course}
-                                            time={schedule.time}
-                                            className="h-10 px-4 bg-green-600 hover:bg-green-700 text-white shadow-lg"
-                                          />
-                                        )}
                                       </div>
                                     </div>
                                   ))}
