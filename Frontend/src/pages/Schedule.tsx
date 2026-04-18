@@ -459,8 +459,8 @@ export default function Schedule() {
                                         </div>
 
                                         {/* Hover Buttons */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out rounded-lg z-50">
-                                          <div className="absolute bottom-2 left-2 right-2 flex gap-2">
+                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out rounded-lg z-50 flex items-center justify-center">
+                                          <div className="flex gap-3 p-3 bg-white/10 rounded-lg backdrop-blur-md">
                                             {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
                                               <StartClassButton 
                                                 scheduleId={schedule.id || schedule._id}
@@ -468,7 +468,7 @@ export default function Schedule() {
                                                 studentName={schedule.studentName}
                                                 course={schedule.course}
                                                 time={schedule.time}
-                                                className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105 flex-1"
+                                                className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105"
                                               />
                                             ) : (
                                               <JoinClassButton 
@@ -476,7 +476,7 @@ export default function Schedule() {
                                                 teacherName={schedule.teacherName}
                                                 course={schedule.course}
                                                 time={schedule.time}
-                                                className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105 flex-1"
+                                                className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105"
                                               />
                                             )}
                                             <Button
@@ -488,7 +488,7 @@ export default function Schedule() {
                                                 setCurrent(schedule);
                                                 setIsEditOpen(true);
                                               }}
-                                              className="bg-white/90 hover:bg-white text-gray-800 shadow-xl px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-gray-300 transition-all duration-200 hover:scale-105"
+                                              className="bg-white/90 hover:bg-white text-gray-800 shadow-xl px-4 py-2 text-xs font-medium rounded-lg border-2 border-gray-300 transition-all duration-200 hover:scale-105"
                                             >
                                               <Pencil className="w-3 h-3 mr-1" />
                                               Edit

@@ -391,14 +391,14 @@ export default function TeacherZoomManager({
                   </div>
 
                   {/* Hover Buttons */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out rounded-xl z-50">
-                    <div className="absolute bottom-4 left-4 right-4 flex gap-3">
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out rounded-xl z-50 flex items-center justify-center">
+                    <div className="flex gap-3 p-4 bg-white/10 rounded-lg backdrop-blur-md">
                       
                       {/* Scheduled Meeting */}
                       {meeting.status === "scheduled" && (
                         <>
                           <Button
-                            className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105 flex-1"
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-6 py-3 font-medium rounded-lg transition-all duration-200 hover:scale-105"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -411,7 +411,7 @@ export default function TeacherZoomManager({
 
                           <Button
                             variant="outline"
-                            className="bg-white/90 hover:bg-white text-gray-800 shadow-xl px-4 py-2 text-sm font-medium rounded-lg border-2 border-gray-300 transition-all duration-200 hover:scale-105"
+                            className="bg-white/90 hover:bg-white text-gray-800 shadow-xl px-6 py-3 font-medium rounded-lg border-2 border-gray-300 transition-all duration-200 hover:scale-105"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -428,7 +428,7 @@ export default function TeacherZoomManager({
                       {meeting.status === "live" && (
                         <>
                           <Button
-                            className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105 flex-1"
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-xl px-6 py-3 font-medium rounded-lg transition-all duration-200 hover:scale-105"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -440,7 +440,7 @@ export default function TeacherZoomManager({
                           </Button>
 
                           <Button
-                            className="bg-red-600 hover:bg-red-700 text-white shadow-xl px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105"
+                            className="bg-red-600 hover:bg-red-700 text-white shadow-xl px-6 py-3 font-medium rounded-lg transition-all duration-200 hover:scale-105"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
