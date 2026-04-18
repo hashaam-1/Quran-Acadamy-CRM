@@ -245,57 +245,66 @@ export default function TeacherZoomManager({
               {scheduledMeetings.map((meeting) => (
                 <div
                   key={meeting._id}
-                  className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl hover:border-blue-400 transition-all duration-300"
+                  className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300"
                 >
-                  {/* Info */}
-                  <div className="space-y-3">
-                    <div>
-                      <h3 className="font-semibold text-lg text-gray-900">
-                        {meeting.className}
-                      </h3>
-                      <p className="text-sm text-gray-600">{meeting.course}</p>
-                      <p className="text-xs text-gray-400">
-                        {formatTime(meeting.createdAt)}
-                      </p>
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <Video className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg text-gray-900">
+                          {meeting.className}
+                        </h3>
+                        <p className="text-sm text-gray-600">{meeting.course}</p>
+                      </div>
                     </div>
-                    
                     <Badge className={`${getStatusColor(meeting.status)} text-white`}>
                       {meeting.status}
                     </Badge>
+                  </div>
 
-                    {/* Action Buttons */}
-                    <div className="space-y-2 pt-2">
+                  {/* Content */}
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Calendar className="w-4 h-4" />
+                      <span>Created: {formatTime(meeting.createdAt)}</span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="space-y-2 pt-4 border-t border-gray-100">
+                    <Button
+                      className="w-full bg-green-600 hover:bg-green-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJoinMeeting(meeting);
+                      }}
+                    >
+                      {meeting.status === "live" ? "Join Live" : "Start Class"}
+                    </Button>
+
+                    <div className="grid grid-cols-2 gap-2">
                       <Button
-                        className="w-full bg-green-600 hover:bg-green-700"
+                        variant="outline"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleJoinMeeting(meeting);
+                          handleEditMeeting(meeting);
                         }}
                       >
-                        {meeting.status === "live" ? "Join Live" : "Start Class"}
+                        Edit
                       </Button>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditMeeting(meeting);
-                          }}
-                        >
-                          Edit
-                        </Button>
-
-                        <Button
-                          className="bg-red-600 hover:bg-red-700"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEndClass(meeting._id);
-                          }}
-                        >
-                          {meeting.status === "live" ? "End" : "Cancel"}
-                        </Button>
-                      </div>
+                      <Button
+                        className="bg-red-600 hover:bg-red-700"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEndClass(meeting._id);
+                        }}
+                      >
+                        {meeting.status === "live" ? "End" : "Cancel"}
+                      </Button>
                     </div>
                   </div>
                 </div>

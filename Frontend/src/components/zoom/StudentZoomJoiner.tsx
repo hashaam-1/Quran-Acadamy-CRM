@@ -351,64 +351,77 @@ export default function StudentZoomJoiner({
               {mySchedules.map((schedule) => (
                 <div
                   key={schedule._id}
-                  className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl hover:border-blue-400 transition-all duration-300"
+                  className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300"
                 >
-                  {/* Info */}
-                  <div className="space-y-3">
-                    <div>
-                      <h3 className="font-semibold text-lg text-gray-900">
-                        {schedule.className}
-                      </h3>
-                      <p className="text-sm text-gray-600">{schedule.course}</p>
-                      <p className="text-xs text-gray-400">
-                        Teacher: {schedule.teacherName} | {schedule.day} at {schedule.time}
-                      </p>
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <Video className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg text-gray-900">
+                          {schedule.className}
+                        </h3>
+                        <p className="text-sm text-gray-600">{schedule.course}</p>
+                      </div>
                     </div>
-                    
                     <Badge className="bg-blue-100 text-blue-700">
                       {schedule.status}
                     </Badge>
+                  </div>
 
-                    {/* Action Buttons */}
-                    <div className="space-y-2 pt-2">
+                  {/* Content */}
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <User className="w-4 h-4" />
+                      <span>Teacher: {schedule.teacherName}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Calendar className="w-4 h-4" />
+                      <span>{schedule.day} at {schedule.time}</span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="space-y-2 pt-4 border-t border-gray-100">
+                    <Button
+                      className="w-full bg-green-600 hover:bg-green-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJoinClass(schedule._id);
+                      }}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Joining...
+                        </>
+                      ) : (
+                        "Join Class"
+                      )}
+                    </Button>
+
+                    <div className="grid grid-cols-2 gap-2">
                       <Button
-                        className="w-full bg-green-600 hover:bg-green-700"
+                        variant="outline"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleJoinClass(schedule._id);
+                          handleEditSchedule(schedule);
                         }}
                       >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Joining...
-                          </>
-                        ) : (
-                          "Join Class"
-                        )}
+                        Edit
                       </Button>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditSchedule(schedule);
-                          }}
-                        >
-                          Edit
-                        </Button>
-
-                        <Button
-                          className="bg-blue-600 hover:bg-blue-700"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewSchedule(schedule);
-                          }}
-                        >
-                          View
-                        </Button>
-                      </div>
+                      <Button
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewSchedule(schedule);
+                        }}
+                      >
+                        View
+                      </Button>
                     </div>
                   </div>
                 </div>

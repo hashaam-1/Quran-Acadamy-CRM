@@ -427,23 +427,39 @@ export default function Schedule() {
                                       )}
                                       onClick={() => { setCurrent(schedule); setIsEditOpen(true); }}
                                     >
-                                      <div className="pr-8">
-                                        <div className="flex items-center gap-1 mb-2">
+                                      <div className="p-4">
+                                        {/* Header */}
+                                        <div className="flex items-center justify-between mb-3">
+                                          <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                              <Video className="w-4 h-4 text-white" />
+                                            </div>
+                                            <div>
+                                              <h4 className="font-semibold text-sm text-gray-900 truncate">{schedule.studentName}</h4>
+                                              <p className="text-xs text-gray-600 truncate">{schedule.course}</p>
+                                            </div>
+                                          </div>
                                           <Badge variant="outline" className="text-xs">
                                             {schedule.course}
                                           </Badge>
                                         </div>
-                                        <h4 className="font-semibold text-sm truncate mb-1">{schedule.studentName}</h4>
-                                        <p className="text-xs text-muted-foreground truncate mb-2">{schedule.teacherName}</p>
-                                        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
-                                          <Clock className="h-3 w-3 shrink-0" />
-                                          <span>{schedule.time}</span>
-                                          <span className="shrink-0">â¢</span>
-                                          <span className="shrink-0">{schedule.duration}</span>
+
+                                        {/* Content */}
+                                        <div className="space-y-2 mb-3">
+                                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                                            <User className="w-3 h-3" />
+                                            <span className="truncate">{schedule.teacherName}</span>
+                                          </div>
+                                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                                            <Clock className="w-3 h-3 shrink-0" />
+                                            <span>{schedule.time}</span>
+                                            <span className="shrink-0">â¢</span>
+                                            <span className="shrink-0">{schedule.duration}</span>
+                                          </div>
                                         </div>
-                                        
+
                                         {/* Action Buttons */}
-                                        <div className="space-y-2">
+                                        <div className="space-y-2 pt-2 border-t border-gray-100">
                                           {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
                                             <StartClassButton 
                                               scheduleId={schedule.id || schedule._id}
@@ -462,20 +478,32 @@ export default function Schedule() {
                                               className="h-8 px-3 bg-green-600 hover:bg-green-700 text-white shadow-lg text-xs w-full"
                                             />
                                           )}
+                                          <div className="grid grid-cols-2 gap-1">
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setCurrent(schedule);
+                                                setIsEditOpen(true);
+                                              }}
+                                              className="text-xs h-6"
+                                            >
+                                              Edit
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                // Add view functionality if needed
+                                              }}
+                                              className="text-xs h-6"
+                                            >
+                                              View
+                                            </Button>
+                                          </div>
                                         </div>
-                                      </div>
-                                      <div className="absolute top-2 right-2 opacity-100 transition-all duration-200 z-20">
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setCurrent(schedule);
-                                            setIsEditOpen(true);
-                                          }}
-                                        >
-                                          <Pencil className="h-3 w-3" />
-                                        </Button>
                                       </div>
                                     </div>
                                   ))}
