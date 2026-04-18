@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Video, Users, Calendar, Clock, Play, BookOpen, User } from 'lucide-react';
+import { Loader2, Video, Users, Calendar, Clock, Play, BookOpen, User, Edit, Settings } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { toast } from 'sonner';
 
@@ -82,6 +82,8 @@ export default function StudentZoomJoiner({
   const [availableMeetings, setAvailableMeetings] = useState<Meeting[]>([]);
   const [mySchedules, setMySchedules] = useState<Schedule[]>([]);
   const [error, setError] = useState('');
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
 
   // Fetch schedules and available meetings on component mount
   useEffect(() => {
@@ -284,6 +286,42 @@ export default function StudentZoomJoiner({
     return meeting.status === 'live' || meeting.status === 'scheduled';
   };
 
+  const handleEditSchedule = (schedule: Schedule) => {
+    console.log('StudentZoomJoiner - Editing schedule:', schedule);
+    setEditingSchedule(schedule);
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingSchedule) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/schedules/${editingSchedule._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(editingSchedule)
+      });
+
+      if (response.ok) {
+        toast.success("Schedule updated successfully");
+        setEditDialogOpen(false);
+        setEditingSchedule(null);
+        fetchStudentSchedules(); // Refresh the schedules
+      } else {
+        throw new Error('Failed to update schedule');
+      }
+    } catch (err) {
+      console.error('Error updating schedule:', err);
+      toast.error("Failed to update schedule");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Only Scheduled Classes with Hover Join Button */}
@@ -318,31 +356,48 @@ export default function StudentZoomJoiner({
                     </Badge>
                   </div>
                   
-                  {/* Hover Join Button */}
+                  {/* Hover Action Buttons */}
                   <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={isLoading}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleJoinClass(schedule._id);
-                      }}
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Joining...
-                        </>
-                      ) : (
-                        <>
-                          <Video className="w-4 h-4 mr-2" />
-                          Join Class
-                        </>
-                      )}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={isLoading}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleJoinClass(schedule._id);
+                        }}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Joining...
+                          </>
+                        ) : (
+                          <>
+                            <Video className="w-4 h-4 mr-2" />
+                            Join
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={isLoading}
+                        className="bg-white hover:bg-gray-100 text-gray-700 border-white shadow-lg"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleEditSchedule(schedule);
+                        }}
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -375,6 +430,114 @@ export default function StudentZoomJoiner({
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Edit Schedule Dialog */}
+      {editingSchedule && (
+        <Dialog 
+          open={editDialogOpen}
+          modal={true}
+          onOpenChange={(open) => {
+            setEditDialogOpen(open);
+            if (!open) {
+              setTimeout(() => {
+                document.body.style.pointerEvents = "auto";
+              }, 0);
+              setEditingSchedule(null);
+            }
+          }}
+        >
+          <DialogContent
+            className="sm:max-w-[500px] z-[9999]"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
+            <DialogHeader>
+              <DialogTitle>Edit Class Schedule</DialogTitle>
+              <DialogDescription>
+                Update the details for your {editingSchedule.course} class
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Class Name</label>
+                <input
+                  type="text"
+                  className="w-full p-2 border rounded-md"
+                  value={editingSchedule.className}
+                  onChange={(e) => setEditingSchedule({...editingSchedule, className: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Course</label>
+                <input
+                  type="text"
+                  className="w-full p-2 border rounded-md"
+                  value={editingSchedule.course}
+                  onChange={(e) => setEditingSchedule({...editingSchedule, course: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Day</label>
+                <select
+                  className="w-full p-2 border rounded-md"
+                  value={editingSchedule.day}
+                  onChange={(e) => setEditingSchedule({...editingSchedule, day: e.target.value})}
+                >
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Time</label>
+                <input
+                  type="text"
+                  className="w-full p-2 border rounded-md"
+                  value={editingSchedule.time}
+                  onChange={(e) => setEditingSchedule({...editingSchedule, time: e.target.value})}
+                  placeholder="e.g., 2:00 PM"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button
+                  type="button"
+                  onClick={handleSaveEdit}
+                  disabled={isLoading}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setEditDialogOpen(false);
+                    setEditingSchedule(null);
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       )}
