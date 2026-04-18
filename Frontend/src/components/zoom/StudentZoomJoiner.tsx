@@ -131,6 +131,8 @@ export default function StudentZoomJoiner({
           console.log(`Fetched ${schedules.length} schedules for ${currentUser?.role} (${currentUser?.name})`);
           console.log('StudentZoomJoiner - Schedules data:', data.schedules);
           
+          setMySchedules(schedules); // IMPORTANT FIX
+          
           // If no schedules, load sample data for demonstration
           if (schedules.length === 0) {
             const sampleSchedules: Schedule[] = [

@@ -80,9 +80,17 @@ export default function TeacherZoomManager({
         const data = await response.json();
         if (data.success) {
           const meetings = data.meetings || [];
-          const liveMeetings = meetings.filter((m: Meeting) => m.status === 'live');
-          const scheduledMeetings = meetings.filter((m: Meeting) => m.status === 'scheduled');
+
+          const liveMeetings = meetings.filter(
+            (m: Meeting) => m.status === "live"
+          );
+
+          const scheduledMeetings = meetings.filter(
+            (m: Meeting) => m.status === "scheduled"
+          );
+
           setLiveMeetings(liveMeetings);
+          setScheduledMeetings(scheduledMeetings); // IMPORTANT FIX
 
           // If no scheduled meetings, load sample data for demonstration
           // if (scheduledMeetings.length === 0) {
@@ -330,7 +338,7 @@ export default function TeacherZoomManager({
         </div>
 
         <div className="p-6">
-          {scheduledMeetings.length === 0 ? (
+          {[...scheduledMeetings, ...liveMeetings].length === 0 ? (
             <div className="text-center py-12">
               <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
               {/* <p className="text-lg font-medium text-gray-700">No scheduled classes</p>
@@ -338,7 +346,7 @@ export default function TeacherZoomManager({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-visible">
-              {scheduledMeetings.map((meeting) => (
+              {[...scheduledMeetings, ...liveMeetings].map((meeting) => (
                 <div
                   key={meeting._id}
                   className="group relative bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-visible"
