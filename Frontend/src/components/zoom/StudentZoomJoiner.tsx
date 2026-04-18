@@ -465,30 +465,29 @@ export default function StudentZoomJoiner({
                   </div>
 
                   {/* Hover Buttons */}
-                  <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 translate-y-2 transition-all duration-300 ease-out flex flex-col gap-2 z-50 pointer-events-none">
-                    <Button
-                      className="bg-green-600 hover:bg-green-700 text-white shadow-xl hover:shadow-green-500/40 transform hover:scale-105 transition-all duration-200 border-0 pointer-events-auto"
-                      size="sm"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleJoinClass(schedule._id);
-                      }}
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Joining...
-                        </>
-                      ) : (
-                        "Join Class"
-                      )}
-                    </Button>
-                    <div className="flex gap-2">
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-xl z-50">
+                    <div className="flex gap-3">
+                      <Button
+                        className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-2 font-medium"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleJoinClass(schedule._id);
+                        }}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Joining...
+                          </>
+                        ) : (
+                          "Join Class"
+                        )}
+                      </Button>
+
                       <Button
                         variant="outline"
-                        className="bg-white hover:bg-gray-50 text-gray-700 border-gray-300 shadow-xl hover:shadow-gray-500/40 transform hover:scale-105 transition-all duration-200 pointer-events-auto"
-                        size="sm"
+                        className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-6 py-2 font-medium border-gray-300"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -496,17 +495,6 @@ export default function StudentZoomJoiner({
                         }}
                       >
                         Edit
-                      </Button>
-                      <Button
-                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-xl hover:shadow-blue-500/40 transform hover:scale-105 transition-all duration-200 pointer-events-auto"
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleViewSchedule(schedule);
-                        }}
-                      >
-                        View
                       </Button>
                     </div>
                   </div>

@@ -391,26 +391,26 @@ export default function TeacherZoomManager({
 
                   {/* Hover Buttons */}
                   {/* Hover Buttons */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-xl z-50">
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-xl z-50">
                     <div className="flex gap-3">
 
                       {/* Scheduled Meeting */}
                       {meeting.status === "scheduled" && (
                         <>
                           <Button
-                            className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-5"
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-2 font-medium"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
                               handleJoinMeeting(meeting);
                             }}
                           >
-                            Join Meeting
+                            Join Class
                           </Button>
 
                           <Button
                             variant="outline"
-                            className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-5"
+                            className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-6 py-2 font-medium border-gray-300"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -426,7 +426,7 @@ export default function TeacherZoomManager({
                       {meeting.status === "live" && (
                         <>
                           <Button
-                            className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-5"
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-2 font-medium"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -437,7 +437,7 @@ export default function TeacherZoomManager({
                           </Button>
 
                           <Button
-                            className="bg-red-600 hover:bg-red-700 text-white shadow-lg px-5"
+                            className="bg-red-600 hover:bg-red-700 text-white shadow-lg px-6 py-2 font-medium"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
