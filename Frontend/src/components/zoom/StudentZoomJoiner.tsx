@@ -132,45 +132,6 @@ export default function StudentZoomJoiner({
           console.log('StudentZoomJoiner - Schedules data:', data.schedules);
           
           setMySchedules(schedules); // IMPORTANT FIX
-          
-          // If no schedules, load sample data for demonstration
-          if (schedules.length === 0) {
-            const sampleSchedules: Schedule[] = [
-              {
-                _id: 'sample-1',
-                className: 'Quran Reading Class',
-                course: 'Qaida',
-                teacherId: 'teacher-1',
-                teacherName: 'Ustadh Ahmed',
-                studentId: currentUser?.id || '',
-                studentName: currentUser?.name || 'Student',
-                day: 'Monday',
-                time: '02:30 PM',
-                duration: '30 min',
-                status: 'scheduled',
-                meetingNumber: '1234567890',
-                createdAt: new Date().toISOString()
-              },
-              {
-                _id: 'sample-2',
-                className: 'Tajweed Practice',
-                course: 'Tajweed',
-                teacherId: 'teacher-2',
-                teacherName: 'Ustadh Fatima',
-                studentId: currentUser?.id || '',
-                studentName: currentUser?.name || 'Student',
-                day: 'Wednesday',
-                time: '03:00 PM',
-                duration: '45 min',
-                status: 'scheduled',
-                meetingNumber: '0987654321',
-                createdAt: new Date().toISOString()
-              }
-            ];
-            setMySchedules(sampleSchedules);
-          } else {
-            setMySchedules(schedules);
-          }
         } else {
           console.log('StudentZoomJoiner - Failed to fetch schedules:', data.message);
         }
@@ -179,40 +140,7 @@ export default function StudentZoomJoiner({
       }
     } catch (err) {
       console.error('Error fetching schedules:', err);
-      // Add fallback sample data for demonstration
-      const sampleSchedules: Schedule[] = [
-        {
-          _id: 'sample-1',
-          className: 'Quran Reading Class',
-          course: 'Qaida',
-          teacherId: 'teacher-1',
-          teacherName: 'Ustadh Ahmed',
-          studentId: currentUser?.id || '',
-          studentName: currentUser?.name || 'Student',
-          day: 'Monday',
-          time: '02:30 PM',
-          duration: '30 min',
-          status: 'scheduled',
-          meetingNumber: '1234567890',
-          createdAt: new Date().toISOString()
-        },
-        {
-          _id: 'sample-2',
-          className: 'Tajweed Practice',
-          course: 'Tajweed',
-          teacherId: 'teacher-2',
-          teacherName: 'Ustadh Fatima',
-          studentId: currentUser?.id || '',
-          studentName: currentUser?.name || 'Student',
-          day: 'Wednesday',
-          time: '03:00 PM',
-          duration: '45 min',
-          status: 'scheduled',
-          meetingNumber: '0987654321',
-          createdAt: new Date().toISOString()
-        }
-      ];
-      setMySchedules(sampleSchedules);
+      setMySchedules([]);
     }
   };
 

@@ -90,99 +90,12 @@ export default function TeacherZoomManager({
           );
 
           setLiveMeetings(liveMeetings);
-          if (scheduledMeetings.length === 0) {
-            // Use sample data for demonstration when no meetings exist
-            console.log('Using sample data for TeacherZoomManager');
-            const sampleMeetings: Meeting[] = [
-              {
-                _id: 'sample-1',
-                className: 'Qaida Lesson',
-                course: 'Qaida',
-                teacherId: currentUser?.id || '',
-                teacherName: currentUser?.name || 'Teacher',
-                studentId: 'student-1',
-                studentName: 'Ahmed',
-                time: '02:00 PM',
-                duration: '45 min',
-                status: 'scheduled' as const,
-                meetingNumber: '1234567890',
-                createdAt: new Date().toISOString(),
-                zoomMeetingId: '',
-                zoomPassword: '',
-                joinUrl: '',
-                startUrl: '',
-                participants: []
-              },
-              {
-                _id: 'sample-2',
-                className: 'Tajweed Practice',
-                course: 'Tajweed',
-                teacherId: currentUser?.id || '',
-                teacherName: currentUser?.name || 'Teacher',
-                studentId: 'student-2',
-                studentName: 'Fatima',
-                time: '03:00 PM',
-                duration: '45 min',
-                status: 'scheduled' as const,
-                meetingNumber: '0987654321',
-                createdAt: new Date().toISOString(),
-                zoomMeetingId: '',
-                zoomPassword: '',
-                joinUrl: '',
-                startUrl: '',
-                participants: []
-              }
-            ];
-            setScheduledMeetings(sampleMeetings);
-          } else {
-            setScheduledMeetings(scheduledMeetings);
-          }
+          setScheduledMeetings(scheduledMeetings);
         }
       }
     } catch (err) {
       console.error('Error fetching teacher meetings:', err);
-      // Add fallback sample data for demonstration
-      const sampleMeetings: Meeting[] = [
-        {
-          _id: 'sample-1',
-          className: 'Quran Reading Class',
-          course: 'Qaida',
-          teacherId: currentUser?.id || '',
-          teacherName: currentUser?.name || 'Teacher',
-          studentId: 'student-1',
-          studentName: 'Ahmed',
-          time: '02:30 PM',
-          duration: '30 min',
-          status: 'scheduled' as const,
-          meetingNumber: '1234567890',
-          createdAt: new Date().toISOString(),
-          zoomMeetingId: '',
-          zoomPassword: '',
-          joinUrl: '',
-          startUrl: '',
-          participants: []
-        },
-        {
-          _id: 'sample-2',
-          className: 'Tajweed Practice',
-          course: 'Tajweed',
-          teacherId: currentUser?.id || '',
-          teacherName: currentUser?.name || 'Teacher',
-          studentId: 'student-2',
-          studentName: 'Fatima',
-          time: '03:00 PM',
-          duration: '45 min',
-          status: 'scheduled' as const,
-          meetingNumber: '0987654321',
-          createdAt: new Date().toISOString(),
-          zoomMeetingId: '',
-          zoomPassword: '',
-          joinUrl: '',
-          startUrl: '',
-          participants: []
-        }
-      ];
-      setScheduledMeetings(sampleMeetings);
+      setScheduledMeetings([]);
     }
   };
 
