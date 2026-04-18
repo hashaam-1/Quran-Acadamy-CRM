@@ -325,16 +325,16 @@ export default function TeacherZoomManager({
       {/* Only Scheduled Classes with Hover Join Button */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">My Classes</h2>
-          <p className="text-sm text-gray-600 mt-1">Hover over classes to join or manage</p>
+          {/* <h2 className="text-xl font-semibold text-gray-900">My Classes</h2>
+          <p className="text-sm text-gray-600 mt-1">Hover over classes to join or manage</p> */}
         </div>
         
         <div className="p-6">
           {scheduledMeetings.length === 0 ? (
             <div className="text-center py-12">
               <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium text-gray-700">No scheduled classes</p>
-              <p className="text-sm mt-2 text-gray-500">Your scheduled classes will appear here</p>
+              {/* <p className="text-lg font-medium text-gray-700">No scheduled classes</p>
+              <p className="text-sm mt-2 text-gray-500">Your scheduled classes will appear here</p> */}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-visible">
