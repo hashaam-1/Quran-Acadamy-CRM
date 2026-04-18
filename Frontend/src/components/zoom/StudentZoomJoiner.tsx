@@ -351,7 +351,7 @@ export default function StudentZoomJoiner({
               {mySchedules.map((schedule) => (
                 <div
                   key={schedule._id}
-                  className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300"
+                  className="group relative bg-white border border-gray-200 rounded-xl p-6 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-hidden"
                 >
                   {/* Header */}
                   <div className="flex items-center justify-between mb-4">
@@ -383,45 +383,59 @@ export default function StudentZoomJoiner({
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="space-y-2 pt-4 border-t border-gray-100">
-                    <Button
-                      className="w-full bg-green-600 hover:bg-green-700"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleJoinClass(schedule._id);
-                      }}
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Joining...
-                        </>
-                      ) : (
-                        "Join Class"
-                      )}
-                    </Button>
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-900/95 to-purple-900/95 backdrop-blur-sm rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-50">
+                    <div className="text-center space-y-3 p-6">
+                      <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                        <Video className="w-8 h-8 text-white" />
+                      </div>
+                      <h4 className="text-white font-bold text-xl mb-1">{schedule.className}</h4>
+                      <p className="text-blue-200 text-sm font-medium">{schedule.course}</p>
+                      
+                      <div className="space-y-3 pt-4">
+                        <Button
+                          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold shadow-xl hover:shadow-green-500/30 transform hover:scale-105 transition-all duration-300 border-0"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleJoinClass(schedule._id);
+                          }}
+                        >
+                          {isLoading ? (
+                            <>
+                              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                              Joining...
+                            </>
+                          ) : (
+                            "Join Class"
+                          )}
+                        </Button>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditSchedule(schedule);
-                        }}
-                      >
-                        Edit
-                      </Button>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Button
+                            variant="outline"
+                            className="bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 font-medium shadow-lg hover:shadow-white/20 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleEditSchedule(schedule);
+                            }}
+                          >
+                            Edit
+                          </Button>
 
-                      <Button
-                        className="bg-blue-600 hover:bg-blue-700"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewSchedule(schedule);
-                        }}
-                      >
-                        View
-                      </Button>
+                          <Button
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg hover:shadow-blue-500/20 transform hover:scale-105 transition-all duration-300"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleViewSchedule(schedule);
+                            }}
+                          >
+                            View
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

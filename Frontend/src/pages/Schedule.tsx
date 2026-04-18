@@ -458,50 +458,62 @@ export default function Schedule() {
                                           </div>
                                         </div>
 
-                                        {/* Action Buttons */}
-                                        <div className="space-y-2 pt-2 border-t border-gray-100">
-                                          {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
-                                            <StartClassButton 
-                                              scheduleId={schedule.id || schedule._id}
-                                              studentId={typeof schedule.studentId === 'object' ? schedule.studentId._id : schedule.studentId}
-                                              studentName={schedule.studentName}
-                                              course={schedule.course}
-                                              time={schedule.time}
-                                              className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white shadow-lg text-xs w-full"
-                                            />
-                                          ) : (
-                                            <JoinClassButton 
-                                              meetingNumber={schedule.meetingNumber}
-                                              teacherName={schedule.teacherName}
-                                              course={schedule.course}
-                                              time={schedule.time}
-                                              className="h-8 px-3 bg-green-600 hover:bg-green-700 text-white shadow-lg text-xs w-full"
-                                            />
-                                          )}
-                                          <div className="grid grid-cols-2 gap-1">
-                                            <Button
-                                              size="sm"
-                                              variant="outline"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                setCurrent(schedule);
-                                                setIsEditOpen(true);
-                                              }}
-                                              className="text-xs h-6"
-                                            >
-                                              Edit
-                                            </Button>
-                                            <Button
-                                              size="sm"
-                                              variant="outline"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                // Add view functionality if needed
-                                              }}
-                                              className="text-xs h-6"
-                                            >
-                                              View
-                                            </Button>
+                                        {/* Hover Overlay */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/95 to-purple-900/95 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-50">
+                                          <div className="text-center space-y-3 p-4">
+                                            <div className="w-12 h-12 mx-auto mb-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                                              <Video className="w-6 h-6 text-white" />
+                                            </div>
+                                            <h4 className="text-white font-bold text-sm mb-1">{schedule.studentName}</h4>
+                                            <p className="text-blue-200 text-xs font-medium">{schedule.course}</p>
+                                            
+                                            <div className="space-y-2 pt-3">
+                                              {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
+                                                <StartClassButton 
+                                                  scheduleId={schedule.id || schedule._id}
+                                                  studentId={typeof schedule.studentId === 'object' ? schedule.studentId._id : schedule.studentId}
+                                                  studentName={schedule.studentName}
+                                                  course={schedule.course}
+                                                  time={schedule.time}
+                                                  className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white shadow-lg text-xs w-full"
+                                                />
+                                              ) : (
+                                                <JoinClassButton 
+                                                  meetingNumber={schedule.meetingNumber}
+                                                  teacherName={schedule.teacherName}
+                                                  course={schedule.course}
+                                                  time={schedule.time}
+                                                  className="h-8 px-3 bg-green-600 hover:bg-green-700 text-white shadow-lg text-xs w-full"
+                                                />
+                                              )}
+                                              <div className="grid grid-cols-2 gap-2">
+                                                <Button
+                                                  size="sm"
+                                                  variant="outline"
+                                                  onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setCurrent(schedule);
+                                                    setIsEditOpen(true);
+                                                  }}
+                                                  className="bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 text-xs h-7"
+                                                >
+                                                  Edit
+                                                </Button>
+                                                <Button
+                                                  size="sm"
+                                                  variant="outline"
+                                                  onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    // Add view functionality if needed
+                                                  }}
+                                                  className="bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 text-xs h-7"
+                                                >
+                                                  View
+                                                </Button>
+                                              </div>
+                                            </div>
                                           </div>
                                         </div>
                                       </div>
