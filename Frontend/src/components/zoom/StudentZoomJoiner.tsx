@@ -347,91 +347,69 @@ export default function StudentZoomJoiner({
               <p className="text-sm mt-2 text-gray-500">Your scheduled classes will appear here</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-visible">
               {mySchedules.map((schedule) => (
                 <div
                   key={schedule._id}
-                  className="group relative bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-lg transition-all duration-200 relative overflow-hidden"
+                  className="group relative bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-hidden min-h-[220px]"
                 >
-                  {/* Class Info */}
+                  {/* Info */}
                   <div className="space-y-2">
-                    <h3 className="font-semibold text-gray-900">{schedule.className}</h3>
+                    <h3 className="font-semibold text-lg text-gray-900">
+                      {schedule.className}
+                    </h3>
+
                     <p className="text-sm text-gray-600">{schedule.course}</p>
-                    <p className="text-sm text-gray-500">Teacher: {schedule.teacherName}</p>
-                    <p className="text-xs text-gray-400">{schedule.day} at {schedule.time}</p>
-                    <Badge className="bg-blue-100 text-blue-700 text-xs">
+
+                    <p className="text-xs text-gray-400">
+                      Teacher: {schedule.teacherName} | {schedule.day} at {schedule.time}
+                    </p>
+
+                    <Badge className="bg-blue-100 text-blue-700">
                       {schedule.status}
                     </Badge>
                   </div>
-                  
-                  {/* Simple Hover Overlay with Buttons */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-900/95 to-purple-900/95 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-50 pointer-events-none">
-                    <div className="text-center space-y-4 p-6 pointer-events-auto">
-                      <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                        <Video className="w-8 h-8 text-white" />
-                      </div>
-                      <h4 className="text-white font-bold text-xl mb-1">{schedule.className}</h4>
-                      <p className="text-blue-200 text-sm font-medium">{schedule.course}</p>
-                      
-                      <div className="space-y-3 pt-4">
-                        <Button
-                          type="button"
-                          size="lg"
-                          disabled={isLoading}
-                          className="pointer-events-auto w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold shadow-xl hover:shadow-green-500/30 transform hover:scale-105 transition-all duration-300 border-0"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleJoinClass(schedule._id);
-                          }}
-                        >
-                          {isLoading ? (
-                            <>
-                              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                              Joining...
-                            </>
-                          ) : (
-                            <>
-                              <Video className="w-5 h-5 mr-2" />
-                              Join Class
-                            </>
-                          )}
-                        </Button>
-                        
-                        <div className="grid grid-cols-2 gap-3">
-                          <Button
-                            type="button"
-                            size="lg"
-                            variant="outline"
-                            disabled={isLoading}
-                            className="pointer-events-auto bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 font-medium shadow-lg hover:shadow-white/20 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleEditSchedule(schedule);
-                            }}
-                          >
-                            <Edit className="w-4 h-4 mr-2" />
-                            Edit
-                          </Button>
-                          <Button
-                            type="button"
-                            size="lg"
-                            variant="outline"
-                            disabled={isLoading}
-                            className="pointer-events-auto bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-blue-500/30 hover:border-blue-500/50 font-medium shadow-lg hover:shadow-blue-500/20 transform hover:scale-105 transition-all duration-300 backdrop-blur-sm"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleViewSchedule(schedule);
-                            }}
-                          >
-                            <Eye className="w-4 h-4 mr-2" />
-                            View
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 z-[999] bg-black/80 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-3 transition-all duration-300 rounded-xl">
+
+                    <Button
+                      className="w-40 bg-green-600 hover:bg-green-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJoinClass(schedule._id);
+                      }}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Joining...
+                        </>
+                      ) : (
+                        "Join Class"
+                      )}
+                    </Button>
+
+                    <Button
+                      className="w-40"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditSchedule(schedule);
+                      }}
+                    >
+                      Edit
+                    </Button>
+
+                    <Button
+                      className="w-40 bg-blue-600 hover:bg-blue-700"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewSchedule(schedule);
+                      }}
+                    >
+                      View Details
+                    </Button>
                   </div>
                 </div>
               ))}
