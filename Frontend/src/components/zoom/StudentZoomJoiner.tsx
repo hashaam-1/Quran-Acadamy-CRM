@@ -357,7 +357,7 @@ export default function StudentZoomJoiner({
                   </div>
                   
                   {/* Perfect Right-Side Hover Panel */}
-                  <div className="absolute top-0 right-0 h-full w-80 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 shadow-2xl transform translate-x-full group-hover:translate-x-0 transition-all duration-500 ease-out pointer-events-none rounded-r-lg">
+                  <div className="absolute top-0 right-0 h-full w-80 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 shadow-2xl transform translate-x-full group-hover:translate-x-0 transition-all duration-500 ease-out pointer-events-none rounded-r-lg z-50">
                     <div className="p-6 h-full flex flex-col justify-between">
                       {/* Header Section */}
                       <div className="space-y-4">

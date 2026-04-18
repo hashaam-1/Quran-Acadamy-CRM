@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Video, Users, Calendar, Clock, Play, Square, Eye, Settings } from 'lucide-react';
+import { Loader2, Video, Users, Calendar, Clock, Play, Square, Eye, Settings, Edit, BookOpen } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { toast } from 'sonner';
 
@@ -56,6 +56,8 @@ export default function TeacherZoomManager({
   const [liveMeetings, setLiveMeetings] = useState<Meeting[]>([]);
   const [scheduledMeetings, setScheduledMeetings] = useState<Meeting[]>([]);
   const [error, setError] = useState('');
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
   const { currentUser } = useAuthStore();
 
   // Fetch teacher's meetings on component mount
@@ -186,6 +188,42 @@ export default function TeacherZoomManager({
     }
   };
 
+  const handleEditMeeting = (meeting: Meeting) => {
+    console.log('TeacherZoomManager - Editing meeting:', meeting);
+    setEditingMeeting(meeting);
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingMeeting) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/${editingMeeting._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(editingMeeting)
+      });
+
+      if (response.ok) {
+        toast.success("Meeting updated successfully");
+        setEditDialogOpen(false);
+        setEditingMeeting(null);
+        fetchTeacherMeetings(); // Refresh the meetings
+      } else {
+        throw new Error('Failed to update meeting');
+      }
+    } catch (err) {
+      console.error('Error updating meeting:', err);
+      toast.error("Failed to update meeting");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Only Scheduled Classes with Hover Join Button */}
@@ -220,7 +258,7 @@ export default function TeacherZoomManager({
                   </div>
                   
                   {/* Perfect Right-Side Hover Panel */}
-                  <div className="absolute top-0 right-0 h-full w-80 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 shadow-2xl transform translate-x-full group-hover:translate-x-0 transition-all duration-500 ease-out pointer-events-none rounded-r-lg">
+                  <div className="absolute top-0 right-0 h-full w-80 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 shadow-2xl transform translate-x-full group-hover:translate-x-0 transition-all duration-500 ease-out pointer-events-none rounded-r-lg z-50">
                     <div className="p-6 h-full flex flex-col justify-between">
                       {/* Header Section */}
                       <div className="space-y-4">
@@ -307,7 +345,7 @@ export default function TeacherZoomManager({
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              // Add edit functionality here
+                              handleEditMeeting(meeting);
                             }}
                           >
                             <Edit className="w-4 h-4 mr-2" />
@@ -363,6 +401,109 @@ export default function TeacherZoomManager({
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Edit Meeting Dialog */}
+      {editingMeeting && (
+        <Dialog 
+          open={editDialogOpen}
+          modal={true}
+          onOpenChange={(open) => {
+            setEditDialogOpen(open);
+            if (!open) {
+              setTimeout(() => {
+                document.body.style.pointerEvents = "auto";
+              }, 0);
+              setEditingMeeting(null);
+            }
+          }}
+        >
+          <DialogContent
+            className="sm:max-w-[600px] z-[9999] bg-gradient-to-br from-white to-blue-50 border-blue-200"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+          >
+            <DialogHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg -m-6 mb-6 p-6">
+              <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
+                <Edit className="w-5 h-5" />
+                Edit Meeting
+              </DialogTitle>
+              <DialogDescription className="text-blue-100">
+                Update the details for your {editingMeeting.course} meeting
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Video className="w-4 h-4 text-blue-600" />
+                    Class Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                    value={editingMeeting.className}
+                    onChange={(e) => setEditingMeeting({...editingMeeting, className: e.target.value})}
+                    placeholder="Enter class name"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-purple-600" />
+                    Course
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                    value={editingMeeting.course}
+                    onChange={(e) => setEditingMeeting({...editingMeeting, course: e.target.value})}
+                    placeholder="Enter course name"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 text-blue-700">
+                  <Users className="w-4 h-4" />
+                  <span className="text-sm font-medium">Meeting ID: {editingMeeting.meetingNumber}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  onClick={handleSaveEdit}
+                  disabled={isLoading}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setEditDialogOpen(false);
+                    setEditingMeeting(null);
+                  }}
+                  className="flex-1 border-gray-300 hover:bg-gray-50 text-gray-700 font-medium"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       )}
