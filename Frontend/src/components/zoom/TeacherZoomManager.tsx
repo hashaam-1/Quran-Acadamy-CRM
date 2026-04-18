@@ -245,58 +245,58 @@ export default function TeacherZoomManager({
               {scheduledMeetings.map((meeting) => (
                 <div
                   key={meeting._id}
-                  className="group relative bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl hover:border-blue-400 transition-all duration-300 overflow-hidden min-h-[220px]"
+                  className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-xl hover:border-blue-400 transition-all duration-300"
                 >
                   {/* Info */}
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-lg text-gray-900">
-                      {meeting.className}
-                    </h3>
-
-                    <p className="text-sm text-gray-600">{meeting.course}</p>
-
-                    <p className="text-xs text-gray-400">
-                      {formatTime(meeting.createdAt)}
-                    </p>
-
+                  <div className="space-y-3">
+                    <div>
+                      <h3 className="font-semibold text-lg text-gray-900">
+                        {meeting.className}
+                      </h3>
+                      <p className="text-sm text-gray-600">{meeting.course}</p>
+                      <p className="text-xs text-gray-400">
+                        {formatTime(meeting.createdAt)}
+                      </p>
+                    </div>
+                    
                     <Badge className={`${getStatusColor(meeting.status)} text-white`}>
                       {meeting.status}
                     </Badge>
-                  </div>
 
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 z-[999] bg-black/80 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-3 transition-all duration-300 rounded-xl">
+                    {/* Action Buttons */}
+                    <div className="space-y-2 pt-2">
+                      <Button
+                        className="w-full bg-green-600 hover:bg-green-700"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleJoinMeeting(meeting);
+                        }}
+                      >
+                        {meeting.status === "live" ? "Join Live" : "Start Class"}
+                      </Button>
 
-                    <Button
-                      className="w-40 bg-green-600 hover:bg-green-700"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleJoinMeeting(meeting);
-                      }}
-                    >
-                      {meeting.status === "live" ? "Join Live" : "Start Class"}
-                    </Button>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditMeeting(meeting);
+                          }}
+                        >
+                          Edit
+                        </Button>
 
-                    <Button
-                      className="w-40"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditMeeting(meeting);
-                      }}
-                    >
-                      Edit
-                    </Button>
-
-                    <Button
-                      className="w-40 bg-red-600 hover:bg-red-700"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEndClass(meeting._id);
-                      }}
-                    >
-                      {meeting.status === "live" ? "End" : "Cancel"}
-                    </Button>
+                        <Button
+                          className="bg-red-600 hover:bg-red-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEndClass(meeting._id);
+                          }}
+                        >
+                          {meeting.status === "live" ? "End" : "Cancel"}
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
