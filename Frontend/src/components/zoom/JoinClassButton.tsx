@@ -113,13 +113,15 @@ export default function JoinClassButton({
         e.preventDefault();
         e.stopPropagation();
         
+        console.log('JoinClassButton clicked', { meetingNumber, currentUser: currentUser?.name, role: currentUser?.role });
+        
         if (!currentUser) {
           toast.error('Please login to join class');
           return;
         }
 
         if (!meetingNumber) {
-          toast.error('Meeting number is required');
+          toast.error('Class has not started yet. Please wait for the teacher to start the class.');
           return;
         }
 
@@ -137,19 +139,23 @@ export default function JoinClassButton({
           });
 
           const data = await response.json();
+          console.log('Join meeting response:', data);
 
           if (response.ok) {
             toast.success('Joined class successfully!');
             
             // Open Zoom meeting for student (role: 0)
-            window.open(`/zoom-join?meetingNumber=${meetingNumber}&role=0`, '_blank');
+            const zoomUrl = `/zoom-join?meetingNumber=${meetingNumber}&role=0`;
+            console.log('Opening Zoom:', zoomUrl);
+            window.open(zoomUrl, '_blank');
           } else {
-            throw new Error(data.error || 'Failed to join class');
+            throw new Error(data.error || data.message || 'Failed to join class');
           }
         } catch (err) {
           console.error('Error joining class:', err);
-          setError(err instanceof Error ? err.message : 'Failed to join class');
-          toast.error('Failed to join class');
+          const errorMessage = err instanceof Error ? err.message : 'Failed to join class';
+          setError(errorMessage);
+          toast.error(errorMessage);
         } finally {
           setIsLoading(false);
         }

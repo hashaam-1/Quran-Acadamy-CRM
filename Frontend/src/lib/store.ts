@@ -109,6 +109,7 @@ export interface ClassSchedule {
   duration: string;
   status: "scheduled" | "in_progress" | "completed" | "cancelled" | "rescheduled";
   day: string;
+  meetingNumber?: string; // Added for Zoom meetings
   rescheduleRequest?: {
     requestedBy: string;
     newTime: string;

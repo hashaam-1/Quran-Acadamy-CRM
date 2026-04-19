@@ -244,13 +244,16 @@ export default function Schedule() {
             className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
           />
         ) : (
-          <JoinClassButton
-            meetingNumber={slot.meetingNumber}
-            teacherName={slot.teacherName}
-            course={slot.course}
-            time={slot.time}
-            className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
-          />
+          // Students can only join classes that are in progress and have a meeting number
+          slot.status === "in_progress" && slot.meetingNumber && (
+            <JoinClassButton
+              meetingNumber={slot.meetingNumber}
+              teacherName={slot.teacherName}
+              course={slot.course}
+              time={slot.time}
+              className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
+            />
+          )
         )}
 
         {/* Edit Button - Only for teachers and admin */}
