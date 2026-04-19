@@ -218,75 +218,84 @@ export default function Schedule() {
                 )}
               >
                 {getSchedulesByDay(day).map((slot) => (
-                  <div
-                    key={slot.id}
-                    className={cn(
-                      "relative overflow-hidden p-3 rounded-lg bg-card border-l-4 shadow-soft hover:shadow-medium transition-all cursor-pointer group",
-                      statusConfig[slot.status].color
-                    )}
-                  >
-                    {/* Hover Overlay */}
-<div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-lg z-20">
-  <div className="flex gap-2">
-    
-    {/* Edit Button */}
-    <Button
-      size="sm"
-      onClick={(e) => {
-        e.stopPropagation();
-        setCurrent(slot);
-        setIsEditOpen(true);
-      }}
-      className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-3 text-xs rounded-md shadow"
-    >
-      <Pencil className="h-3 w-3 mr-1" />
-      Edit
-    </Button>
-
-    {/* Join Class */}
-    {currentUser?.role === "teacher" ? (
-      <StartClassButton
-        scheduleId={slot.id || slot._id}
-        studentId={typeof slot.studentId === "object" ? slot.studentId._id : slot.studentId}
-        studentName={slot.studentName}
-        course={slot.course}
-        time={slot.time}
-        className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow"
-      />
-    ) : (
-      <JoinClassButton
-        meetingNumber={slot.meetingNumber}
-        teacherName={slot.teacherName}
-        course={slot.course}
-        time={slot.time}
-        className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow"
-      />
+  <div
+    key={slot.id}
+    className={cn(
+      "relative overflow-hidden p-3 rounded-lg bg-card border-l-4 shadow-soft hover:shadow-medium transition-all duration-300 cursor-pointer group",
+      statusConfig[slot.status].color
     )}
-  </div>
-</div>
+  >
+    {/* Hover Overlay */}
+    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-lg z-20">
+      <div className="flex gap-2">
+        
+        {/* Edit Button */}
+        <Button
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            setCurrent(slot);
+            setIsEditOpen(true);
+          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
+        >
+          <Pencil className="h-3 w-3 mr-1" />
+          Edit
+        </Button>
 
-{/* Header */}
-<div className="mb-2 relative z-10">
-  <Badge className={cn("text-xs", courseColors[slot.course as keyof typeof courseColors])}>
-    {slot.course}
-  </Badge>
-</div>
-                    <p className="font-medium text-sm truncate">{slot.studentName}</p>
-                    <p className="text-xs text-muted-foreground truncate">{slot.teacherName}</p>
-                    <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      <span>{slot.time}</span>
-                      <span>â¢</span>
-                      <span>{slot.duration}</span>
-                    </div>
-                    {slot.status === "in_progress" && (
-                      <Button size="sm" variant="success" className="w-full mt-2 h-7 text-xs">
-                        <Video className="h-3 w-3 mr-1" />
-                        Join Now
-                      </Button>
-                    )}
-                  </div>
-                ))}
+        {/* Join Class Button */}
+        {currentUser?.role === "teacher" ? (
+          <StartClassButton
+            scheduleId={slot.id || slot._id}
+            studentId={
+              typeof slot.studentId === "object"
+                ? slot.studentId?._id
+                : slot.studentId
+            }
+            studentName={slot.studentName}
+            course={slot.course}
+            time={slot.time}
+            className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
+          />
+        ) : (
+          <JoinClassButton
+            meetingNumber={slot.meetingNumber}
+            teacherName={slot.teacherName}
+            course={slot.course}
+            time={slot.time}
+            className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
+          />
+        )}
+      </div>
+    </div>
+
+    {/* Normal Card Content */}
+    <div className="relative z-10">
+      <div className="mb-2">
+        <Badge
+          className={cn(
+            "text-xs",
+            courseColors[slot.course as keyof typeof courseColors]
+          )}
+        >
+          {slot.course}
+        </Badge>
+      </div>
+
+      <p className="font-medium text-sm truncate">{slot.studentName}</p>
+      <p className="text-xs text-muted-foreground truncate">
+        {slot.teacherName}
+      </p>
+
+      <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+        <Clock className="h-3 w-3" />
+        <span>{slot.time}</span>
+        <span>â¢</span>
+        <span>{slot.duration}</span>
+      </div>
+    </div>
+  </div>
+))}
                 {getSchedulesByDay(day).length === 0 && (
                   <div className="h-full flex items-center justify-center">
                     <p className="text-xs text-muted-foreground">No classes</p>
