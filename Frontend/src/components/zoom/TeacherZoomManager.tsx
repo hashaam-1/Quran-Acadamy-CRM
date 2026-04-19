@@ -297,31 +297,31 @@ export default function TeacherZoomManager({
                     </div>
                   </div>
 
-                  {/* Beautiful Hover Buttons - Always Show Both Buttons */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out rounded-2xl z-50 flex items-center justify-center pointer-events-none backdrop-blur-xl">
-                    <div className="flex gap-4 p-6 bg-white/10 rounded-2xl backdrop-blur-2xl border border-white/20 pointer-events-auto shadow-2xl">
+                  {/* Clean Hover Buttons - Single Shade, Centered */}
+                  <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out rounded-2xl z-50 flex items-center justify-center pointer-events-none">
+                    <div className="flex gap-4 pointer-events-auto">
                       
                       <Button
-                        className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-2xl px-8 py-4 font-bold rounded-2xl transition-all duration-300 hover:scale-110 hover:shadow-emerald-500/50 flex items-center gap-3"
+                        className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-3 font-semibold rounded-xl transition-all duration-200 hover:scale-105 flex items-center gap-2"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleJoinMeeting(meeting);
                         }}
                       >
-                        <Video className="w-5 h-5" />
+                        <Video className="w-4 h-4" />
                         Join Class
                       </Button>
 
                       <Button
-                        className="bg-gradient-to-r from-white to-gray-50 hover:from-gray-50 hover:to-gray-100 text-gray-800 shadow-2xl px-8 py-4 font-bold rounded-2xl transition-all duration-300 hover:scale-110 hover:shadow-gray-400/50 flex items-center gap-3 border-2 border-gray-200"
+                        className="bg-white hover:bg-gray-50 text-gray-800 shadow-lg px-6 py-3 font-semibold rounded-xl transition-all duration-200 hover:scale-105 flex items-center gap-2 border border-gray-300"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleEditMeeting(meeting);
                         }}
                       >
-                        <Pencil className="w-5 h-5" />
+                        <Pencil className="w-4 h-4" />
                         Edit
                       </Button>
                     </div>
