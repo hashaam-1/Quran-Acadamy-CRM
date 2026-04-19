@@ -418,14 +418,14 @@ export default function Schedule() {
                                     <div
                                       key={schedule.id || schedule._id || idx}
                                       className={cn(
-                                        "group relative bg-gradient-to-br from-white via-white to-gray-50 border-0 rounded-2xl p-4 shadow-lg hover:shadow-2xl transition-all duration-500 ease-out overflow-hidden cursor-pointer transform hover:-translate-y-1",
-                                        courseBlockColors[schedule.course as keyof typeof courseBlockColors] && 
-                                        `bg-opacity-20 border-l-4 border-l-[${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}]`,
-                                        schedule.course === 'Qaida' && 'bg-blue-100',
-                                        schedule.course === 'Nazra' && 'bg-green-100',
-                                        schedule.course === 'Hifz' && 'bg-yellow-100',
-                                        schedule.course === 'Tajweed' && 'bg-purple-100'
-                                      )}
+                                          "relative bg-white border border-gray-200 rounded-lg p-3",
+                                          courseBlockColors[schedule.course as keyof typeof courseBlockColors] && 
+                                          `bg-opacity-20 border-l-4 border-l-[${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}]`,
+                                          schedule.course === 'Qaida' && 'bg-blue-100',
+                                          schedule.course === 'Nazra' && 'bg-green-100',
+                                          schedule.course === 'Hifz' && 'bg-yellow-100',
+                                          schedule.course === 'Tajweed' && 'bg-purple-100'
+                                        )}
                                     >
                                       {/* Background Pattern */}
                                       <div className="absolute inset-0 opacity-5">
@@ -467,44 +467,7 @@ export default function Schedule() {
                                           </div>
                                         </div>
 
-                                        {/* Beautiful Hover Buttons */}
-                                        <div className="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out rounded-2xl z-50 flex items-center justify-center pointer-events-none backdrop-blur-xl">
-                                          <div className="flex gap-3 p-4 bg-white/10 rounded-2xl backdrop-blur-2xl border border-white/20 pointer-events-auto shadow-2xl">
-                                            {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
-                                              <StartClassButton 
-                                                scheduleId={schedule.id || schedule._id}
-                                                studentId={typeof schedule.studentId === 'object' ? schedule.studentId._id : schedule.studentId}
-                                                studentName={schedule.studentName}
-                                                course={schedule.course}
-                                                time={schedule.time}
-                                                className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-2xl px-6 py-3 text-xs font-bold rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-emerald-500/50 flex items-center gap-2"
-                                              />
-                                            ) : (
-                                              <JoinClassButton 
-                                                meetingNumber={schedule.meetingNumber}
-                                                teacherName={schedule.teacherName}
-                                                course={schedule.course}
-                                                time={schedule.time}
-                                                className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-2xl px-6 py-3 text-xs font-bold rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-emerald-500/50 flex items-center gap-2"
-                                              />
-                                            )}
-                                            <Button
-                                              size="sm"
-                                              variant="outline"
-                                              onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setCurrent(schedule);
-                                                setIsEditOpen(true);
-                                              }}
-                                              className="bg-gradient-to-r from-white to-gray-50 hover:from-gray-50 hover:to-gray-100 text-gray-800 shadow-2xl px-6 py-3 text-xs font-bold rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-gray-400/50 flex items-center gap-2 border-2 border-gray-200"
-                                            >
-                                              <Pencil className="w-3 h-3" />
-                                              Edit
-                                            </Button>
-                                          </div>
-                                        </div>
-                                      </div>
+                                                                              </div>
                                     </div>
                                   ))}
                                 </div>
