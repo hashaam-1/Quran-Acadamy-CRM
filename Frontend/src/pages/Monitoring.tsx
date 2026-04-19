@@ -14,8 +14,16 @@ import {
   TrendingUp,
   Eye,
   RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { schedulesApi } from "@/lib/api/schedules";
+import { ClassSchedule } from "@/lib/store";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/lib/auth-store";
+import { toast } from "sonner";
+import { format, isBefore, isAfter, addMinutes, parse } from "date-fns";
 
 interface LiveClass {
   id: string;
@@ -25,7 +33,9 @@ interface LiveClass {
   startTime: string;
   duration: number;
   elapsed: number;
-  status: "on_time" | "late" | "ongoing" | "extended";
+  status: "live" | "upcoming" | "completed" | "late";
+  meetingNumber?: string;
+  scheduleId: string;
 }
 
 interface ClassSummary {
@@ -37,30 +47,6 @@ interface ClassSummary {
   late: number;
 }
 
-const mockLiveClasses: LiveClass[] = [
-  { id: "1", studentName: "Ahmed Hassan", teacherName: "Ustaz Bilal", course: "Hifz", startTime: "14:00", duration: 45, elapsed: 30, status: "ongoing" },
-  { id: "2", studentName: "Sara Khan", teacherName: "Ustaza Maryam", course: "Tajweed", startTime: "14:15", duration: 30, elapsed: 20, status: "ongoing" },
-  { id: "3", studentName: "Yusuf Ibrahim", teacherName: "Ustaz Omar", course: "Qaida", startTime: "14:00", duration: 30, elapsed: 35, status: "extended" },
-  { id: "4", studentName: "Fatima Ahmed", teacherName: "Ustaza Aisha", course: "Nazra", startTime: "14:30", duration: 45, elapsed: 5, status: "on_time" },
-  { id: "5", studentName: "Omar Sheikh", teacherName: "Ustaz Ibrahim", course: "Hifz", startTime: "14:00", duration: 60, elapsed: 0, status: "late" },
-];
-
-const summary: ClassSummary = {
-  total: 28,
-  completed: 15,
-  ongoing: 5,
-  upcoming: 5,
-  missed: 2,
-  late: 1,
-};
-
-const statusConfig = {
-  on_time: { label: "On Time", variant: "success" as const, color: "bg-success" },
-  late: { label: "Late Start", variant: "warning" as const, color: "bg-warning" },
-  ongoing: { label: "In Progress", variant: "info" as const, color: "bg-info animate-pulse" },
-  extended: { label: "Extended", variant: "accent" as const, color: "bg-accent" },
-};
-
 interface TeacherPerformance {
   id: string;
   name: string;
@@ -69,15 +55,16 @@ interface TeacherPerformance {
   onTimeRate: number;
   avgRating: number;
   status: "excellent" | "good" | "needs_improvement";
+  liveClasses: number;
+  upcomingClasses: number;
 }
 
-const mockTeacherPerformance: TeacherPerformance[] = [
-  { id: "1", name: "Ustaz Bilal", classesCompleted: 6, totalClasses: 6, onTimeRate: 100, avgRating: 4.9, status: "excellent" },
-  { id: "2", name: "Ustaza Maryam", classesCompleted: 5, totalClasses: 6, onTimeRate: 92, avgRating: 4.8, status: "excellent" },
-  { id: "3", name: "Ustaz Omar", classesCompleted: 4, totalClasses: 5, onTimeRate: 85, avgRating: 4.6, status: "good" },
-  { id: "4", name: "Ustaza Aisha", classesCompleted: 2, totalClasses: 4, onTimeRate: 100, avgRating: 4.9, status: "excellent" },
-  { id: "5", name: "Ustaz Ibrahim", classesCompleted: 0, totalClasses: 2, onTimeRate: 0, avgRating: 0, status: "needs_improvement" },
-];
+const statusConfig = {
+  live: { label: "Live", variant: "success" as const, color: "bg-success animate-pulse" },
+  upcoming: { label: "Upcoming", variant: "info" as const, color: "bg-info" },
+  completed: { label: "Completed", variant: "secondary" as const, color: "bg-secondary" },
+  late: { label: "Late", variant: "warning" as const, color: "bg-warning" },
+};
 
 const performanceConfig = {
   excellent: { label: "Excellent", variant: "success" as const },
@@ -86,6 +73,167 @@ const performanceConfig = {
 };
 
 export default function Monitoring() {
+  const navigate = useNavigate();
+  const { currentUser } = useAuthStore();
+
+  // Fetch today's scheduled classes
+  const { data: schedules = [], isLoading, refetch } = useQuery({
+    queryKey: ['schedules'],
+    queryFn: schedulesApi.getAll,
+  });
+
+  // Process schedules to get today's classes and calculate status
+  const processSchedules = (schedules: ClassSchedule[]) => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const todaySchedules = schedules.filter(schedule => {
+      // Check if schedule is for today based on day field
+      const scheduleDay = format(new Date(), 'EEEE').toLowerCase();
+      return schedule.day.toLowerCase() === scheduleDay;
+    });
+
+    const liveClasses: LiveClass[] = todaySchedules.map(schedule => {
+      const now = new Date();
+      const startTime = parse(schedule.time, 'HH:mm', new Date());
+      const endTime = addMinutes(startTime, parseInt(schedule.duration) || 30);
+      
+      let status: "live" | "upcoming" | "completed" | "late" = "upcoming";
+      let elapsed = 0;
+
+      if (schedule.status === "in_progress" && schedule.meetingNumber) {
+        status = "live";
+        elapsed = Math.floor((now.getTime() - startTime.getTime()) / 60000);
+      } else if (schedule.status === "completed") {
+        status = "completed";
+        elapsed = parseInt(schedule.duration) || 30;
+      } else if (isAfter(now, endTime) && schedule.status !== "completed") {
+        status = "late";
+        elapsed = parseInt(schedule.duration) || 30;
+      } else if (isBefore(now, startTime)) {
+        status = "upcoming";
+        elapsed = 0;
+      } else if (isBefore(now, endTime) && schedule.status === "scheduled") {
+        status = "late"; // Should have started but hasn't
+        elapsed = 0;
+      } else {
+        status = "live";
+        elapsed = Math.floor((now.getTime() - startTime.getTime()) / 60000);
+      }
+
+      return {
+        id: schedule.id || schedule._id || '',
+        studentName: schedule.studentName,
+        teacherName: schedule.teacherName,
+        course: schedule.course,
+        startTime: schedule.time,
+        duration: parseInt(schedule.duration) || 30,
+        elapsed: Math.max(0, elapsed),
+        status,
+        meetingNumber: schedule.meetingNumber,
+        scheduleId: schedule.id || schedule._id || '',
+      };
+    });
+
+    // Calculate summary
+    const summary: ClassSummary = {
+      total: todaySchedules.length,
+      completed: liveClasses.filter(c => c.status === 'completed').length,
+      ongoing: liveClasses.filter(c => c.status === 'live').length,
+      upcoming: liveClasses.filter(c => c.status === 'upcoming').length,
+      missed: liveClasses.filter(c => c.status === 'late').length,
+      late: liveClasses.filter(c => c.status === 'late').length,
+    };
+
+    // Calculate teacher performance
+    const teacherMap = new Map<string, TeacherPerformance>();
+    
+    todaySchedules.forEach(schedule => {
+      const teacherId = schedule.teacherId;
+      const teacherName = schedule.teacherName;
+      
+      if (!teacherMap.has(teacherId)) {
+        teacherMap.set(teacherId, {
+          id: teacherId,
+          name: teacherName,
+          classesCompleted: 0,
+          totalClasses: 0,
+          onTimeRate: 0,
+          avgRating: 4.5, // Mock rating for now
+          status: "good",
+          liveClasses: 0,
+          upcomingClasses: 0,
+        });
+      }
+      
+      const teacher = teacherMap.get(teacherId)!;
+      teacher.totalClasses++;
+      
+      if (schedule.status === 'completed') {
+        teacher.classesCompleted++;
+      }
+    });
+
+    // Calculate performance metrics for each teacher
+    teacherMap.forEach(teacher => {
+      const onTimeClasses = todaySchedules.filter(s => 
+        s.teacherId === teacher.id && s.status !== 'completed'
+      ).length;
+      
+      teacher.onTimeRate = teacher.totalClasses > 0 
+        ? Math.round((teacher.classesCompleted / teacher.totalClasses) * 100)
+        : 0;
+      
+      teacher.liveClasses = liveClasses.filter(c => 
+        todaySchedules.find(s => s.id === c.scheduleId)?.teacherId === teacher.id && c.status === 'live'
+      ).length;
+      
+      teacher.upcomingClasses = liveClasses.filter(c => 
+        todaySchedules.find(s => s.id === c.scheduleId)?.teacherId === teacher.id && c.status === 'upcoming'
+      ).length;
+      
+      if (teacher.onTimeRate >= 95) {
+        teacher.status = "excellent";
+      } else if (teacher.onTimeRate >= 80) {
+        teacher.status = "good";
+      } else {
+        teacher.status = "needs_improvement";
+      }
+    });
+
+    return { liveClasses, summary, teacherPerformance: Array.from(teacherMap.values()) };
+  };
+
+  const { liveClasses, summary, teacherPerformance } = processSchedules(schedules);
+
+  // Handle observe button click - join zoom meeting
+  const handleObserve = async (liveClass: LiveClass) => {
+    if (!liveClass.meetingNumber) {
+      toast.error('No active meeting found for this class');
+      return;
+    }
+
+    try {
+      // Join as observer (admin role = 1 for host privileges)
+      const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${liveClass.meetingNumber}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (response.ok) {
+        toast.success('Joining class as observer');
+        navigate(`/zoom-join?meetingNumber=${liveClass.meetingNumber}&role=1`);
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Failed to join class');
+      }
+    } catch (error) {
+      console.error('Error joining class:', error);
+      toast.error('Failed to join class');
+    }
+  };
+
   return (
     <MainLayout title="Class Monitoring" subtitle="Live class tracking and supervision">
       {/* Summary Stats */}
@@ -105,7 +253,7 @@ export default function Monitoring() {
         <Card variant="stat" className="animate-slide-up stagger-3">
           <CardContent className="p-4 text-center">
             <p className="text-2xl font-bold text-info">{summary.ongoing}</p>
-            <p className="text-xs text-muted-foreground">Ongoing</p>
+            <p className="text-xs text-muted-foreground">Live</p>
           </CardContent>
         </Card>
         <Card variant="stat" className="animate-slide-up stagger-4">
@@ -134,71 +282,91 @@ export default function Monitoring() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-              Live Classes
+              Today's Classes
             </CardTitle>
-            <Button variant="ghost" size="sm" className="gap-2">
+            <Button variant="ghost" size="sm" className="gap-2" onClick={() => refetch()}>
               <RefreshCw className="h-4 w-4" />
               Refresh
             </Button>
           </CardHeader>
           <CardContent className="space-y-3">
-            {mockLiveClasses.map((session) => (
-              <div
-                key={session.id}
-                className={cn(
-                  "p-4 rounded-lg border transition-all",
-                  session.status === "late" && "bg-warning/5 border-warning/20",
-                  session.status === "extended" && "bg-accent/5 border-accent/20",
-                  (session.status === "ongoing" || session.status === "on_time") && "bg-card"
-                )}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Video className="h-5 w-5 text-primary" />
-                      </div>
-                      <span className={cn(
-                        "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card",
-                        statusConfig[session.status].color
-                      )} />
-                    </div>
-                    <div>
-                      <p className="font-medium">{session.studentName}</p>
-                      <p className="text-sm text-muted-foreground">{session.teacherName}</p>
-                    </div>
-                  </div>
-                  <Badge variant={statusConfig[session.status].variant}>
-                    {statusConfig[session.status].label}
-                  </Badge>
-                </div>
-
-                <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
-                  <span>{session.course}</span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {session.elapsed}/{session.duration} min
-                  </span>
-                </div>
-
-                <Progress 
-                  value={(session.elapsed / session.duration) * 100} 
-                  className="h-2"
-                />
-
-                <div className="flex items-center gap-2 mt-3">
-                  <Button variant="outline" size="sm" className="flex-1 gap-1">
-                    <Eye className="h-3 w-3" />
-                    Observe
-                  </Button>
-                  {session.status === "late" && (
-                    <Button variant="outline" size="sm" className="text-warning">
-                      <AlertTriangle className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
               </div>
-            ))}
+            ) : liveClasses.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No classes scheduled for today
+              </div>
+            ) : (
+              liveClasses.map((session) => (
+                <div
+                  key={session.id}
+                  className={cn(
+                    "p-4 rounded-lg border transition-all",
+                    session.status === "late" && "bg-warning/5 border-warning/20",
+                    session.status === "live" && "bg-success/5 border-success/20",
+                    session.status === "upcoming" && "bg-info/5 border-info/20",
+                    session.status === "completed" && "bg-secondary/5 border-secondary/20"
+                  )}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Video className="h-5 w-5 text-primary" />
+                        </div>
+                        <span className={cn(
+                          "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card",
+                          statusConfig[session.status].color
+                        )} />
+                      </div>
+                      <div>
+                        <p className="font-medium">{session.studentName}</p>
+                        <p className="text-sm text-muted-foreground">{session.teacherName}</p>
+                      </div>
+                    </div>
+                    <Badge variant={statusConfig[session.status].variant}>
+                      {statusConfig[session.status].label}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+                    <span>{session.course}</span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {session.startTime}
+                    </span>
+                  </div>
+
+                  {session.status === "live" && (
+                    <Progress 
+                      value={Math.min((session.elapsed / session.duration) * 100, 100)} 
+                      className="h-2 mb-3"
+                    />
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    {session.status === "live" && session.meetingNumber && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 gap-1"
+                        onClick={() => handleObserve(session)}
+                      >
+                        <Eye className="h-3 w-3" />
+                        Observe
+                      </Button>
+                    )}
+                    {session.status === "late" && (
+                      <Button variant="outline" size="sm" className="text-warning">
+                        <AlertTriangle className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
 
@@ -211,86 +379,90 @@ export default function Monitoring() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {mockTeacherPerformance.map((teacher) => (
-              <div
-                key={teacher.id}
-                className="p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
-                      {teacher.name.split(" ").slice(1).map(n => n[0]).join("")}
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : teacherPerformance.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No teacher data available
+              </div>
+            ) : (
+              teacherPerformance.map((teacher) => (
+                <div
+                  key={teacher.id}
+                  className="p-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-medium">
+                        {teacher.name.split(" ").slice(1).map(n => n[0]).join("")}
+                      </div>
+                      <div>
+                        <p className="font-medium">{teacher.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {teacher.classesCompleted}/{teacher.totalClasses} classes
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant={performanceConfig[teacher.status].variant}>
+                      {performanceConfig[teacher.status].label}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">On-Time Rate</p>
+                      <div className="flex items-center gap-2">
+                        <Progress value={teacher.onTimeRate} className="h-2 flex-1" />
+                        <span className="font-medium">{teacher.onTimeRate}%</span>
+                      </div>
                     </div>
                     <div>
-                      <p className="font-medium">{teacher.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {teacher.classesCompleted}/{teacher.totalClasses} classes
+                      <p className="text-muted-foreground">Live/Upcoming</p>
+                      <p className="font-medium">
+                        {teacher.liveClasses} / {teacher.upcomingClasses}
                       </p>
                     </div>
                   </div>
-                  <Badge variant={performanceConfig[teacher.status].variant}>
-                    {performanceConfig[teacher.status].label}
-                  </Badge>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">On-Time Rate</p>
-                    <div className="flex items-center gap-2">
-                      <Progress value={teacher.onTimeRate} className="h-2 flex-1" />
-                      <span className="font-medium">{teacher.onTimeRate}%</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Avg Rating</p>
-                    <p className="font-medium">
-                      {teacher.avgRating > 0 ? `★ ${teacher.avgRating}` : "N/A"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </CardContent>
         </Card>
       </div>
 
       {/* Alerts Section */}
-      <Card className="mt-6 animate-slide-up border-warning/50 bg-warning/5">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-warning">
-            <AlertTriangle className="h-5 w-5" />
-            Active Alerts
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
-              <div className="flex items-center gap-3">
-                <XCircle className="h-5 w-5 text-destructive" />
-                <div>
-                  <p className="font-medium">Class Not Started</p>
-                  <p className="text-sm text-muted-foreground">Omar Sheikh's class with Ustaz Ibrahim is 15 minutes late</p>
+      {liveClasses.filter(c => c.status === 'late').length > 0 && (
+        <Card className="mt-6 animate-slide-up border-warning/50 bg-warning/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-warning">
+              <AlertTriangle className="h-5 w-5" />
+              Active Alerts
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {liveClasses.filter(c => c.status === 'late').map((session) => (
+                <div key={session.id} className="flex items-center justify-between p-3 rounded-lg bg-card border">
+                  <div className="flex items-center gap-3">
+                    <XCircle className="h-5 w-5 text-destructive" />
+                    <div>
+                      <p className="font-medium">Class Not Started</p>
+                      <p className="text-sm text-muted-foreground">
+                        {session.studentName}'s class with {session.teacherName} is late
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    Take Action
+                  </Button>
                 </div>
-              </div>
-              <Button variant="outline" size="sm">
-                Take Action
-              </Button>
+              ))}
             </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-card border">
-              <div className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-accent" />
-                <div>
-                  <p className="font-medium">Extended Class</p>
-                  <p className="text-sm text-muted-foreground">Yusuf Ibrahim's class has exceeded the scheduled duration</p>
-                </div>
-              </div>
-              <Button variant="outline" size="sm">
-                Notify
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </MainLayout>
   );
 }
