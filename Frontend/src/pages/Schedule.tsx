@@ -119,23 +119,8 @@ export default function Schedule() {
         matchesWeek = isCurrentWeek;
       }
       
-      // Role-based filtering
+      // All roles can see all classes - no role-based filtering
       let matchesRole = true;
-      if (currentUser?.role === 'teacher') {
-        // Teachers can only see their own classes
-        matchesRole = s.teacherId?._id === currentUser.id || 
-                      s.teacherId === currentUser.id || 
-                      s.teacherName === currentUser.name;
-      } else if (currentUser?.role === 'student') {
-        // Students can only see their own classes
-        const currentStudentId = currentUser.id || (currentUser as any)._id || (currentUser as any).studentId;
-        const scheduleStudentId = typeof s.studentId === 'object' && s.studentId !== null 
-          ? (s.studentId as any)._id || (s.studentId as any).id
-          : s.studentId;
-        
-        matchesRole = scheduleStudentId === currentStudentId || s.studentName === currentUser.name;
-      }
-      // Admin and team_leader can see all
       
       return matchesDay && matchesTeacher && matchesWeek && matchesRole;
     });
@@ -317,21 +302,33 @@ export default function Schedule() {
           />
         )}
 
-        {/* Edit Button - Only for teachers and admin */}
-        {(currentUser?.role === "teacher" || currentUser?.role === "admin" || currentUser?.role === "team_leader" || currentUser?.role === "sales_team") && (
-          <Button
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              setCurrent(slot);
-              setIsEditOpen(true);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
-          >
-            <Pencil className="h-3 w-3 mr-1" />
-            Edit
-          </Button>
-        )}
+        {/* Edit Button - Available for all roles */}
+        <Button
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            setCurrent(slot);
+            setIsEditOpen(true);
+          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
+        >
+          <Pencil className="h-3 w-3 mr-1" />
+          Edit
+        </Button>
+
+        {/* Delete Button - Available for all roles */}
+        <Button
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            setCurrent(slot);
+            setIsDeleteOpen(true);
+          }}
+          className="bg-red-600 hover:bg-red-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
+        >
+          <Trash2 className="h-3 w-3 mr-1" />
+          Delete
+        </Button>
       </div>
     </div>
 
