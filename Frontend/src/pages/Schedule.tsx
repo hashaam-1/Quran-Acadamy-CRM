@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import StartClassButton from "@/components/zoom/StartClassButton";
-import JoinClassButton from "@/components/zoom/JoinClassButton";
 import {
   Select,
   SelectContent,
@@ -32,17 +30,10 @@ import {
   Calendar,
   Pencil,
   Trash2,
-  Grid3x3,
-  List,
-  ClipboardCheck,
 } from "lucide-react";
-import { ClassSchedule } from "@/lib/store";
+import { useCRMStore, ClassSchedule } from "@/lib/store";
 import { ScheduleForm } from "@/components/forms/ScheduleForm";
-import JoinClassButtonClean from "@/components/zoom/ZoomMeetingClean";
 import { toast } from "sonner";
-import { useSchedules, useCreateSchedule, useUpdateSchedule, useDeleteSchedule } from "@/hooks/useSchedules";
-import { useTeachers } from "@/hooks/useTeachers";
-import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 
 const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -61,72 +52,15 @@ const courseColors = {
   Tajweed: "bg-primary/10 text-primary",
 };
 
-const courseBlockColors: Record<string, string> = {
-  Qaida: "bg-blue-500",
-  Nazra: "bg-red-500",
-  Hifz: "bg-yellow-500",
-  Tajweed: "bg-green-500",
-};
-
-// Generate time slots from 12 AM to 11 PM
-const generateTimeSlots = () => {
-  const slots = [];
-  for (let hour = 0; hour < 24; hour++) {
-    const period = hour < 12 ? 'AM' : 'PM';
-    const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-    slots.push({
-      hour,
-      label: `${displayHour} ${period}`,
-    });
-  }
-  return slots;
-};
-
-const timeSlots = generateTimeSlots();
-
-// Production-ready system uses real meeting numbers from database
-// No need for generateMeetingNumber function anymore
-
-// Parse time string to hour (24-hour format)
-const parseTimeToHour = (timeStr: string): number => {
-  const match = timeStr.match(/(\d+):?(\d+)?\s*(AM|PM)/i);
-  if (!match) return 0;
-  
-  let hour = parseInt(match[1]);
-  const period = match[3].toUpperCase();
-  
-  if (period === 'PM' && hour !== 12) {
-    hour += 12;
-  } else if (period === 'AM' && hour === 12) {
-    hour = 0;
-  }
-  
-  return hour;
-};
-
-// Calculate duration in hours
-const parseDuration = (durationStr: string): number => {
-  const match = durationStr.match(/(\d+)\s*min/);
-  if (match) {
-    return parseInt(match[1]) / 60;
-  }
-  return 1;
-};
-
 export default function Schedule() {
-  const { data: schedules = [], isLoading: schedulesLoading } = useSchedules();
-  const { data: teachers = [], isLoading: teachersLoading } = useTeachers();
-  const { currentUser } = useAuthStore();
-  const createSchedule = useCreateSchedule();
-  const updateScheduleMutation = useUpdateSchedule();
-  const deleteScheduleMutation = useDeleteSchedule();
+  const { schedules, teachers, addSchedule, updateSchedule, deleteSchedule } = useCRMStore();
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [teacherFilter, setTeacherFilter] = useState("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [current, setCurrent] = useState<ClassSchedule | null>(null);
-  
+
   const getWeekDates = () => {
     const start = new Date(currentWeek);
     start.setDate(start.getDate() - start.getDay() + 1);
@@ -145,135 +79,35 @@ export default function Schedule() {
   const weekDates = getWeekDates();
 
   const getSchedulesByDay = (day: string) => {
-    console.log('Filtering schedules for day:', day, 'currentUser:', currentUser);
-    console.log('All schedules:', schedules.map(s => ({
-      id: s.id || s._id,
-      day: s.day,
-      teacherId: s.teacherId,
-      teacherName: s.teacherName,
-      studentName: s.studentName
-    })));
-    const filteredSchedules = schedules.filter(s => {
+    return schedules.filter(s => {
       const matchesDay = s.day === day;
       const matchesTeacher = teacherFilter === "all" || s.teacherId === teacherFilter;
-      
-      // Role-based filtering
-      let matchesRole = true;
-      if (currentUser?.role === 'teacher') {
-        // Teachers can only see their own classes
-        matchesRole = s.teacherId?._id === currentUser.id || 
-                      s.teacherId === currentUser.id || 
-                      s.teacherName === currentUser.name;
-      } else if (currentUser?.role === 'student') {
-        // Students can only see their own classes
-        const currentStudentId = currentUser.id || (currentUser as any)._id || (currentUser as any).studentId;
-        const scheduleStudentId = typeof s.studentId === 'object' && s.studentId !== null 
-          ? (s.studentId as any)._id || (s.studentId as any).id
-          : s.studentId;
-        
-        matchesRole = scheduleStudentId === currentStudentId || s.studentName === currentUser.name;
-        console.log('Student schedule check:', {
-          scheduleStudentId,
-          currentStudentId,
-          studentName: s.studentName,
-          currentUserName: currentUser.name,
-          matchesRole
-        });
-      }
-      // Admin and team_leader can see all
-      
-      const result = matchesDay && matchesTeacher && matchesRole;
-      if (currentUser?.role === 'student' && matchesDay) {
-        console.log('Schedule item:', {
-          studentName: s.studentName,
-          studentId: s.studentId,
-          day: s.day,
-          matchesDay,
-          matchesRole,
-          result
-        });
-      }
-      
-      return result;
+      return matchesDay && matchesTeacher;
     });
-    console.log('Filtered schedules for student:', filteredSchedules);
-    return filteredSchedules;
   };
 
   const handleAdd = (data: Omit<ClassSchedule, 'id'>) => {
-    createSchedule.mutate(data, {
-      onSuccess: () => {
-        setIsAddOpen(false);
-      }
-    });
+    addSchedule(data);
+    toast.success("Class scheduled successfully");
   };
 
   const handleEdit = (data: Omit<ClassSchedule, 'id'>) => {
     if (current) {
-      const scheduleId = (current as any)._id || current.id;
-      updateScheduleMutation.mutate({ id: scheduleId, data }, {
-        onSuccess: () => {
-          setIsEditOpen(false);
-          setCurrent(null);
-        }
-      });
+      updateSchedule(current.id, data);
+      toast.success("Schedule updated");
     }
   };
 
   const handleDelete = () => {
     if (current) {
-      const scheduleId = (current as any)._id || current.id;
-      deleteScheduleMutation.mutate(scheduleId, {
-        onSuccess: () => {
-          setIsDeleteOpen(false);
-          setCurrent(null);
-        }
-      });
+      deleteSchedule(current.id);
+      setIsDeleteOpen(false);
+      toast.success("Class deleted");
     }
-  };
-
-  
-  // Get schedules for a specific day and time slot (for grid view)
-  const getSchedulesForSlot = (day: string, hour: number) => {
-    return getSchedulesByDay(day).filter(schedule => {
-      const scheduleHour = parseTimeToHour(schedule.time);
-      const duration = parseDuration(schedule.duration);
-      return hour >= scheduleHour && hour < scheduleHour + duration;
-    });
-  };
-
-  // Count classes per day (for grid view)
-  const getClassCountForDay = (day: string) => {
-    return getSchedulesByDay(day).length;
   };
 
   const todayClassCount = schedules.filter(s => s.day === weekDays[new Date().getDay() - 1]).length;
   const completedToday = schedules.filter(s => s.day === weekDays[new Date().getDay() - 1] && s.status === 'completed').length;
-
-  // Filter schedules based on teacher and role
-  const filteredSchedules = schedules.filter(schedule => {
-    const matchesTeacher = teacherFilter === "all" || schedule.teacherId === teacherFilter;
-    
-    // Role-based filtering
-    let matchesRole = true;
-    if (currentUser?.role === 'teacher') {
-      // Teachers can only see their own classes
-      matchesRole = schedule.teacherId?._id === currentUser.id || 
-                    schedule.teacherId === currentUser.id || 
-                    schedule.teacherName === currentUser.name;
-    } else if (currentUser?.role === 'student') {
-      // Students can only see their own classes
-      const currentStudentId = currentUser.id || (currentUser as any)._id || (currentUser as any).studentId;
-      const scheduleStudentId = typeof schedule.studentId === 'object' && schedule.studentId !== null 
-        ? (schedule.studentId as any)._id || (schedule.studentId as any).id
-        : schedule.studentId;
-      
-      matchesRole = scheduleStudentId === currentStudentId || schedule.studentName === currentUser.name;
-    }
-    // Admin and team_leader can see all
-    
-    return matchesTeacher && matchesRole;
-  });
 
   return (
     <MainLayout title="Class Schedule" subtitle="Weekly timetable view">
@@ -299,24 +133,108 @@ export default function Schedule() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Teachers</SelectItem>
-              {teachers.map((teacher) => {
-                const teacherId = (teacher as any)._id || teacher.id;
-                return (
-                  <SelectItem key={teacherId} value={teacherId}>{teacher.name}</SelectItem>
-                );
-              })}
+              {teachers.map((teacher) => (
+                <SelectItem key={teacher.id} value={teacher.id}>{teacher.name}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          {(currentUser?.role === 'admin' || currentUser?.role === 'team_leader' || currentUser?.role === 'sales_team') && (
-            <Button className="gap-2" onClick={() => setIsAddOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Add Class
-            </Button>
-          )}
+          <Button className="gap-2" onClick={() => setIsAddOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Add Class
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <Card className="animate-slide-up overflow-hidden">
+        <CardContent className="p-0">
+          <div className="grid grid-cols-7 border-b">
+            {weekDates.map((date) => (
+              <div
+                key={date.day}
+                className={cn(
+                  "p-4 text-center border-r last:border-r-0",
+                  date.isToday && "bg-primary/5"
+                )}
+              >
+                <p className="text-sm text-muted-foreground">{date.day}</p>
+                <p className={cn(
+                  "text-2xl font-bold mt-1",
+                  date.isToday && "text-primary"
+                )}>
+                  {date.date}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 min-h-[500px]">
+            {weekDays.map((day) => (
+              <div
+                key={day}
+                className={cn(
+                  "border-r last:border-r-0 p-2 space-y-2",
+                  weekDates.find(d => d.day === day)?.isToday && "bg-primary/5"
+                )}
+              >
+                {getSchedulesByDay(day).map((slot) => (
+                  <div
+                    key={slot.id}
+                    className={cn(
+                      "p-3 rounded-lg bg-card border-l-4 shadow-soft hover:shadow-medium transition-all cursor-pointer group",
+                      statusConfig[slot.status].color
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <Badge className={cn("text-xs", courseColors[slot.course as keyof typeof courseColors])}>
+                        {slot.course}
+                      </Badge>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-5 w-5 p-0"
+                          onClick={() => { setCurrent(slot); setIsEditOpen(true); }}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-5 w-5 p-0 text-destructive"
+                          onClick={() => { setCurrent(slot); setIsDeleteOpen(true); }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="font-medium text-sm truncate">{slot.studentName}</p>
+                    <p className="text-xs text-muted-foreground truncate">{slot.teacherName}</p>
+                    <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      <span>{slot.time}</span>
+                      <span>â¢</span>
+                      <span>{slot.duration}</span>
+                    </div>
+                    {slot.status === "in_progress" && (
+                      <Button size="sm" variant="success" className="w-full mt-2 h-7 text-xs">
+                        <Video className="h-3 w-3 mr-1" />
+                        Join Now
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                {getSchedulesByDay(day).length === 0 && (
+                  <div className="h-full flex items-center justify-center">
+                    <p className="text-xs text-muted-foreground">No classes</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         <Card variant="stat" className="animate-slide-up">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -330,12 +248,11 @@ export default function Schedule() {
             </div>
           </CardContent>
         </Card>
-
-        <Card variant="stat" className="animate-slide-up" style={{ animationDelay: "0.1s" }}>
+        <Card variant="stat" className="animate-slide-up">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
-                <ClipboardCheck className="h-5 w-5 text-success" />
+                <User className="h-5 w-5 text-success" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{completedToday}</p>
@@ -344,12 +261,11 @@ export default function Schedule() {
             </div>
           </CardContent>
         </Card>
-
-        <Card variant="stat" className="animate-slide-up" style={{ animationDelay: "0.2s" }}>
+        <Card variant="stat" className="animate-slide-up">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                <Clock className="h-5 w-5 text-accent" />
+              <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
+                <Clock className="h-5 w-5 text-warning" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{schedules.length}</p>
@@ -358,144 +274,6 @@ export default function Schedule() {
             </div>
           </CardContent>
         </Card>
-      </div>
-      <Card className="animate-slide-up overflow-hidden">
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <div className="min-w-[1200px]">
-              {/* Schedule Grid View */}
-              <div className="overflow-x-auto">
-                <div className="min-w-[1200px]">
-                  {/* Grid Header */}
-                  <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-0 border border-b bg-muted/30">
-                    <div className="p-3 border-r border-b font-medium text-sm">Time</div>
-                    {weekDays.map((day, index) => (
-                      <div
-                        key={day}
-                        className={cn(
-                          "p-3 border-r border-b text-center font-medium text-sm",
-                          index === 6 && "border-r-0"
-                        )}
-                      >
-                        {day}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Time Slots Grid */}
-                  <div className="grid grid-cols-[126px_repeat(7,1fr)] gap-0 border border-l-0 border-t-0 border-r-0">
-                    {timeSlots.map((slot) => (
-                      <React.Fragment key={slot.hour}>
-                        {/* Time Label */}
-                        <div className="min-h-[140px] border-r border-b flex items-center justify-center p-3 bg-muted/20">
-                          <span className="text-sm text-muted-foreground font-medium">
-                            {slot.label}
-                          </span>
-                        </div>
-
-                        {/* Day Columns */}
-                        {weekDays.map((day, dayIndex) => {
-                          const schedulesInSlot = getSchedulesByDay(day).filter(schedule => {
-                            const scheduleHour = parseTimeToHour(schedule.time);
-                            const duration = parseDuration(schedule.duration);
-                            return slot.hour >= scheduleHour && slot.hour < scheduleHour + duration;
-                          });
-
-                          const isToday = weekDates.find(d => d.day === day)?.isToday;
-
-                          return (
-                            <div
-                              key={`${day}-${slot.hour}`}
-                              className={cn(
-                                "min-h-[140px] border-r border-b relative",
-                                isToday && "bg-primary/5",
-                                dayIndex === 6 && "border-r-0"
-                              )}
-                            >
-                              {schedulesInSlot.length > 0 ? (
-                                <div className="p-2 h-full">
-                                  {schedulesInSlot.map((schedule, idx) => (
-                                    <div
-                                      key={schedule.id || schedule._id || idx}
-                                      className={cn(
-                                          "relative bg-white border border-gray-200 rounded-lg p-3",
-                                          courseBlockColors[schedule.course as keyof typeof courseBlockColors] && 
-                                          `bg-opacity-20 border-l-4 border-l-[${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}]`,
-                                          schedule.course === 'Qaida' && 'bg-blue-100',
-                                          schedule.course === 'Nazra' && 'bg-green-100',
-                                          schedule.course === 'Hifz' && 'bg-yellow-100',
-                                          schedule.course === 'Tajweed' && 'bg-purple-100'
-                                        )}
-                                    >
-                                      {/* Background Pattern */}
-                                      <div className="absolute inset-0 opacity-5">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"></div>
-                                      </div>
-                                      
-                                      <div className="relative">
-                                        {/* Header */}
-                                        <div className="flex items-center justify-between mb-4">
-                                          <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
-                                              <Video className="w-5 h-5 text-white" />
-                                            </div>
-                                            <div>
-                                              <h4 className="font-bold text-base text-gray-900 tracking-tight truncate">{schedule.studentName}</h4>
-                                              <p className="text-sm font-medium text-gray-600 truncate">{schedule.course}</p>
-                                            </div>
-                                          </div>
-                                          <Badge className="bg-gradient-to-r from-emerald-100 to-cyan-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full shadow-md border border-emerald-200">
-                                            {schedule.course}
-                                          </Badge>
-                                        </div>
-
-                                        {/* Content */}
-                                        <div className="relative space-y-3 mb-4">
-                                          <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg p-2">
-                                            <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-500 rounded flex items-center justify-center">
-                                              <User className="w-3 h-3 text-white" />
-                                            </div>
-                                            <span className="font-medium truncate">{schedule.teacherName}</span>
-                                          </div>
-                                          <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg p-2">
-                                            <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-purple-500 rounded flex items-center justify-center">
-                                              <Clock className="w-3 h-3 text-white" />
-                                            </div>
-                                            <span className="font-medium">{schedule.time}</span>
-                                            <span className="font-medium">â¢</span>
-                                            <span className="font-medium">{schedule.duration}</span>
-                                          </div>
-                                        </div>
-
-                                                                              </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div className="h-full bg-gray-50 hover:bg-gray-100 transition-colors"></div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </React.Fragment>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Legend */}
-      <div className="mt-6 flex items-center gap-6">
-        <div className="text-sm font-semibold">Course Types:</div>
-        {Object.entries(courseBlockColors).map(([course, color]) => (
-          <div key={course} className="flex items-center gap-2">
-            <div className={cn("w-4 h-4 rounded", color)}></div>
-            <span className="text-sm">{course}</span>
-          </div>
-        ))}
       </div>
 
       <ScheduleForm
