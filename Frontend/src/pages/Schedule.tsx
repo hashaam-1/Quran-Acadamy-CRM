@@ -33,6 +33,8 @@ import {
 } from "lucide-react";
 import { useCRMStore, ClassSchedule } from "@/lib/store";
 import { ScheduleForm } from "@/components/forms/ScheduleForm";
+import StartClassButton from "@/components/zoom/StartClassButton";
+import JoinClassButton from "@/components/zoom/JoinClassButton";
 import { toast } from "sonner";
 import { useSchedules, useCreateSchedule, useUpdateSchedule, useDeleteSchedule } from "@/hooks/useSchedules";
 import { useTeachers } from "@/hooks/useTeachers";
@@ -228,22 +230,51 @@ export default function Schedule() {
                         {slot.course}
                       </Badge>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-5 w-5 p-0"
-                          onClick={() => { setCurrent(slot); setIsEditOpen(true); }}
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-5 w-5 p-0 text-destructive"
-                          onClick={() => { setCurrent(slot); setIsDeleteOpen(true); }}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                        {/* Join Class Button - visible for teachers and students */}
+                        {(currentUser?.role === 'teacher' || currentUser?.role === 'student') && (
+                          <>
+                            {currentUser?.role === 'teacher' ? (
+                              <StartClassButton 
+                                scheduleId={slot.id || slot._id}
+                                studentId={typeof slot.studentId === 'object' ? slot.studentId._id : slot.studentId}
+                                studentName={slot.studentName}
+                                course={slot.course}
+                                time={slot.time}
+                                className="h-5 w-5 p-0 bg-green-600 hover:bg-green-700 text-white"
+                              />
+                            ) : (
+                              <JoinClassButton 
+                                meetingNumber={slot.meetingNumber}
+                                teacherName={slot.teacherName}
+                                course={slot.course}
+                                time={slot.time}
+                                className="h-5 w-5 p-0 bg-blue-600 hover:bg-blue-700 text-white"
+                              />
+                            )}
+                          </>
+                        )}
+                        
+                        {/* Edit/Delete Buttons - visible for admin and team_leader */}
+                        {(currentUser?.role === 'admin' || currentUser?.role === 'team_leader' || currentUser?.role === 'sales_team') && (
+                          <>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-5 w-5 p-0"
+                              onClick={() => { setCurrent(slot); setIsEditOpen(true); }}
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-5 w-5 p-0 text-destructive"
+                              onClick={() => { setCurrent(slot); setIsDeleteOpen(true); }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
                     <p className="font-medium text-sm truncate">{slot.studentName}</p>
