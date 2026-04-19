@@ -355,7 +355,7 @@ export default function StudentZoomJoiner({
               {mySchedules.map((schedule) => (
   <div
     key={schedule._id}
-    className="group relative rounded-2xl bg-white border border-gray-200 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+    className="rounded-2xl bg-white border border-gray-200 shadow-md"
   >
     {/* Card Body */}
     <div className="p-6">
@@ -390,36 +390,6 @@ export default function StudentZoomJoiner({
           <Clock className="w-4 h-4 text-gray-400" />
           {schedule.day} - {schedule.time}
         </div>
-      </div>
-    </div>
-
-    {/* Hover Overlay */}
-    <div className="absolute inset-0 bg-black/70 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center z-20">
-      <div className="flex gap-3">
-        
-        {/* Join Button */}
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleJoinClass(schedule._id);
-          }}
-          className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl"
-        >
-          <Video className="w-4 h-4 mr-2" />
-          Join Class
-        </Button>
-
-        {/* Edit Button */}
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleEditSchedule(schedule);
-          }}
-          className="bg-white text-gray-800 hover:bg-gray-100 px-5 py-2 rounded-xl"
-        >
-          <Pencil className="w-4 h-4 mr-2" />
-          Edit
-        </Button>
       </div>
     </div>
   </div>
