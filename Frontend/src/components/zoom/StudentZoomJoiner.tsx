@@ -353,89 +353,77 @@ export default function StudentZoomJoiner({
           {mySchedules.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-visible">
               {mySchedules.map((schedule) => (
-                <div
-                  key={schedule._id}
-                  className="group relative bg-gradient-to-br from-white via-white to-gray-50 border-0 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 ease-out overflow-hidden cursor-pointer transform hover:-translate-y-1"
-                >
-                  {/* Background Pattern */}
-                  <div className="absolute inset-0 opacity-5">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"></div>
-                  </div>
-                  
-                  {/* Header */}
-                  <div className="relative flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Video className="w-7 h-7 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-xl text-gray-900 tracking-tight">
-                          {schedule.className}
-                        </h3>
-                        <p className="text-sm font-medium text-gray-600">{schedule.course}</p>
-                      </div>
-                    </div>
-                    <Badge className="bg-gradient-to-r from-emerald-100 to-cyan-100 text-emerald-800 text-sm font-semibold px-4 py-2 rounded-full shadow-md border border-emerald-200">
-                      {schedule.status || 'Scheduled'}
-                    </Badge>
-                  </div>
+  <div
+    key={schedule._id}
+    className="group relative rounded-2xl bg-white border border-gray-200 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+  >
+    {/* Card Body */}
+    <div className="p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
+            <Video className="w-6 h-6 text-white" />
+          </div>
 
-                  {/* Content */}
-                  <div className="relative space-y-4 mb-6">
-                    <div className="flex items-center gap-3 text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg flex items-center justify-center">
-                        <User className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="font-medium">Teacher: {schedule.teacherName}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-600 bg-gray-50 rounded-xl p-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-purple-500 rounded-lg flex items-center justify-center">
-                        <Clock className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="font-medium">{schedule.day} at {schedule.time}</span>
-                    </div>
-                  </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">
+              {schedule.className}
+            </h3>
+            <p className="text-sm text-gray-500">{schedule.course}</p>
+          </div>
+        </div>
 
-                  {/* Clean Hover Buttons - Single Shade, Centered */}
-                  <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out rounded-2xl z-50 flex items-center justify-center pointer-events-none">
-                    <div className="flex gap-4 pointer-events-auto">
-                      
-                      <Button
-                        className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-6 py-3 font-semibold rounded-xl transition-all duration-200 hover:scale-105 flex items-center gap-2"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleJoinClass(schedule._id);
-                        }}
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Joining...
-                          </>
-                        ) : (
-                          <>
-                            <Video className="w-4 h-4" />
-                            Join Class
-                          </>
-                        )}
-                      </Button>
+        <Badge className="bg-blue-100 text-blue-700">
+          {schedule.status || "Scheduled"}
+        </Badge>
+      </div>
 
-                      <Button
-                        className="bg-white hover:bg-gray-50 text-gray-800 shadow-lg px-6 py-3 font-semibold rounded-xl transition-all duration-200 hover:scale-105 flex items-center gap-2 border border-gray-300"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleEditSchedule(schedule);
-                        }}
-                      >
-                        <Pencil className="w-4 h-4" />
-                        Edit
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+      {/* Info */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <User className="w-4 h-4 text-gray-400" />
+          {schedule.teacherName}
+        </div>
+
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Clock className="w-4 h-4 text-gray-400" />
+          {schedule.day} - {schedule.time}
+        </div>
+      </div>
+    </div>
+
+    {/* Hover Overlay */}
+    <div className="absolute inset-0 bg-black/70 rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center z-20">
+      <div className="flex gap-3">
+        
+        {/* Join Button */}
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleJoinClass(schedule._id);
+          }}
+          className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl"
+        >
+          <Video className="w-4 h-4 mr-2" />
+          Join Class
+        </Button>
+
+        {/* Edit Button */}
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleEditSchedule(schedule);
+          }}
+          className="bg-white text-gray-800 hover:bg-gray-100 px-5 py-2 rounded-xl"
+        >
+          <Pencil className="w-4 h-4 mr-2" />
+          Edit
+        </Button>
+      </div>
+    </div>
+  </div>
+))}
             </div>
           )}
         </div>
