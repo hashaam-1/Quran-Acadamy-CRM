@@ -246,7 +246,7 @@ export default function ZoomMeetingClean() {
       
       // Initialize Zoom SDK with correct v6.0.0 options
       ZoomMtg.init({
-        leaveUrl: '/',
+        leaveUrl: '/schedule',
         disablePreview: true,
         success: () => {
           console.log('Zoom SDK initialized successfully');
@@ -306,7 +306,7 @@ export default function ZoomMeetingClean() {
   const leaveMeeting = () => {
     try {
       setIsJoined(false);
-      navigate('/dashboard');
+      navigate('/schedule');
       toast.success('Left meeting');
     } catch (error) {
       console.error('Error leaving meeting:', error);
@@ -323,10 +323,10 @@ export default function ZoomMeetingClean() {
               <p className="text-gray-600">Meeting ID: {meetingNumber || 'N/A'}</p>
             </div>
             <Button 
-              onClick={() => navigate('/dashboard')} 
+              onClick={() => navigate('/schedule')} 
               variant="outline"
             >
-              Back to Dashboard
+              Back to Schedule
             </Button>
           </div>
 
