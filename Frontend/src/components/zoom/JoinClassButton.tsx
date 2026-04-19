@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Video, Users, Calendar, Clock, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface JoinClassButtonProps {
@@ -36,6 +37,7 @@ export default function JoinClassButton({
   const [meeting, setMeeting] = useState<any>(null);
   const [error, setError] = useState('');
   const { currentUser } = useAuthStore();
+  const navigate = useNavigate();
 
   const handleJoinClass = async () => {
     if (!currentUser) {
@@ -184,10 +186,10 @@ export default function JoinClassButton({
           if (joinResponse.ok) {
             toast.success('Joined class successfully!');
             
-            // Open Zoom meeting directly for student (role: 0)
+            // Open Zoom meeting directly for student (role: 0) in same tab
             const zoomUrl = `/zoom-join?meetingNumber=${meetingToJoin}&role=0`;
-            console.log('Opening Zoom directly:', zoomUrl);
-            window.open(zoomUrl, '_blank');
+            console.log('Opening Zoom in same tab:', zoomUrl);
+            navigate(zoomUrl);
           } else {
             throw new Error(joinData.error || joinData.message || 'Failed to join class');
           }
