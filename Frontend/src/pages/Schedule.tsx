@@ -227,22 +227,8 @@ export default function Schedule() {
   >
     {/* Hover Overlay */}
     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-lg z-20">
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2">
         
-        {/* Edit Button */}
-        <Button
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            setCurrent(slot);
-            setIsEditOpen(true);
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
-        >
-          <Pencil className="h-3 w-3 mr-1" />
-          Edit
-        </Button>
-
         {/* Join Class Button */}
         {currentUser?.role === "teacher" ? (
           <StartClassButton
@@ -265,6 +251,22 @@ export default function Schedule() {
             time={slot.time}
             className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
           />
+        )}
+
+        {/* Edit Button - Only for teachers and admin */}
+        {(currentUser?.role === "teacher" || currentUser?.role === "admin" || currentUser?.role === "team_leader" || currentUser?.role === "sales_team") && (
+          <Button
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setCurrent(slot);
+              setIsEditOpen(true);
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
+          >
+            <Pencil className="h-3 w-3 mr-1" />
+            Edit
+          </Button>
         )}
       </div>
     </div>
