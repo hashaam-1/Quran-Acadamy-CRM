@@ -255,54 +255,90 @@ export default function TeacherZoomManager({
           {[...scheduledMeetings, ...liveMeetings].length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-visible">
               {[...scheduledMeetings, ...liveMeetings].map((meeting) => (
-                <div
-                  key={meeting._id}
-                  className="rounded-2xl bg-white border border-gray-200 shadow-md"
-                >
-                  {/* Card Body */}
-                  <div className="p-6">
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
-                          <Video className="w-6 h-6 text-white" />
-                        </div>
+  <div
+    key={meeting._id}
+    className="group relative rounded-2xl bg-white border border-gray-200 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
+  >
+    {/* Hover Overlay */}
+    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center z-10">
+      <div className="flex gap-3">
+        {/* Join Button */}
+        <Button
+          onClick={() => handleJoinMeeting(meeting)}
+          className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl"
+        >
+          <Play className="w-4 h-4 mr-2" />
+          Join Class
+        </Button>
 
-                        <div>
-                          <h3 className="text-lg font-bold text-gray-900">
-                            {meeting.className}
-                          </h3>
-                          <p className="text-sm text-gray-500">{meeting.course}</p>
-                        </div>
-                      </div>
+        {/* Edit Button */}
+        <Button
+          onClick={() => handleEditMeeting(meeting)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl"
+        >
+          <Pencil className="w-4 h-4 mr-2" />
+          Edit
+        </Button>
 
-                      <Badge className="bg-blue-100 text-blue-700">
-                        {meeting.status}
-                      </Badge>
-                    </div>
+        {/* End Button */}
+        {meeting.status === "live" && (
+          <Button
+            onClick={() => handleEndClass(meeting._id)}
+            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-xl"
+          >
+            <Square className="w-4 h-4 mr-2" />
+            End
+          </Button>
+        )}
+      </div>
+    </div>
 
-                    {/* Info */}
-                    <div className="space-y-3">
-                      {meeting.studentName && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <User className="w-4 h-4 text-gray-400" />
-                          {meeting.studentName}
-                        </div>
-                      )}
-                      {meeting.time && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Clock className="w-4 h-4 text-gray-400" />
-                          {meeting.time} {meeting.duration && `â¢ ${meeting.duration}`}
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        Created: {formatTime(meeting.createdAt)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+    {/* Card Body */}
+    <div className="p-6 relative z-0">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
+            <Video className="w-6 h-6 text-white" />
+          </div>
+
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">
+              {meeting.className}
+            </h3>
+            <p className="text-sm text-gray-500">{meeting.course}</p>
+          </div>
+        </div>
+
+        <Badge className="bg-blue-100 text-blue-700 capitalize">
+          {meeting.status}
+        </Badge>
+      </div>
+
+      {/* Info */}
+      <div className="space-y-3">
+        {meeting.studentName && (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <User className="w-4 h-4 text-gray-400" />
+            {meeting.studentName}
+          </div>
+        )}
+
+        {meeting.time && (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Clock className="w-4 h-4 text-gray-400" />
+            {meeting.time}
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Clock className="w-4 h-4 text-gray-400" />
+          Created: {formatTime(meeting.createdAt)}
+        </div>
+      </div>
+    </div>
+  </div>
+))}
             </div>
           )}
         </div>
