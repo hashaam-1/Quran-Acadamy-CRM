@@ -15,6 +15,9 @@ interface JoinClassButtonProps {
   course?: string;
   time?: string;
   disabled?: boolean;
+  scheduleId?: string;
+  studentId?: string;
+  studentName?: string;
 }
 
 export default function JoinClassButton({ 
@@ -23,7 +26,10 @@ export default function JoinClassButton({
   teacherName = "",
   course = "",
   time = "",
-  disabled = false
+  disabled = false,
+  scheduleId,
+  studentId,
+  studentName
 }: JoinClassButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -113,15 +119,10 @@ export default function JoinClassButton({
         e.preventDefault();
         e.stopPropagation();
         
-        console.log('JoinClassButton clicked', { meetingNumber, currentUser: currentUser?.name, role: currentUser?.role });
+        console.log('JoinClassButton clicked', { meetingNumber, scheduleId, currentUser: currentUser?.name, role: currentUser?.role });
         
         if (!currentUser) {
           toast.error('Please login to join class');
-          return;
-        }
-
-        if (!meetingNumber) {
-          toast.error('Class has not started yet. Please wait for the teacher to start the class.');
           return;
         }
 
@@ -129,8 +130,47 @@ export default function JoinClassButton({
         setError('');
 
         try {
-          // Register the student as joining the meeting
-          const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${meetingNumber}`, {
+          let meetingToJoin = meetingNumber;
+
+          // If no meeting number exists, create one first
+          if (!meetingNumber && scheduleId) {
+            console.log('No meeting number, creating meeting for schedule:', scheduleId);
+            
+            const createResponse = await fetch('https://quran-acadamy-crm-production.up.railway.app/api/meetings/start-class', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify({
+                scheduleId,
+                className: course,
+                course,
+                teacherId: studentId, // For students, this is their own ID
+                teacherName: currentUser.name,
+                studentId,
+                studentName,
+                time
+              })
+            });
+
+            const createData = await createResponse.json();
+            console.log('Create meeting response:', createData);
+
+            if (createData.success) {
+              meetingToJoin = createData.meeting.meetingNumber;
+              toast.success('Meeting created successfully!');
+            } else {
+              throw new Error(createData.error || createData.message || 'Failed to create meeting');
+            }
+          }
+
+          if (!meetingToJoin) {
+            throw new Error('No meeting number available');
+          }
+
+          // Join the meeting
+          const joinResponse = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${meetingToJoin}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -138,18 +178,18 @@ export default function JoinClassButton({
             }
           });
 
-          const data = await response.json();
-          console.log('Join meeting response:', data);
+          const joinData = await joinResponse.json();
+          console.log('Join meeting response:', joinData);
 
-          if (response.ok) {
+          if (joinResponse.ok) {
             toast.success('Joined class successfully!');
             
-            // Open Zoom meeting for student (role: 0)
-            const zoomUrl = `/zoom-join?meetingNumber=${meetingNumber}&role=0`;
-            console.log('Opening Zoom:', zoomUrl);
+            // Open Zoom meeting directly for student (role: 0)
+            const zoomUrl = `/zoom-join?meetingNumber=${meetingToJoin}&role=0`;
+            console.log('Opening Zoom directly:', zoomUrl);
             window.open(zoomUrl, '_blank');
           } else {
-            throw new Error(data.error || data.message || 'Failed to join class');
+            throw new Error(joinData.error || joinData.message || 'Failed to join class');
           }
         } catch (err) {
           console.error('Error joining class:', err);

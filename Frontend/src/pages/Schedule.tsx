@@ -217,7 +217,20 @@ export default function Schedule() {
                   weekDates.find(d => d.day === day)?.isToday && "bg-primary/5"
                 )}
               >
-                {getSchedulesByDay(day).map((slot) => (
+                {getSchedulesByDay(day).map((slot) => {
+  // Debug logging for student schedule data
+  if (currentUser?.role === 'student') {
+    console.log('Student schedule slot:', {
+      id: slot.id,
+      status: slot.status,
+      meetingNumber: slot.meetingNumber,
+      course: slot.course,
+      studentName: slot.studentName,
+      teacherName: slot.teacherName
+    });
+  }
+
+  return (
   <div
     key={slot.id}
     className={cn(
@@ -244,16 +257,17 @@ export default function Schedule() {
             className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
           />
         ) : (
-          // Students can only join classes that are in progress and have a meeting number
-          slot.status === "in_progress" && slot.meetingNumber && (
-            <JoinClassButton
-              meetingNumber={slot.meetingNumber}
-              teacherName={slot.teacherName}
-              course={slot.course}
-              time={slot.time}
-              className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
-            />
-          )
+          // Students can join any scheduled class - will create meeting if needed
+          <JoinClassButton
+            meetingNumber={slot.meetingNumber}
+            teacherName={slot.teacherName}
+            course={slot.course}
+            time={slot.time}
+            scheduleId={slot.id || slot._id}
+            studentId={typeof slot.studentId === "object" ? slot.studentId?._id : slot.studentId}
+            studentName={slot.studentName}
+            className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
+          />
         )}
 
         {/* Edit Button - Only for teachers and admin */}
@@ -300,7 +314,8 @@ export default function Schedule() {
       </div>
     </div>
   </div>
-))}
+  );
+})}
                 {getSchedulesByDay(day).length === 0 && (
                   <div className="h-full flex items-center justify-center">
                     <p className="text-xs text-muted-foreground">No classes</p>
