@@ -64,7 +64,7 @@ export default function TeacherZoomManager({
   const [error, setError] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
-    const { currentUser } = useAuthStore();
+  const { currentUser } = useAuthStore();
 
   // Fetch teacher's meetings on component mount
   useEffect(() => {
@@ -184,7 +184,7 @@ export default function TeacherZoomManager({
     }
   };
 
-  
+
   const handleJoinMeeting = (meeting: Meeting) => {
     // Navigate to Zoom meeting - role will be determined by user type in ZoomMeetingClean component
     navigate(`/zoom-join?meetingNumber=${meeting.meetingNumber}`);
@@ -297,43 +297,16 @@ export default function TeacherZoomManager({
                     </div>
                   </div>
 
-                  {/* Hover Buttons - Improved */}
-                  <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out rounded-xl z-50 flex items-center justify-center pointer-events-none">
-                    <div className="flex gap-3 p-4 bg-white/20 rounded-xl backdrop-blur-sm border border-white/30 pointer-events-auto">
-                      
-                      {/* Always show both buttons for any status */}
-                      <>
-                        <Button
-                          className="bg-green-600 hover:bg-green-700 text-white shadow-2xl px-6 py-3 font-semibold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-green-600/50"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleJoinMeeting(meeting);
-                          }}
-                        >
-                          <Video className="w-4 h-4 mr-2" />
-                          Join Class
-                        </Button>
+                  {/* Hover Buttons */}
+                  <div className="absolute inset-0 z-50 rounded-xl bg-black/60 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex items-center justify-center">
+                    <div className="flex flex-wrap items-center justify-center gap-3 px-4">
 
-                        <Button
-                          variant="outline"
-                          className="bg-white hover:bg-gray-50 text-gray-800 shadow-2xl px-6 py-3 font-semibold rounded-xl border-2 border-gray-300 transition-all duration-200 hover:scale-105 hover:shadow-gray-400/50"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleEditMeeting(meeting);
-                          }}
-                        >
-                          <Pencil className="w-4 h-4 mr-2" />
-                          Edit
-                        </Button>
-                      </>
-
-                      {/* Original conditional buttons - kept as backup */}
-                      {false && meeting.status === "scheduled" && (
+                      {/* Scheduled Class */}
+                      {meeting.status === "scheduled" && (
                         <>
                           <Button
-                            className="bg-green-600 hover:bg-green-700 text-white shadow-2xl px-6 py-3 font-semibold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-green-600/50"
+                            type="button"
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-5"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -345,8 +318,9 @@ export default function TeacherZoomManager({
                           </Button>
 
                           <Button
+                            type="button"
                             variant="outline"
-                            className="bg-white hover:bg-gray-50 text-gray-800 shadow-2xl px-6 py-3 font-semibold rounded-xl border-2 border-gray-300 transition-all duration-200 hover:scale-105 hover:shadow-gray-400/50"
+                            className="bg-white text-gray-800 hover:bg-gray-100 shadow-lg px-5"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -359,11 +333,12 @@ export default function TeacherZoomManager({
                         </>
                       )}
 
-                      {/* Live Meeting */}
+                      {/* Live Class */}
                       {meeting.status === "live" && (
                         <>
                           <Button
-                            className="bg-green-600 hover:bg-green-700 text-white shadow-2xl px-6 py-3 font-semibold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-green-600/50"
+                            type="button"
+                            className="bg-green-600 hover:bg-green-700 text-white shadow-lg px-5"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -375,7 +350,8 @@ export default function TeacherZoomManager({
                           </Button>
 
                           <Button
-                            className="bg-red-600 hover:bg-red-700 text-white shadow-2xl px-6 py-3 font-semibold rounded-xl transition-all duration-200 hover:scale-105 hover:shadow-red-600/50"
+                            type="button"
+                            className="bg-red-600 hover:bg-red-700 text-white shadow-lg px-5"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -387,6 +363,7 @@ export default function TeacherZoomManager({
                           </Button>
                         </>
                       )}
+
                     </div>
                   </div>
                 </div>
