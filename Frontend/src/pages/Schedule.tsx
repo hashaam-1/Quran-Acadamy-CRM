@@ -34,6 +34,9 @@ import {
 import { useCRMStore, ClassSchedule } from "@/lib/store";
 import { ScheduleForm } from "@/components/forms/ScheduleForm";
 import { toast } from "sonner";
+import { useSchedules, useCreateSchedule, useUpdateSchedule, useDeleteSchedule } from "@/hooks/useSchedules";
+import { useTeachers } from "@/hooks/useTeachers";
+import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 
 const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -53,7 +56,12 @@ const courseColors = {
 };
 
 export default function Schedule() {
-  const { schedules, teachers, addSchedule, updateSchedule, deleteSchedule } = useCRMStore();
+  const { data: schedules = [], isLoading: schedulesLoading } = useSchedules();
+  const { data: teachers = [], isLoading: teachersLoading } = useTeachers();
+  const { currentUser } = useAuthStore();
+  const createSchedule = useCreateSchedule();
+  const updateScheduleMutation = useUpdateSchedule();
+  const deleteScheduleMutation = useDeleteSchedule();
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [teacherFilter, setTeacherFilter] = useState("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -82,27 +90,58 @@ export default function Schedule() {
     return schedules.filter(s => {
       const matchesDay = s.day === day;
       const matchesTeacher = teacherFilter === "all" || s.teacherId === teacherFilter;
-      return matchesDay && matchesTeacher;
+      
+      // Role-based filtering
+      let matchesRole = true;
+      if (currentUser?.role === 'teacher') {
+        // Teachers can only see their own classes
+        matchesRole = s.teacherId?._id === currentUser.id || 
+                      s.teacherId === currentUser.id || 
+                      s.teacherName === currentUser.name;
+      } else if (currentUser?.role === 'student') {
+        // Students can only see their own classes
+        const currentStudentId = currentUser.id || (currentUser as any)._id || (currentUser as any).studentId;
+        const scheduleStudentId = typeof s.studentId === 'object' && s.studentId !== null 
+          ? (s.studentId as any)._id || (s.studentId as any).id
+          : s.studentId;
+        
+        matchesRole = scheduleStudentId === currentStudentId || s.studentName === currentUser.name;
+      }
+      // Admin and team_leader can see all
+      
+      return matchesDay && matchesTeacher && matchesRole;
     });
   };
 
   const handleAdd = (data: Omit<ClassSchedule, 'id'>) => {
-    addSchedule(data);
-    toast.success("Class scheduled successfully");
+    createSchedule.mutate(data, {
+      onSuccess: () => {
+        setIsAddOpen(false);
+      }
+    });
   };
 
   const handleEdit = (data: Omit<ClassSchedule, 'id'>) => {
     if (current) {
-      updateSchedule(current.id, data);
-      toast.success("Schedule updated");
+      const scheduleId = (current as any)._id || current.id;
+      updateScheduleMutation.mutate({ id: scheduleId, data }, {
+        onSuccess: () => {
+          setIsEditOpen(false);
+          setCurrent(null);
+        }
+      });
     }
   };
 
   const handleDelete = () => {
     if (current) {
-      deleteSchedule(current.id);
-      setIsDeleteOpen(false);
-      toast.success("Class deleted");
+      const scheduleId = (current as any)._id || current.id;
+      deleteScheduleMutation.mutate(scheduleId, {
+        onSuccess: () => {
+          setIsDeleteOpen(false);
+          setCurrent(null);
+        }
+      });
     }
   };
 
