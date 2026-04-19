@@ -89,9 +89,35 @@ export default function Schedule() {
   const weekDates = getWeekDates();
 
   const getSchedulesByDay = (day: string) => {
+    // Get the current week's date range
+    const startOfWeek = new Date(currentWeek);
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Start from Monday
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Sunday
+    
     return schedules.filter(s => {
       const matchesDay = s.day === day;
       const matchesTeacher = teacherFilter === "all" || s.teacherId === teacherFilter;
+      
+      // Week-based filtering - check if schedule falls within current week
+      let matchesWeek = true;
+      if (s.date) {
+        // If schedule has a specific date, check if it's within current week
+        const scheduleDate = new Date(s.date);
+        matchesWeek = scheduleDate >= startOfWeek && scheduleDate <= endOfWeek;
+      } else {
+        // For backward compatibility - only show schedules without dates if they're for current week
+        // This is temporary until all schedules have dates
+        const today = new Date();
+        const currentWeekStart = new Date(today);
+        currentWeekStart.setDate(today.getDate() - today.getDay() + 1);
+        const currentWeekEnd = new Date(currentWeekStart);
+        currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
+        
+        // Only show old schedules if currentWeek is the current week
+        const isCurrentWeek = currentWeek.toDateString() === currentWeekStart.toDateString();
+        matchesWeek = isCurrentWeek;
+      }
       
       // Role-based filtering
       let matchesRole = true;
@@ -111,12 +137,25 @@ export default function Schedule() {
       }
       // Admin and team_leader can see all
       
-      return matchesDay && matchesTeacher && matchesRole;
+      return matchesDay && matchesTeacher && matchesWeek && matchesRole;
     });
   };
 
   const handleAdd = (data: Omit<ClassSchedule, 'id'>) => {
-    createSchedule.mutate(data, {
+    // Calculate the date for the selected day in the current week
+    const dayIndex = weekDays.indexOf(data.day);
+    const startOfWeek = new Date(currentWeek);
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Start from Monday
+    const classDate = new Date(startOfWeek);
+    classDate.setDate(startOfWeek.getDate() + dayIndex);
+    
+    // Add the date to the schedule data
+    const scheduleWithDate = {
+      ...data,
+      date: classDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
+    };
+    
+    createSchedule.mutate(scheduleWithDate, {
       onSuccess: () => {
         setIsAddOpen(false);
       }
@@ -154,13 +193,21 @@ export default function Schedule() {
     <MainLayout title="Class Schedule" subtitle="Weekly timetable view">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => setCurrentWeek(new Date(currentWeek.setDate(currentWeek.getDate() - 7)))}>
+          <Button variant="outline" size="icon" onClick={() => {
+            const newWeek = new Date(currentWeek);
+            newWeek.setDate(newWeek.getDate() - 7);
+            setCurrentWeek(newWeek);
+          }}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <div className="text-lg font-semibold">
             {weekDates[0].month} {weekDates[0].date} - {weekDates[6].month} {weekDates[6].date}
           </div>
-          <Button variant="outline" size="icon" onClick={() => setCurrentWeek(new Date(currentWeek.setDate(currentWeek.getDate() + 7)))}>
+          <Button variant="outline" size="icon" onClick={() => {
+            const newWeek = new Date(currentWeek);
+            newWeek.setDate(newWeek.getDate() + 7);
+            setCurrentWeek(newWeek);
+          }}>
             <ChevronRight className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="sm" onClick={() => setCurrentWeek(new Date())}>
