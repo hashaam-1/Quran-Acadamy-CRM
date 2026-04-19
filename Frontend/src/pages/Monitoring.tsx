@@ -204,16 +204,49 @@ export default function Monitoring() {
 
   const { liveClasses, summary, teacherPerformance } = processSchedules(schedules);
 
-  // Handle observe button click - join zoom meeting
+  // Handle observe button click - join or create zoom meeting
   const handleObserve = async (liveClass: LiveClass) => {
-    if (!liveClass.meetingNumber) {
-      toast.error('No active meeting found for this class');
-      return;
-    }
-
     try {
-      // Join as observer (admin role = 1 for host privileges)
-      const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${liveClass.meetingNumber}`, {
+      let meetingToJoin = liveClass.meetingNumber;
+
+      // If no meeting number exists, create one first
+      if (!meetingToJoin && liveClass.scheduleId) {
+        toast.loading('Creating meeting for observation...');
+        
+        const createResponse = await fetch('https://quran-acadamy-crm-production.up.railway.app/api/meetings/start-class', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            scheduleId: liveClass.scheduleId,
+            className: liveClass.course,
+            course: liveClass.course,
+            teacherId: currentUser?.id,
+            teacherName: currentUser?.name,
+            studentId: liveClass.scheduleId, // Use scheduleId as fallback
+            studentName: liveClass.studentName,
+            time: liveClass.startTime
+          })
+        });
+
+        const createData = await createResponse.json();
+
+        if (createData.success) {
+          meetingToJoin = createData.meeting.meetingNumber;
+          toast.success('Meeting created for observation');
+        } else {
+          throw new Error(createData.error || createData.message || 'Failed to create meeting');
+        }
+      }
+
+      if (!meetingToJoin) {
+        throw new Error('No meeting number available');
+      }
+
+      // Join the meeting as observer (admin role = 1 for host privileges)
+      const joinResponse = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${meetingToJoin}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -221,16 +254,17 @@ export default function Monitoring() {
         }
       });
 
-      if (response.ok) {
+      if (joinResponse.ok) {
         toast.success('Joining class as observer');
-        navigate(`/zoom-join?meetingNumber=${liveClass.meetingNumber}&role=1`);
+        navigate(`/zoom-join?meetingNumber=${meetingToJoin}&role=1`);
       } else {
-        const data = await response.json();
-        toast.error(data.error || 'Failed to join class');
+        const data = await joinResponse.json();
+        throw new Error(data.error || data.message || 'Failed to join class');
       }
     } catch (error) {
-      console.error('Error joining class:', error);
-      toast.error('Failed to join class');
+      console.error('Error observing class:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to observe class';
+      toast.error(errorMessage);
     }
   };
 
@@ -347,17 +381,15 @@ export default function Monitoring() {
                   )}
 
                   <div className="flex items-center gap-2">
-                    {session.status === "live" && session.meetingNumber && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1 gap-1"
-                        onClick={() => handleObserve(session)}
-                      >
-                        <Eye className="h-3 w-3" />
-                        Observe
-                      </Button>
-                    )}
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 gap-1"
+                      onClick={() => handleObserve(session)}
+                    >
+                      <Eye className="h-3 w-3" />
+                      Observe
+                    </Button>
                     {session.status === "late" && (
                       <Button variant="outline" size="sm" className="text-warning">
                         <AlertTriangle className="h-4 w-4" />
