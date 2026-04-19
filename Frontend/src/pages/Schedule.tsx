@@ -418,7 +418,7 @@ export default function Schedule() {
                                     <div
                                       key={schedule.id || schedule._id || idx}
                                       className={cn(
-                                        "group border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow",
+                                        "group relative bg-gradient-to-br from-white via-white to-gray-50 border-0 rounded-2xl p-4 shadow-lg hover:shadow-2xl transition-all duration-500 ease-out overflow-hidden cursor-pointer transform hover:-translate-y-1",
                                         courseBlockColors[schedule.course as keyof typeof courseBlockColors] && 
                                         `bg-opacity-20 border-l-4 border-l-[${courseBlockColors[schedule.course as keyof typeof courseBlockColors]}]`,
                                         schedule.course === 'Qaida' && 'bg-blue-100',
@@ -427,40 +427,49 @@ export default function Schedule() {
                                         schedule.course === 'Tajweed' && 'bg-purple-100'
                                       )}
                                     >
-                                      <div className="p-4">
+                                      {/* Background Pattern */}
+                                      <div className="absolute inset-0 opacity-5">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"></div>
+                                      </div>
+                                      
+                                      <div className="relative">
                                         {/* Header */}
-                                        <div className="flex items-center justify-between mb-3">
-                                          <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                              <Video className="w-4 h-4 text-white" />
+                                        <div className="flex items-center justify-between mb-4">
+                                          <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+                                              <Video className="w-5 h-5 text-white" />
                                             </div>
                                             <div>
-                                              <h4 className="font-semibold text-sm text-gray-900 truncate">{schedule.studentName}</h4>
-                                              <p className="text-xs text-gray-600 truncate">{schedule.course}</p>
+                                              <h4 className="font-bold text-base text-gray-900 tracking-tight truncate">{schedule.studentName}</h4>
+                                              <p className="text-sm font-medium text-gray-600 truncate">{schedule.course}</p>
                                             </div>
                                           </div>
-                                          <Badge variant="outline" className="text-xs">
+                                          <Badge className="bg-gradient-to-r from-emerald-100 to-cyan-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full shadow-md border border-emerald-200">
                                             {schedule.course}
                                           </Badge>
                                         </div>
 
                                         {/* Content */}
-                                        <div className="space-y-2 mb-3">
-                                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                                            <User className="w-3 h-3" />
-                                            <span className="truncate">{schedule.teacherName}</span>
+                                        <div className="relative space-y-3 mb-4">
+                                          <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg p-2">
+                                            <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-500 rounded flex items-center justify-center">
+                                              <User className="w-3 h-3 text-white" />
+                                            </div>
+                                            <span className="font-medium truncate">{schedule.teacherName}</span>
                                           </div>
-                                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                                            <Clock className="w-3 h-3 shrink-0" />
-                                            <span>{schedule.time}</span>
-                                            <span className="shrink-0">â¢</span>
-                                            <span className="shrink-0">{schedule.duration}</span>
+                                          <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg p-2">
+                                            <div className="w-6 h-6 bg-gradient-to-br from-purple-400 to-purple-500 rounded flex items-center justify-center">
+                                              <Clock className="w-3 h-3 text-white" />
+                                            </div>
+                                            <span className="font-medium">{schedule.time}</span>
+                                            <span className="font-medium">â¢</span>
+                                            <span className="font-medium">{schedule.duration}</span>
                                           </div>
                                         </div>
 
-                                        {/* Hover Buttons - Improved */}
-                                        <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out rounded-lg z-50 flex items-center justify-center pointer-events-none">
-                                          <div className="flex gap-3 p-3 bg-white/20 rounded-xl backdrop-blur-sm border border-white/30 pointer-events-auto">
+                                        {/* Beautiful Hover Buttons */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-800/95 to-gray-900/95 opacity-0 group-hover:opacity-100 transition-all duration-500 ease-out rounded-2xl z-50 flex items-center justify-center pointer-events-none backdrop-blur-xl">
+                                          <div className="flex gap-3 p-4 bg-white/10 rounded-2xl backdrop-blur-2xl border border-white/20 pointer-events-auto shadow-2xl">
                                             {currentUser?.role === 'teacher' || currentUser?.role === 'admin' ? (
                                               <StartClassButton 
                                                 scheduleId={schedule.id || schedule._id}
@@ -468,7 +477,7 @@ export default function Schedule() {
                                                 studentName={schedule.studentName}
                                                 course={schedule.course}
                                                 time={schedule.time}
-                                                className="bg-green-600 hover:bg-green-700 text-white shadow-2xl px-4 py-2 text-xs font-semibold rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-green-600/50"
+                                                className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-2xl px-6 py-3 text-xs font-bold rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-emerald-500/50 flex items-center gap-2"
                                               />
                                             ) : (
                                               <JoinClassButton 
@@ -476,7 +485,7 @@ export default function Schedule() {
                                                 teacherName={schedule.teacherName}
                                                 course={schedule.course}
                                                 time={schedule.time}
-                                                className="bg-green-600 hover:bg-green-700 text-white shadow-2xl px-4 py-2 text-xs font-semibold rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-green-600/50"
+                                                className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-2xl px-6 py-3 text-xs font-bold rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-emerald-500/50 flex items-center gap-2"
                                               />
                                             )}
                                             <Button
@@ -488,9 +497,9 @@ export default function Schedule() {
                                                 setCurrent(schedule);
                                                 setIsEditOpen(true);
                                               }}
-                                              className="bg-white hover:bg-gray-50 text-gray-800 shadow-2xl px-4 py-2 text-xs font-semibold rounded-lg border-2 border-gray-300 transition-all duration-200 hover:scale-105 hover:shadow-gray-400/50"
+                                              className="bg-gradient-to-r from-white to-gray-50 hover:from-gray-50 hover:to-gray-100 text-gray-800 shadow-2xl px-6 py-3 text-xs font-bold rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-gray-400/50 flex items-center gap-2 border-2 border-gray-200"
                                             >
-                                              <Pencil className="w-3 h-3 mr-1" />
+                                              <Pencil className="w-3 h-3" />
                                               Edit
                                             </Button>
                                           </div>
