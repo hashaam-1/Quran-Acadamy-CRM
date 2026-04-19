@@ -230,16 +230,27 @@ export default function Schedule() {
                         {slot.course}
                       </Badge>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {/* Join Class Button - visible only for students */}
-                        {currentUser?.role === 'student' && (
+                        {/* Join Class Button - visible for teachers and students */}
+                        {(currentUser?.role === 'teacher' || currentUser?.role === 'student') && (
                           <div className="flex gap-1">
-                            <JoinClassButton 
-                              meetingNumber={slot.meetingNumber}
-                              teacherName={slot.teacherName}
-                              course={slot.course}
-                              time={slot.time}
-                              className="h-6 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-all duration-200 shadow-sm hover:shadow-md"
-                            />
+                            {currentUser?.role === 'teacher' ? (
+                              <StartClassButton 
+                                scheduleId={slot.id || slot._id}
+                                studentId={typeof slot.studentId === 'object' ? slot.studentId._id : slot.studentId}
+                                studentName={slot.studentName}
+                                course={slot.course}
+                                time={slot.time}
+                                className="h-6 px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded transition-all duration-200 shadow-sm hover:shadow-md"
+                              />
+                            ) : (
+                              <JoinClassButton 
+                                meetingNumber={slot.meetingNumber}
+                                teacherName={slot.teacherName}
+                                course={slot.course}
+                                time={slot.time}
+                                className="h-6 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-all duration-200 shadow-sm hover:shadow-md"
+                              />
+                            )}
                           </div>
                         )}
                         
