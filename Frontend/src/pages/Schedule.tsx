@@ -232,7 +232,7 @@ export default function Schedule() {
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         {/* Join Class Button - visible for teachers and students */}
                         {(currentUser?.role === 'teacher' || currentUser?.role === 'student') && (
-                          <>
+                          <div className="flex gap-1">
                             {currentUser?.role === 'teacher' ? (
                               <StartClassButton 
                                 scheduleId={slot.id || slot._id}
@@ -240,7 +240,7 @@ export default function Schedule() {
                                 studentName={slot.studentName}
                                 course={slot.course}
                                 time={slot.time}
-                                className="h-5 w-5 p-0 bg-green-600 hover:bg-green-700 text-white"
+                                className="h-6 px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded transition-all duration-200 shadow-sm hover:shadow-md"
                               />
                             ) : (
                               <JoinClassButton 
@@ -248,32 +248,32 @@ export default function Schedule() {
                                 teacherName={slot.teacherName}
                                 course={slot.course}
                                 time={slot.time}
-                                className="h-5 w-5 p-0 bg-blue-600 hover:bg-blue-700 text-white"
+                                className="h-6 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-all duration-200 shadow-sm hover:shadow-md"
                               />
                             )}
-                          </>
+                          </div>
                         )}
                         
                         {/* Edit/Delete Buttons - visible for admin and team_leader */}
                         {(currentUser?.role === 'admin' || currentUser?.role === 'team_leader' || currentUser?.role === 'sales_team') && (
-                          <>
+                          <div className="flex gap-1">
                             <Button 
                               variant="ghost" 
-                              size="icon" 
-                              className="h-5 w-5 p-0"
+                              size="sm"
+                              className="h-6 w-6 p-0 hover:bg-gray-100 transition-all duration-200"
                               onClick={() => { setCurrent(slot); setIsEditOpen(true); }}
                             >
                               <Pencil className="h-3 w-3" />
                             </Button>
                             <Button 
                               variant="ghost" 
-                              size="icon" 
-                              className="h-5 w-5 p-0 text-destructive"
+                              size="sm"
+                              className="h-6 w-6 p-0 text-destructive hover:bg-red-50 transition-all duration-200"
                               onClick={() => { setCurrent(slot); setIsDeleteOpen(true); }}
                             >
                               <Trash2 className="h-3 w-3" />
                             </Button>
-                          </>
+                          </div>
                         )}
                       </div>
                     </div>
