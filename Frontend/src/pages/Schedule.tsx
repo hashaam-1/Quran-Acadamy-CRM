@@ -225,11 +225,7 @@ export default function Schedule() {
                       statusConfig[slot.status].color
                     )}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <Badge className={cn("text-xs", courseColors[slot.course as keyof typeof courseColors])}>
-                        {slot.course}
-                      </Badge>
-                      {/* Hover Action Buttons */}
+                    {/* Hover Overlay */}
 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-lg z-20">
   <div className="flex gap-2">
     
@@ -247,7 +243,7 @@ export default function Schedule() {
       Edit
     </Button>
 
-    {/* Join Class Button */}
+    {/* Join Class */}
     {currentUser?.role === "teacher" ? (
       <StartClassButton
         scheduleId={slot.id || slot._id}
@@ -268,7 +264,13 @@ export default function Schedule() {
     )}
   </div>
 </div>
-                    </div>
+
+{/* Header */}
+<div className="mb-2 relative z-10">
+  <Badge className={cn("text-xs", courseColors[slot.course as keyof typeof courseColors])}>
+    {slot.course}
+  </Badge>
+</div>
                     <p className="font-medium text-sm truncate">{slot.studentName}</p>
                     <p className="text-xs text-muted-foreground truncate">{slot.teacherName}</p>
                     <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
