@@ -176,6 +176,28 @@ export default function Schedule() {
 
   return (
     <MainLayout title="Class Schedule" subtitle="Weekly timetable view">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card variant="stat" className="animate-slide-up stagger-1">
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold">{schedules.length}</p>
+            <p className="text-xs text-muted-foreground">Total Scheduled</p>
+          </CardContent>
+        </Card>
+        <Card variant="stat" className="animate-slide-up stagger-2">
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold text-success">{completedToday}</p>
+            <p className="text-xs text-muted-foreground">Completed Today</p>
+          </CardContent>
+        </Card>
+        <Card variant="stat" className="animate-slide-up stagger-3">
+          <CardContent className="p-4 text-center">
+            <p className="text-2xl font-bold text-info">{todayClassCount}</p>
+            <p className="text-xs text-muted-foreground">Total Classes Today</p>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => {
@@ -266,71 +288,10 @@ export default function Schedule() {
   <div
     key={slot.id}
     className={cn(
-      "relative overflow-hidden p-3 rounded-lg bg-card border-l-4 shadow-soft hover:shadow-medium transition-all duration-300 cursor-pointer group",
+      "relative overflow-hidden p-3 rounded-lg bg-card border-l-4 shadow-soft",
       statusConfig[slot.status].color
     )}
   >
-    {/* Hover Overlay */}
-    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-lg z-20">
-      <div className="flex flex-col gap-2">
-        
-        {/* Join Class Button */}
-        {currentUser?.role === "teacher" ? (
-          <StartClassButton
-            scheduleId={slot.id || slot._id}
-            studentId={
-              typeof slot.studentId === "object"
-                ? slot.studentId?._id
-                : slot.studentId
-            }
-            studentName={slot.studentName}
-            course={slot.course}
-            time={slot.time}
-            className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
-          />
-        ) : (
-          // Students can join any scheduled class - will create meeting if needed
-          <JoinClassButton
-            meetingNumber={slot.meetingNumber}
-            teacherName={slot.teacherName}
-            course={slot.course}
-            time={slot.time}
-            scheduleId={slot.id || slot._id}
-            studentId={typeof slot.studentId === "object" ? slot.studentId?._id : slot.studentId}
-            studentName={slot.studentName}
-            className="bg-green-600 hover:bg-green-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
-          />
-        )}
-
-        {/* Edit Button - Available for all roles */}
-        <Button
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            setCurrent(slot);
-            setIsEditOpen(true);
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
-        >
-          <Pencil className="h-3 w-3 mr-1" />
-          Edit
-        </Button>
-
-        {/* Delete Button - Available for all roles */}
-        <Button
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            setCurrent(slot);
-            setIsDeleteOpen(true);
-          }}
-          className="bg-red-600 hover:bg-red-700 text-white h-8 px-3 text-xs rounded-md shadow-md"
-        >
-          <Trash2 className="h-3 w-3 mr-1" />
-          Delete
-        </Button>
-      </div>
-    </div>
 
     {/* Normal Card Content */}
     <div className="relative z-10">
