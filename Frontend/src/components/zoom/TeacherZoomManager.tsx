@@ -257,11 +257,35 @@ export default function TeacherZoomManager({
               {[...scheduledMeetings, ...liveMeetings].map((meeting) => (
                 <div
                   key={meeting._id}
-                  className="rounded-2xl bg-white border border-gray-200 shadow-md"
+                  className="group relative overflow-hidden rounded-2xl bg-white border border-gray-200 shadow-md hover:shadow-xl transition-all duration-300"
                 >
-                  {/* Card Body */}
-                  <div className="p-6">
-                    {/* Header */}
+                  {/* Hover Buttons */}
+                  <div className="absolute inset-0 z-20 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="flex gap-3">
+                      {/* Edit Button */}
+                      {meeting.status === "scheduled" && (
+                        <Button
+                          onClick={() => handleEditMeeting(meeting)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-2"
+                        >
+                          <Pencil className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                      )}
+
+                      {/* Join Button */}
+                      <Button
+                        onClick={() => handleJoinMeeting(meeting)}
+                        className="bg-green-600 hover:bg-green-700 text-white rounded-xl px-4 py-2"
+                      >
+                        <Play className="w-4 h-4 mr-2" />
+                        Join Class
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="p-6 relative z-10">
                     <div className="flex items-center justify-between mb-5">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
@@ -276,12 +300,11 @@ export default function TeacherZoomManager({
                         </div>
                       </div>
 
-                      <Badge className="bg-blue-100 text-blue-700">
+                      <Badge className="bg-blue-100 text-blue-700 capitalize">
                         {meeting.status}
                       </Badge>
                     </div>
 
-                    {/* Info */}
                     <div className="space-y-3">
                       {meeting.studentName && (
                         <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -289,12 +312,14 @@ export default function TeacherZoomManager({
                           {meeting.studentName}
                         </div>
                       )}
+
                       {meeting.time && (
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Clock className="w-4 h-4 text-gray-400" />
-                          {meeting.time} {meeting.duration && `â¢ ${meeting.duration}`}
+                          {meeting.time}
                         </div>
                       )}
+
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Clock className="w-4 h-4 text-gray-400" />
                         Created: {formatTime(meeting.createdAt)}
