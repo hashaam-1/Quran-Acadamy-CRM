@@ -90,22 +90,33 @@ export default function Syllabus() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Get user ID - handles both id and _id from different login sources
-    const userId = currentUser?.id || (currentUser as any)?._id || (currentUser as any)?.userId;
+    // Get user ID - prioritize MongoDB ObjectId _id over string id
+    const userId = (currentUser as any)?._id || currentUser?.id || (currentUser as any)?.userId;
     const userName = currentUser?.name || (currentUser as any)?.firstName || 'Unknown User';
     
     // Enhanced validation
     console.log('User validation:', {
       currentUser,
       userId,
+      userIdType: typeof userId,
       userName,
       hasId: !!userId,
-      hasName: !!userName
+      hasName: !!userName,
+      isObjectId: typeof userId === 'string' && userId.length === 24 && /^[0-9a-fA-F]{24}$/.test(userId)
     });
     
     if (!userId) {
       console.error('No user ID found in currentUser:', currentUser);
       alert('User authentication issue. Please log in again.');
+      return;
+    }
+    
+    // Validate ObjectId format
+    const isObjectIdFormat = typeof userId === 'string' && userId.length === 24 && /^[0-9a-fA-F]{24}$/.test(userId);
+    if (!isObjectIdFormat) {
+      console.error('Invalid ObjectId format for createdBy:', userId);
+      console.error('Expected 24-character hexadecimal string, got:', typeof userId, userId);
+      alert('User ID format error. Please log in again.');
       return;
     }
     
