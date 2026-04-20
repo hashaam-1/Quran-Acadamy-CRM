@@ -68,7 +68,7 @@ export const useCreateSyllabus = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (data: Partial<Syllabus>) => {
+    mutationFn: async (data: Partial<Syllabus> | FormData) => {
       return await syllabusApi.create(data);
     },
     onSuccess: () => {
@@ -82,7 +82,7 @@ export const useUpdateSyllabus = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<Syllabus> }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Syllabus> | FormData }) => {
       return await syllabusApi.update(id, data);
     },
     onSuccess: () => {

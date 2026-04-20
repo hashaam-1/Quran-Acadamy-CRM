@@ -98,7 +98,7 @@ export default function Syllabus() {
       return;
     }
     
-    // Create JSON payload for proper ObjectId handling
+    // Create syllabus data
     const syllabusData = {
       title: formData.title,
       course: formData.course,
@@ -116,12 +116,32 @@ export default function Syllabus() {
       assessmentCriteria: formData.assessmentCriteria.split('\n').filter(a => a.trim()),
       topics: [] // Empty topics array for new syllabus
     };
-    
+
     try {
-      if (editingSyllabus) {
-        await updateSyllabus.mutateAsync({ id: editingSyllabus.id, data: syllabusData });
+      if (selectedFiles.length > 0) {
+        // Use FormData when files are present
+        const formDataToSend = new FormData();
+        
+        // Add all syllabus data as JSON string
+        formDataToSend.append('syllabusData', JSON.stringify(syllabusData));
+        
+        // Add files
+        selectedFiles.forEach((fileItem) => {
+          formDataToSend.append('attachments', fileItem.file);
+        });
+        
+        if (editingSyllabus) {
+          await updateSyllabus.mutateAsync({ id: editingSyllabus.id, data: formDataToSend });
+        } else {
+          await createSyllabus.mutateAsync(formDataToSend);
+        }
       } else {
-        await createSyllabus.mutateAsync(syllabusData);
+        // Use JSON when no files
+        if (editingSyllabus) {
+          await updateSyllabus.mutateAsync({ id: editingSyllabus.id, data: syllabusData });
+        } else {
+          await createSyllabus.mutateAsync(syllabusData);
+        }
       }
       setIsDialogOpen(false);
       setEditingSyllabus(null);
@@ -773,10 +793,9 @@ export default function Syllabus() {
                     accept=".pdf,.doc,.docx,.xls,.xlsx"
                     multiple
                     onChange={handleFileChange}
-                    disabled={true} // Temporarily disabled to avoid backend file upload issues
                   />
                   <p className="text-xs text-muted-foreground">
-                    File upload temporarily disabled to prevent server errors
+                    Maximum file size: 5MB per file. Supported formats: PDF, DOC, DOCX, XLS, XLSX
                   </p>
                   {selectedFiles.length > 0 && (
                     <div className="mt-2 space-y-1">
