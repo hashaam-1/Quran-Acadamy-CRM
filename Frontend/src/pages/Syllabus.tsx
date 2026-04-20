@@ -92,7 +92,7 @@ export default function Syllabus() {
     
     // Get user ID - handles both id and _id from different login sources
     const userId = currentUser?.id || (currentUser as any)?._id || (currentUser as any)?.userId;
-    const userName = currentUser?.name || currentUser?.fullName || (currentUser as any)?.firstName || 'Unknown User';
+    const userName = currentUser?.name || (currentUser as any)?.firstName || 'Unknown User';
     
     // Enhanced validation
     console.log('User validation:', {
@@ -109,8 +109,8 @@ export default function Syllabus() {
       return;
     }
     
-    // Validate required form fields
-    const requiredFields = ['title', 'course', 'description', 'duration'];
+    // Validate required form fields (matching backend requirements)
+    const requiredFields = ['title', 'course', 'level', 'description', 'duration'];
     const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData] || formData[field as keyof typeof formData].trim() === '');
     
     if (missingFields.length > 0) {
@@ -122,8 +122,8 @@ export default function Syllabus() {
     // Create syllabus data with validated user info
     const syllabusData = {
       title: formData.title.trim(),
-      course: formData.course,
-      level: formData.level,
+      course: formData.course as 'Qaida' | 'Nazra' | 'Hifz' | 'Tajweed',
+      level: formData.level as 'Beginner' | 'Intermediate' | 'Advanced',
       description: formData.description.trim(),
       duration: formData.duration.trim(),
       status: formData.status,
@@ -148,18 +148,32 @@ export default function Syllabus() {
     
     try {
       if (selectedFiles.length > 0) {
-        // Use FormData when files are present
+        // Use FormData when files are present - send fields directly as backend expects
         const formDataToSend = new FormData();
         
-        // Add all syllabus data as JSON string
-        formDataToSend.append('syllabusData', JSON.stringify(syllabusData));
+        // Add all syllabus data fields directly (not as JSON string)
+        formDataToSend.append('title', syllabusData.title);
+        formDataToSend.append('course', syllabusData.course);
+        formDataToSend.append('level', syllabusData.level);
+        formDataToSend.append('description', syllabusData.description);
+        formDataToSend.append('duration', syllabusData.duration);
+        formDataToSend.append('status', syllabusData.status);
+        formDataToSend.append('createdBy', syllabusData.createdBy);
+        formDataToSend.append('createdByName', syllabusData.createdByName);
+        
+        // Add arrays as JSON strings (backend will parse them)
+        formDataToSend.append('topics', JSON.stringify(syllabusData.topics));
+        formDataToSend.append('objectives', JSON.stringify(syllabusData.objectives));
+        formDataToSend.append('prerequisites', JSON.stringify(syllabusData.prerequisites));
+        formDataToSend.append('materials', JSON.stringify(syllabusData.materials));
+        formDataToSend.append('assessmentCriteria', JSON.stringify(syllabusData.assessmentCriteria));
         
         // Add files
         selectedFiles.forEach((fileItem) => {
           formDataToSend.append('attachments', fileItem.file);
         });
         
-        console.log('Submitting with FormData...');
+        console.log('Submitting with FormData (fields directly)...');
         if (editingSyllabus) {
           await updateSyllabus.mutateAsync({ id: editingSyllabus.id, data: formDataToSend });
         } else {
