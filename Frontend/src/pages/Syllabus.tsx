@@ -92,22 +92,43 @@ export default function Syllabus() {
     
     // Get user ID - handles both id and _id from different login sources
     const userId = currentUser?.id || (currentUser as any)?._id || (currentUser as any)?.userId;
+    const userName = currentUser?.name || currentUser?.fullName || (currentUser as any)?.firstName || 'Unknown User';
+    
+    // Enhanced validation
+    console.log('User validation:', {
+      currentUser,
+      userId,
+      userName,
+      hasId: !!userId,
+      hasName: !!userName
+    });
     
     if (!userId) {
-      console.error('No user ID found');
+      console.error('No user ID found in currentUser:', currentUser);
+      alert('User authentication issue. Please log in again.');
       return;
     }
     
-    // Create syllabus data
+    // Validate required form fields
+    const requiredFields = ['title', 'course', 'description', 'duration'];
+    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData] || formData[field as keyof typeof formData].trim() === '');
+    
+    if (missingFields.length > 0) {
+      console.error('Missing required fields:', missingFields);
+      alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+    
+    // Create syllabus data with validated user info
     const syllabusData = {
-      title: formData.title,
+      title: formData.title.trim(),
       course: formData.course,
       level: formData.level,
-      description: formData.description,
-      duration: formData.duration,
+      description: formData.description.trim(),
+      duration: formData.duration.trim(),
       status: formData.status,
       createdBy: userId,
-      createdByName: currentUser?.name || '',
+      createdByName: userName,
       
       // Parse arrays from text areas
       objectives: formData.objectives.split('\n').filter(o => o.trim()),
@@ -117,6 +138,14 @@ export default function Syllabus() {
       topics: [] // Empty topics array for new syllabus
     };
 
+    // Debug logging
+    console.log('=== SYLLABUS SUBMISSION DEBUG ===');
+    console.log('User ID:', userId);
+    console.log('User Name:', currentUser?.name);
+    console.log('Syllabus Data:', syllabusData);
+    console.log('Selected Files:', selectedFiles.length);
+    console.log('================================');
+    
     try {
       if (selectedFiles.length > 0) {
         // Use FormData when files are present
@@ -130,6 +159,7 @@ export default function Syllabus() {
           formDataToSend.append('attachments', fileItem.file);
         });
         
+        console.log('Submitting with FormData...');
         if (editingSyllabus) {
           await updateSyllabus.mutateAsync({ id: editingSyllabus.id, data: formDataToSend });
         } else {
@@ -137,6 +167,7 @@ export default function Syllabus() {
         }
       } else {
         // Use JSON when no files
+        console.log('Submitting with JSON...');
         if (editingSyllabus) {
           await updateSyllabus.mutateAsync({ id: editingSyllabus.id, data: syllabusData });
         } else {
