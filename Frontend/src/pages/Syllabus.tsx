@@ -66,6 +66,27 @@ export default function Syllabus() {
   
   const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
   
+  // File size validation (5MB limit)
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles: FileWithPreview[] = [];
+    
+    files.forEach(file => {
+      if (file.size > MAX_FILE_SIZE) {
+        alert(`File "${file.name}" is too large. Maximum size is 5MB.`);
+        return;
+      }
+      validFiles.push({
+        file,
+        name: file.name
+      });
+    });
+    
+    setSelectedFiles(prev => [...prev, ...validFiles]);
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -100,10 +121,12 @@ export default function Syllabus() {
     formDataToSend.append('assessmentCriteria', JSON.stringify(assessmentCriteria));
     formDataToSend.append('topics', JSON.stringify([]));
     
-    // Add files
-    selectedFiles.forEach((fileItem) => {
-      formDataToSend.append('attachments', fileItem.file);
-    });
+    // Add files (only if file upload is enabled)
+    if (selectedFiles.length > 0) {
+      selectedFiles.forEach((fileItem) => {
+        formDataToSend.append('attachments', fileItem.file);
+      });
+    }
     
     try {
       if (editingSyllabus) {
@@ -625,6 +648,11 @@ export default function Syllabus() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingSyllabus ? 'Edit Syllabus' : 'Add Syllabus'}</DialogTitle>
+            <DialogDescription>
+              {editingSyllabus 
+                ? 'Edit the syllabus details and curriculum content below.' 
+                : 'Create a new syllabus by filling in the details and curriculum content below.'}
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -749,21 +777,18 @@ export default function Syllabus() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="attachments">Attachments (PDF, DOC, DOCX, XLS, XLSX)</Label>
+                  <Label htmlFor="attachments">Attachments (PDF, DOC, DOCX, XLS, XLSX) - Max 5MB per file</Label>
                   <Input
                     id="attachments"
                     type="file"
                     accept=".pdf,.doc,.docx,.xls,.xlsx"
                     multiple
-                    onChange={(e) => {
-                      const files = Array.from(e.target.files || []);
-                      const fileItems = files.map(file => ({
-                        file,
-                        name: file.name
-                      }));
-                      setSelectedFiles(prev => [...prev, ...fileItems]);
-                    }}
+                    onChange={handleFileChange}
+                    disabled={true} // Temporarily disabled to avoid backend file upload issues
                   />
+                  <p className="text-xs text-muted-foreground">
+                    File upload temporarily disabled to prevent server errors
+                  </p>
                   {selectedFiles.length > 0 && (
                     <div className="mt-2 space-y-1">
                       {selectedFiles.map((fileItem, index) => (
