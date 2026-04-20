@@ -53,18 +53,14 @@ export const syllabusApi = {
   },
 
   // Create new syllabus
-  create: async (data: FormData | Partial<Syllabus>): Promise<Syllabus> => {
-    const response = await api.post('/syllabus', data, {
-      headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {}
-    });
+  create: async (data: Partial<Syllabus>): Promise<Syllabus> => {
+    const response = await api.post('/syllabus', data);
     return response.data;
   },
 
   // Update syllabus
-  update: async (id: string, data: FormData | Partial<Syllabus>): Promise<Syllabus> => {
-    const response = await api.put(`/syllabus/${id}`, data, {
-      headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {}
-    });
+  update: async (id: string, data: Partial<Syllabus>): Promise<Syllabus> => {
+    const response = await api.put(`/syllabus/${id}`, data);
     return response.data;
   },
 

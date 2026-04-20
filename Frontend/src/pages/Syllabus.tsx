@@ -98,41 +98,30 @@ export default function Syllabus() {
       return;
     }
     
-    // Create FormData for file upload
-    const formDataToSend = new FormData();
-    formDataToSend.append('title', formData.title);
-    formDataToSend.append('course', formData.course);
-    formDataToSend.append('level', formData.level);
-    formDataToSend.append('description', formData.description);
-    formDataToSend.append('duration', formData.duration);
-    formDataToSend.append('status', formData.status);
-    formDataToSend.append('createdBy', userId);
-    formDataToSend.append('createdByName', currentUser?.name || '');
-    
-    // Add arrays
-    const objectives = formData.objectives.split('\n').filter(o => o.trim());
-    const prerequisites = formData.prerequisites.split('\n').filter(p => p.trim());
-    const materials = formData.materials.split('\n').filter(m => m.trim());
-    const assessmentCriteria = formData.assessmentCriteria.split('\n').filter(a => a.trim());
-    
-    formDataToSend.append('objectives', JSON.stringify(objectives));
-    formDataToSend.append('prerequisites', JSON.stringify(prerequisites));
-    formDataToSend.append('materials', JSON.stringify(materials));
-    formDataToSend.append('assessmentCriteria', JSON.stringify(assessmentCriteria));
-    formDataToSend.append('topics', JSON.stringify([]));
-    
-    // Add files (only if file upload is enabled)
-    if (selectedFiles.length > 0) {
-      selectedFiles.forEach((fileItem) => {
-        formDataToSend.append('attachments', fileItem.file);
-      });
-    }
+    // Create JSON payload for proper ObjectId handling
+    const syllabusData = {
+      title: formData.title,
+      course: formData.course,
+      level: formData.level,
+      description: formData.description,
+      duration: formData.duration,
+      status: formData.status,
+      createdBy: userId,
+      createdByName: currentUser?.name || '',
+      
+      // Parse arrays from text areas
+      objectives: formData.objectives.split('\n').filter(o => o.trim()),
+      prerequisites: formData.prerequisites.split('\n').filter(p => p.trim()),
+      materials: formData.materials.split('\n').filter(m => m.trim()),
+      assessmentCriteria: formData.assessmentCriteria.split('\n').filter(a => a.trim()),
+      topics: [] // Empty topics array for new syllabus
+    };
     
     try {
       if (editingSyllabus) {
-        await updateSyllabus.mutateAsync({ id: editingSyllabus.id, data: formDataToSend });
+        await updateSyllabus.mutateAsync({ id: editingSyllabus.id, data: syllabusData });
       } else {
-        await createSyllabus.mutateAsync(formDataToSend);
+        await createSyllabus.mutateAsync(syllabusData);
       }
       setIsDialogOpen(false);
       setEditingSyllabus(null);
