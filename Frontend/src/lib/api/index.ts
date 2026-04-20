@@ -9,4 +9,5 @@ export { studentLeavesApi } from './studentLeaves';
 export { teamMembersApi } from './teamMembers';
 export { dashboardApi } from './dashboard';
 export { homeworkApi } from './homework';
+export { syllabusApi } from './syllabus';
 export { api } from './config';

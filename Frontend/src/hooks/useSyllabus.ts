@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { syllabusApi } from '@/lib/api';
 
 export interface Syllabus {
   _id: string;
@@ -37,13 +37,7 @@ export const useSyllabi = (filters?: SyllabusFilters) => {
   return useQuery({
     queryKey: ['syllabus', filters],
     queryFn: async () => {
-      const queryParams = new URLSearchParams();
-      if (filters?.course) queryParams.append('course', filters.course);
-      if (filters?.level) queryParams.append('level', filters.level);
-      if (filters?.status) queryParams.append('status', filters.status);
-      
-      const response = await api.get(`/syllabus?${queryParams.toString()}`);
-      return response.data as Syllabus[];
+      return await syllabusApi.getAll(filters);
     },
   });
 };
@@ -53,8 +47,7 @@ export const useSyllabus = (id: string) => {
   return useQuery({
     queryKey: ['syllabus', id],
     queryFn: async () => {
-      const response = await api.get(`/syllabus/${id}`);
-      return response.data as Syllabus;
+      return await syllabusApi.getById(id);
     },
     enabled: !!id,
   });
@@ -65,8 +58,7 @@ export const useSyllabusStats = () => {
   return useQuery({
     queryKey: ['syllabus', 'stats'],
     queryFn: async () => {
-      const response = await api.get('/syllabus/stats');
-      return response.data;
+      return await syllabusApi.getStats();
     },
   });
 };
@@ -77,10 +69,7 @@ export const useCreateSyllabus = () => {
   
   return useMutation({
     mutationFn: async (data: Partial<Syllabus> | FormData) => {
-      const response = await api.post('/syllabus', data, {
-        headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {}
-      });
-      return response.data;
+      return await syllabusApi.create(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['syllabus'] });
@@ -94,10 +83,7 @@ export const useUpdateSyllabus = () => {
   
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Syllabus> | FormData }) => {
-      const response = await api.put(`/syllabus/${id}`, data, {
-        headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {}
-      });
-      return response.data;
+      return await syllabusApi.update(id, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['syllabus'] });
@@ -111,8 +97,7 @@ export const useDeleteSyllabus = () => {
   
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await api.delete(`/syllabus/${id}`);
-      return response.data;
+      return await syllabusApi.delete(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['syllabus'] });
