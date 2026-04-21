@@ -120,7 +120,7 @@ export default function Syllabus() {
       title: '',
       description: '',
       duration: '',
-      order: formData.topics.length,
+      order: formData.topics?.length || 0,
       resources: [],
       activities: []
     });
@@ -143,7 +143,7 @@ export default function Syllabus() {
       // Update existing topic
       setFormData(prev => ({
         ...prev,
-        topics: prev.topics.map(topic => 
+        topics: (prev.topics || []).map(topic => 
           topic.id === editingTopic.id ? topicFormData : topic
         )
       }));
@@ -151,7 +151,7 @@ export default function Syllabus() {
       // Add new topic
       setFormData(prev => ({
         ...prev,
-        topics: [...prev.topics, topicFormData]
+        topics: [...(prev.topics || []), topicFormData]
       }));
     }
 
@@ -163,13 +163,13 @@ export default function Syllabus() {
     if (confirm('Are you sure you want to delete this topic?')) {
       setFormData(prev => ({
         ...prev,
-        topics: prev.topics.filter(topic => topic.id !== topicId)
+        topics: (prev.topics || []).filter(topic => topic.id !== topicId)
       }));
     }
   };
 
   const handleMoveTopic = (topicId: string, direction: 'up' | 'down') => {
-    const topics = [...formData.topics];
+    const topics = [...(formData.topics || [])];
     const index = topics.findIndex(topic => topic.id === topicId);
     
     if (direction === 'up' && index > 0) {
@@ -935,7 +935,7 @@ export default function Syllabus() {
                     </Button>
                   </div>
                   
-                  {formData.topics.length > 0 ? (
+                  {formData.topics?.length > 0 ? (
                     <div className="space-y-2">
                       {formData.topics.map((topic, index) => (
                         <div key={topic.id} className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
@@ -961,7 +961,7 @@ export default function Syllabus() {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleMoveTopic(topic.id, 'down')}
-                              disabled={index === formData.topics.length - 1}
+                              disabled={index === (formData.topics?.length || 0) - 1}
                             >
                               <ChevronRight className="h-4 w-4 rotate-90" />
                             </Button>
