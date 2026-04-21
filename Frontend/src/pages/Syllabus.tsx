@@ -111,14 +111,8 @@ export default function Syllabus() {
       return;
     }
     
-    // Validate ObjectId format
-    const isObjectIdFormat = typeof userId === 'string' && userId.length === 24 && /^[0-9a-fA-F]{24}$/.test(userId);
-    if (!isObjectIdFormat) {
-      console.error('Invalid ObjectId format for createdBy:', userId);
-      console.error('Expected 24-character hexadecimal string, got:', typeof userId, userId);
-      alert('User ID format error. Please log in again.');
-      return;
-    }
+    // No ObjectId validation needed - backend now accepts String for createdBy
+    console.log('Using createdBy ID:', userId, 'Type:', typeof userId);
     
     // Validate required form fields (matching backend requirements)
     const requiredFields = ['title', 'course', 'level', 'description', 'duration'];
