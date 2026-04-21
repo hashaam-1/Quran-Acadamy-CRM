@@ -55,8 +55,7 @@ const syllabusSchema = new mongoose.Schema({
     }
   }],
   createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'TeamMember',
+    type: String,
     required: true
   },
   createdByName: {
