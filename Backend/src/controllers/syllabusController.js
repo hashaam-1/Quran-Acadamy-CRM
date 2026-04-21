@@ -85,12 +85,47 @@ exports.createSyllabus = async (req, res) => {
       });
     }
     
-    // Parse JSON arrays from FormData
-    const parsedTopics = topics ? (typeof topics === 'string' ? JSON.parse(topics) : topics) : [];
-    const parsedObjectives = objectives ? (typeof objectives === 'string' ? JSON.parse(objectives) : objectives) : [];
-    const parsedPrerequisites = prerequisites ? (typeof prerequisites === 'string' ? JSON.parse(prerequisites) : prerequisites) : [];
-    const parsedMaterials = materials ? (typeof materials === 'string' ? JSON.parse(materials) : materials) : [];
-    const parsedAssessmentCriteria = assessmentCriteria ? (typeof assessmentCriteria === 'string' ? JSON.parse(assessmentCriteria) : assessmentCriteria) : [];
+    // Parse JSON arrays from FormData with error handling
+    let parsedTopics = [];
+    let parsedObjectives = [];
+    let parsedPrerequisites = [];
+    let parsedMaterials = [];
+    let parsedAssessmentCriteria = [];
+    
+    try {
+      parsedTopics = topics ? (typeof topics === 'string' ? JSON.parse(topics) : topics) : [];
+    } catch (error) {
+      console.error('Error parsing topics JSON:', error);
+      parsedTopics = [];
+    }
+    
+    try {
+      parsedObjectives = objectives ? (typeof objectives === 'string' ? JSON.parse(objectives) : objectives) : [];
+    } catch (error) {
+      console.error('Error parsing objectives JSON:', error);
+      parsedObjectives = [];
+    }
+    
+    try {
+      parsedPrerequisites = prerequisites ? (typeof prerequisites === 'string' ? JSON.parse(prerequisites) : prerequisites) : [];
+    } catch (error) {
+      console.error('Error parsing prerequisites JSON:', error);
+      parsedPrerequisites = [];
+    }
+    
+    try {
+      parsedMaterials = materials ? (typeof materials === 'string' ? JSON.parse(materials) : materials) : [];
+    } catch (error) {
+      console.error('Error parsing materials JSON:', error);
+      parsedMaterials = [];
+    }
+    
+    try {
+      parsedAssessmentCriteria = assessmentCriteria ? (typeof assessmentCriteria === 'string' ? JSON.parse(assessmentCriteria) : assessmentCriteria) : [];
+    } catch (error) {
+      console.error('Error parsing assessmentCriteria JSON:', error);
+      parsedAssessmentCriteria = [];
+    }
     
     const syllabus = new Syllabus({
       title,
@@ -145,17 +180,59 @@ exports.updateSyllabus = async (req, res) => {
       return res.status(404).json({ message: 'Syllabus not found' });
     }
     
+    // Parse JSON arrays from FormData with error handling
+    let parsedTopics = topics;
+    let parsedObjectives = objectives;
+    let parsedPrerequisites = prerequisites;
+    let parsedMaterials = materials;
+    let parsedAssessmentCriteria = assessmentCriteria;
+    
+    try {
+      parsedTopics = topics ? (typeof topics === 'string' ? JSON.parse(topics) : topics) : topics;
+    } catch (error) {
+      console.error('Error parsing topics JSON in update:', error);
+      parsedTopics = topics;
+    }
+    
+    try {
+      parsedObjectives = objectives ? (typeof objectives === 'string' ? JSON.parse(objectives) : objectives) : objectives;
+    } catch (error) {
+      console.error('Error parsing objectives JSON in update:', error);
+      parsedObjectives = objectives;
+    }
+    
+    try {
+      parsedPrerequisites = prerequisites ? (typeof prerequisites === 'string' ? JSON.parse(prerequisites) : prerequisites) : prerequisites;
+    } catch (error) {
+      console.error('Error parsing prerequisites JSON in update:', error);
+      parsedPrerequisites = prerequisites;
+    }
+    
+    try {
+      parsedMaterials = materials ? (typeof materials === 'string' ? JSON.parse(materials) : materials) : materials;
+    } catch (error) {
+      console.error('Error parsing materials JSON in update:', error);
+      parsedMaterials = materials;
+    }
+    
+    try {
+      parsedAssessmentCriteria = assessmentCriteria ? (typeof assessmentCriteria === 'string' ? JSON.parse(assessmentCriteria) : assessmentCriteria) : assessmentCriteria;
+    } catch (error) {
+      console.error('Error parsing assessmentCriteria JSON in update:', error);
+      parsedAssessmentCriteria = assessmentCriteria;
+    }
+    
     // Update fields
     if (title) syllabus.title = title;
     if (course) syllabus.course = course;
     if (level) syllabus.level = level;
     if (description) syllabus.description = description;
     if (duration) syllabus.duration = duration;
-    if (topics) syllabus.topics = topics;
-    if (objectives) syllabus.objectives = objectives;
-    if (prerequisites) syllabus.prerequisites = prerequisites;
-    if (materials) syllabus.materials = materials;
-    if (assessmentCriteria) syllabus.assessmentCriteria = assessmentCriteria;
+    if (parsedTopics) syllabus.topics = parsedTopics;
+    if (parsedObjectives) syllabus.objectives = parsedObjectives;
+    if (parsedPrerequisites) syllabus.prerequisites = parsedPrerequisites;
+    if (parsedMaterials) syllabus.materials = parsedMaterials;
+    if (parsedAssessmentCriteria) syllabus.assessmentCriteria = parsedAssessmentCriteria;
     if (status) syllabus.status = status;
     
     await syllabus.save();
