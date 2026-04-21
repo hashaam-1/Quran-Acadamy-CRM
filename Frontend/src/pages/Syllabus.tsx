@@ -17,6 +17,16 @@ import { useSyllabi, useCreateSyllabus, useUpdateSyllabus, useDeleteSyllabus } f
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 
+interface CurriculumTopic {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  order: number;
+  resources: string[];
+  activities: string[];
+}
+
 interface SyllabusFormData {
   title: string;
   course: string;
@@ -28,6 +38,7 @@ interface SyllabusFormData {
   materials: string;
   assessmentCriteria: string;
   status: string;
+  topics: CurriculumTopic[];
 }
 
 interface FileWithPreview {
@@ -61,10 +72,24 @@ export default function Syllabus() {
     prerequisites: '',
     materials: '',
     assessmentCriteria: '',
-    status: 'active'
+    status: 'active',
+    topics: []
   });
   
   const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
+  
+  // Curriculum management state
+  const [isCurriculumDialogOpen, setIsCurriculumDialogOpen] = useState(false);
+  const [editingTopic, setEditingTopic] = useState<CurriculumTopic | null>(null);
+  const [topicFormData, setTopicFormData] = useState<CurriculumTopic>({
+    id: '',
+    title: '',
+    description: '',
+    duration: '',
+    order: 0,
+    resources: [],
+    activities: []
+  });
   
   // File size validation (5MB limit)
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
@@ -85,6 +110,83 @@ export default function Syllabus() {
     });
     
     setSelectedFiles(prev => [...prev, ...validFiles]);
+  };
+
+  // Curriculum management functions
+  const handleAddTopic = () => {
+    setEditingTopic(null);
+    setTopicFormData({
+      id: Date.now().toString(),
+      title: '',
+      description: '',
+      duration: '',
+      order: formData.topics.length,
+      resources: [],
+      activities: []
+    });
+    setIsCurriculumDialogOpen(true);
+  };
+
+  const handleEditTopic = (topic: CurriculumTopic) => {
+    setEditingTopic(topic);
+    setTopicFormData(topic);
+    setIsCurriculumDialogOpen(true);
+  };
+
+  const handleSaveTopic = () => {
+    if (!topicFormData.title.trim()) {
+      alert('Please enter a topic title');
+      return;
+    }
+
+    if (editingTopic) {
+      // Update existing topic
+      setFormData(prev => ({
+        ...prev,
+        topics: prev.topics.map(topic => 
+          topic.id === editingTopic.id ? topicFormData : topic
+        )
+      }));
+    } else {
+      // Add new topic
+      setFormData(prev => ({
+        ...prev,
+        topics: [...prev.topics, topicFormData]
+      }));
+    }
+
+    setIsCurriculumDialogOpen(false);
+    setEditingTopic(null);
+  };
+
+  const handleDeleteTopic = (topicId: string) => {
+    if (confirm('Are you sure you want to delete this topic?')) {
+      setFormData(prev => ({
+        ...prev,
+        topics: prev.topics.filter(topic => topic.id !== topicId)
+      }));
+    }
+  };
+
+  const handleMoveTopic = (topicId: string, direction: 'up' | 'down') => {
+    const topics = [...formData.topics];
+    const index = topics.findIndex(topic => topic.id === topicId);
+    
+    if (direction === 'up' && index > 0) {
+      [topics[index], topics[index - 1]] = [topics[index - 1], topics[index]];
+    } else if (direction === 'down' && index < topics.length - 1) {
+      [topics[index], topics[index + 1]] = [topics[index + 1], topics[index]];
+    }
+    
+    // Update order numbers
+    topics.forEach((topic, idx) => {
+      topic.order = idx;
+    });
+    
+    setFormData(prev => ({
+      ...prev,
+      topics
+    }));
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -140,7 +242,7 @@ export default function Syllabus() {
       prerequisites: formData.prerequisites.split('\n').filter(p => p.trim()),
       materials: formData.materials.split('\n').filter(m => m.trim()),
       assessmentCriteria: formData.assessmentCriteria.split('\n').filter(a => a.trim()),
-      topics: [] // Empty topics array for new syllabus
+      topics: formData.topics // Include curriculum topics from form
     };
 
     // Debug logging
@@ -206,7 +308,8 @@ export default function Syllabus() {
         prerequisites: '',
         materials: '',
         assessmentCriteria: '',
-        status: 'active'
+        status: 'active',
+        topics: []
       });
     } catch (error) {
       console.error('Error saving syllabus:', error);
@@ -225,7 +328,8 @@ export default function Syllabus() {
       prerequisites: syllabus.prerequisites?.join('\n') || '',
       materials: syllabus.materials?.join('\n') || '',
       assessmentCriteria: syllabus.assessmentCriteria?.join('\n') || '',
-      status: syllabus.status
+      status: syllabus.status,
+      topics: syllabus.topics || []
     });
     setIsDialogOpen(true);
   };
@@ -820,6 +924,75 @@ export default function Syllabus() {
                     placeholder="Enter each criterion on a new line"
                   />
                 </div>
+
+                {/* Curriculum Topics Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>Curriculum Topics</Label>
+                    <Button type="button" variant="outline" size="sm" onClick={handleAddTopic}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Topic
+                    </Button>
+                  </div>
+                  
+                  {formData.topics.length > 0 ? (
+                    <div className="space-y-2">
+                      {formData.topics.map((topic, index) => (
+                        <div key={topic.id} className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{topic.title}</p>
+                            <p className="text-xs text-muted-foreground">{topic.duration || 'No duration'}</p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleMoveTopic(topic.id, 'up')}
+                              disabled={index === 0}
+                            >
+                              <ChevronRight className="h-4 w-4 rotate-270" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleMoveTopic(topic.id, 'down')}
+                              disabled={index === formData.topics.length - 1}
+                            >
+                              <ChevronRight className="h-4 w-4 rotate-90" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditTopic(topic)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteTopic(topic.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 border-2 border-dashed border-muted-foreground/25 rounded-lg">
+                      <BookOpen className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
+                      <p className="text-sm text-muted-foreground">No curriculum topics added yet</p>
+                      <p className="text-xs text-muted-foreground mt-1">Click "Add Topic" to start building your curriculum</p>
+                    </div>
+                  )}
+                </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
@@ -872,6 +1045,90 @@ export default function Syllabus() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Curriculum Topic Editor Dialog */}
+      <Dialog open={isCurriculumDialogOpen} onOpenChange={setIsCurriculumDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editingTopic ? 'Edit Topic' : 'Add Topic'}</DialogTitle>
+            <DialogDescription>
+              {editingTopic 
+                ? 'Edit the curriculum topic details below.' 
+                : 'Add a new topic to your curriculum.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="topicTitle">Topic Title *</Label>
+              <Input
+                id="topicTitle"
+                value={topicFormData.title}
+                onChange={(e) => setTopicFormData({ ...topicFormData, title: e.target.value })}
+                placeholder="e.g., Arabic Alphabet Basics"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="topicDescription">Description</Label>
+              <Textarea
+                id="topicDescription"
+                value={topicFormData.description}
+                onChange={(e) => setTopicFormData({ ...topicFormData, description: e.target.value })}
+                rows={3}
+                placeholder="Describe what students will learn in this topic"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="topicDuration">Duration</Label>
+              <Input
+                id="topicDuration"
+                value={topicFormData.duration}
+                onChange={(e) => setTopicFormData({ ...topicFormData, duration: e.target.value })}
+                placeholder="e.g., 2 weeks, 5 classes"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="topicResources">Learning Resources (one per line)</Label>
+              <Textarea
+                id="topicResources"
+                value={topicFormData.resources.join('\n')}
+                onChange={(e) => setTopicFormData({ 
+                  ...topicFormData, 
+                  resources: e.target.value.split('\n').filter(r => r.trim()) 
+                })}
+                rows={3}
+                placeholder="Enter each resource on a new line"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="topicActivities">Activities (one per line)</Label>
+              <Textarea
+                id="topicActivities"
+                value={topicFormData.activities.join('\n')}
+                onChange={(e) => setTopicFormData({ 
+                  ...topicFormData, 
+                  activities: e.target.value.split('\n').filter(a => a.trim()) 
+                })}
+                rows={3}
+                placeholder="Enter each activity on a new line"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCurriculumDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveTopic}>
+              {editingTopic ? 'Update' : 'Add'} Topic
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
