@@ -89,24 +89,58 @@ export default function Syllabus() {
 
   // File download functionality
   const handleFileDownload = (attachment: any) => {
-    // Create download URL for the file
-    const fileUrl = attachment.url || attachment.path;
-    if (fileUrl) {
+    // Debug: Log attachment structure
+    console.log('Download attachment data:', attachment);
+    console.log('Available keys:', Object.keys(attachment));
+    
+    // Use the correct field names from backend
+    const fileUrl = attachment.fileUrl || attachment.url || attachment.path;
+    
+    // If we have a fileUrl, construct the full URL
+    let fullUrl = fileUrl;
+    if (fileUrl && !fileUrl.startsWith('http')) {
+      // Construct full URL with the backend base URL
+      fullUrl = `https://quran-acadamy-crm-production.up.railway.app${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+    }
+    
+    console.log('Attempting to download URL:', fullUrl);
+    
+    if (fullUrl) {
       const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = attachment.filename || attachment.originalname || 'syllabus-file';
+      link.href = fullUrl;
+      link.download = attachment.fileName || attachment.filename || attachment.originalname || 'syllabus-file';
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    } else {
+      console.error('No valid file URL found in attachment:', attachment);
+      alert('Unable to download file - file path not found');
     }
   };
 
   const handleFileOpen = (attachment: any) => {
-    // Open file in new tab
-    const fileUrl = attachment.url || attachment.path;
-    if (fileUrl) {
-      window.open(fileUrl, '_blank');
+    // Debug: Log attachment structure
+    console.log('Attachment data:', attachment);
+    console.log('Available keys:', Object.keys(attachment));
+    
+    // Use the correct field names from backend
+    const fileUrl = attachment.fileUrl || attachment.url || attachment.path;
+    
+    // If we have a fileUrl, construct the full URL
+    let fullUrl = fileUrl;
+    if (fileUrl && !fileUrl.startsWith('http')) {
+      // Construct full URL with the backend base URL
+      fullUrl = `https://quran-acadamy-crm-production.up.railway.app${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+    }
+    
+    console.log('Attempting to open URL:', fullUrl);
+    
+    if (fullUrl) {
+      window.open(fullUrl, '_blank');
+    } else {
+      console.error('No valid file URL found in attachment:', attachment);
+      alert('Unable to open file - file path not found');
     }
   };
     
@@ -154,7 +188,7 @@ export default function Syllabus() {
       level: formData.level as 'Beginner' | 'Intermediate' | 'Advanced',
       description: formData.description.trim(),
       duration: formData.duration.trim(),
-      status: formData.status,
+      status: formData.status as 'active' | 'draft' | 'archived',
       createdBy: userId,
       createdByName: userName,
       
@@ -350,7 +384,7 @@ export default function Syllabus() {
                                 <div className="flex items-center gap-2">
                                   <BookOpen className="h-4 w-4 text-muted-foreground" />
                                   <span className="text-sm truncate max-w-[150px]">
-                                    {attachment.filename || attachment.originalname || `File ${index + 1}`}
+                                    {attachment.fileName || attachment.filename || attachment.originalname || `File ${index + 1}`}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -461,7 +495,7 @@ export default function Syllabus() {
                                 <div className="flex items-center gap-2">
                                   <BookOpen className="h-4 w-4 text-muted-foreground" />
                                   <span className="text-sm truncate max-w-[150px]">
-                                    {attachment.filename || attachment.originalname || `File ${index + 1}`}
+                                    {attachment.fileName || attachment.filename || attachment.originalname || `File ${index + 1}`}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -572,7 +606,7 @@ export default function Syllabus() {
                                 <div className="flex items-center gap-2">
                                   <BookOpen className="h-4 w-4 text-muted-foreground" />
                                   <span className="text-sm truncate max-w-[150px]">
-                                    {attachment.filename || attachment.originalname || `File ${index + 1}`}
+                                    {attachment.fileName || attachment.filename || attachment.originalname || `File ${index + 1}`}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -683,7 +717,7 @@ export default function Syllabus() {
                                 <div className="flex items-center gap-2">
                                   <BookOpen className="h-4 w-4 text-muted-foreground" />
                                   <span className="text-sm truncate max-w-[150px]">
-                                    {attachment.filename || attachment.originalname || `File ${index + 1}`}
+                                    {attachment.fileName || attachment.filename || attachment.originalname || `File ${index + 1}`}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
