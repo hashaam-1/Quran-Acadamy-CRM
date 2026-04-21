@@ -268,12 +268,12 @@ export default function Syllabus() {
         formDataToSend.append('createdBy', syllabusData.createdBy);
         formDataToSend.append('createdByName', syllabusData.createdByName);
         
-        // Add arrays as JSON strings (backend will parse them)
-        formDataToSend.append('topics', JSON.stringify(syllabusData.topics));
-        formDataToSend.append('objectives', JSON.stringify(syllabusData.objectives));
-        formDataToSend.append('prerequisites', JSON.stringify(syllabusData.prerequisites));
-        formDataToSend.append('materials', JSON.stringify(syllabusData.materials));
-        formDataToSend.append('assessmentCriteria', JSON.stringify(syllabusData.assessmentCriteria));
+        // Add arrays as JSON strings (backend will parse them) - ensure clean JSON
+        formDataToSend.append('topics', JSON.stringify(syllabusData.topics || []));
+        formDataToSend.append('objectives', JSON.stringify(syllabusData.objectives || []));
+        formDataToSend.append('prerequisites', JSON.stringify(syllabusData.prerequisites || []));
+        formDataToSend.append('materials', JSON.stringify(syllabusData.materials || []));
+        formDataToSend.append('assessmentCriteria', JSON.stringify(syllabusData.assessmentCriteria || []));
         
         // Add files
         selectedFiles.forEach((fileItem) => {
