@@ -78,6 +78,12 @@ try {
 }
 
 /* =========================
+   STATIC FILE SERVING
+========================= */
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+/* =========================
    404 HANDLER
 ========================= */
 app.use((req, res) => {
