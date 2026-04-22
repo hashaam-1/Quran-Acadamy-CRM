@@ -59,7 +59,7 @@ export function HomeworkForm({ open, onOpenChange }: HomeworkFormProps) {
             <Select value={formData.studentId} onValueChange={(value) => setFormData({ ...formData, studentId: value })} disabled={studentsLoading}>
               <SelectTrigger><SelectValue placeholder={studentsLoading ? "Loading students..." : "Select student"} /></SelectTrigger>
               <SelectContent>
-                {students.length === 0 ? (
+                {!Array.isArray(students) || students.length === 0 ? (
                   <div className="p-2 text-sm text-muted-foreground text-center">No students found</div>
                 ) : (
                   students.map((student) => (
