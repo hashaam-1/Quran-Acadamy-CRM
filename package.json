@@ -1,8 +1,4 @@
 {
-  "scripts": {
-    "start": "node Backend/src/server.js",
-    "dev": "nodemon Backend/src/server.js"
-  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "nodemailer": "^7.0.12"

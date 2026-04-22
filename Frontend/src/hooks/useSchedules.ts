@@ -7,13 +7,8 @@ export const useSchedules = () => {
   return useQuery({
     queryKey: ['schedules'],
     queryFn: async () => {
-      try {
-        const data = await schedulesApi.getAll();
-        return Array.isArray(data) ? data : [];
-      } catch (error) {
-        console.error('Schedules API error:', error);
-        throw error;
-      }
+      const data = await schedulesApi.getAll();
+      return Array.isArray(data) ? data : [];
     },
   });
 };

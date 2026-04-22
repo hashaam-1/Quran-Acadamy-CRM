@@ -27,6 +27,9 @@ export function StudentForm({ open, onOpenChange, onSubmit, initialData, mode }:
   
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
+    password: '',
+    userId: '',
     age: 0,
     country: '',
     timezone: '',
@@ -38,15 +41,15 @@ export function StudentForm({ open, onOpenChange, onSubmit, initialData, mode }:
     status: 'active' as Student['status'],
     joinedAt: new Date().toISOString().split('T')[0],
     feeAmount: 100,
-    email: '',
-    password: '',
-    userId: '',
   });
 
   useEffect(() => {
     if (initialData && mode === 'edit') {
       setFormData({
         name: initialData.name,
+        email: initialData.email || '',
+        password: initialData.password || '',
+        userId: initialData.userId || '',
         age: initialData.age,
         country: initialData.country,
         timezone: initialData.timezone,
@@ -58,13 +61,13 @@ export function StudentForm({ open, onOpenChange, onSubmit, initialData, mode }:
         status: initialData.status,
         joinedAt: initialData.joinedAt,
         feeAmount: initialData.feeAmount || 100,
-        email: initialData.email || '',
-        password: initialData.password || '',
-        userId: initialData.userId || '',
       });
     } else {
       setFormData({
         name: '',
+        email: '',
+        password: '',
+        userId: '',
         age: 0,
         country: '',
         timezone: '',
@@ -76,9 +79,6 @@ export function StudentForm({ open, onOpenChange, onSubmit, initialData, mode }:
         status: 'active',
         joinedAt: new Date().toISOString().split('T')[0],
         feeAmount: 100,
-        email: '',
-        password: '',
-        userId: '',
       });
     }
   }, [initialData, mode, open]);
@@ -143,12 +143,12 @@ export function StudentForm({ open, onOpenChange, onSubmit, initialData, mode }:
               <Select value={formData.teacher} onValueChange={handleTeacherChange} disabled={teachersLoading}>
                 <SelectTrigger><SelectValue placeholder={teachersLoading ? "Loading teachers..." : "Select teacher"} /></SelectTrigger>
                 <SelectContent>
-                  {Array.isArray(teachers) && teachers.length === 0 ? (
+                  {teachers.length === 0 ? (
                     <div className="p-2 text-sm text-muted-foreground text-center">No teachers found</div>
                   ) : (
-                    Array.isArray(teachers) ? teachers.map((teacher) => (
-                      <SelectItem key={teacher._id} value={teacher.name}>{teacher.name}</SelectItem>
-                    )) : null
+                    teachers.map((teacher) => (
+                      <SelectItem key={teacher.id || teacher._id} value={teacher.name}>{teacher.name}</SelectItem>
+                    ))
                   )}
                 </SelectContent>
               </Select>

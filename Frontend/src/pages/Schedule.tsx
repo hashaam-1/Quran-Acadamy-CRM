@@ -61,16 +61,6 @@ export default function Schedule() {
   const { data: schedules = [], isLoading: schedulesLoading } = useSchedules();
   const { data: teachers = [], isLoading: teachersLoading } = useTeachers();
   const { currentUser } = useAuthStore();
-
-  // Debug: Log fetched data
-  console.log('=== SCHEDULE DEBUG ===');
-  console.log('Schedules fetched:', schedules);
-  console.log('Schedules count:', schedules.length);
-  console.log('Schedules loading:', schedulesLoading);
-  console.log('Current user:', currentUser);
-  console.log('Current user role:', currentUser?.role);
-  console.log('Current user ID:', currentUser?.id);
-  console.log('====================');
   const createSchedule = useCreateSchedule();
   const updateScheduleMutation = useUpdateSchedule();
   const deleteScheduleMutation = useDeleteSchedule();
@@ -99,59 +89,41 @@ export default function Schedule() {
   const weekDates = getWeekDates();
 
   const getSchedulesByDay = (day: string) => {
-    console.log(`=== getSchedulesByDay DEBUG for ${day} ===`);
-    console.log('Total schedules:', schedules.length);
-    console.log('Current user role:', currentUser?.role);
-    console.log('Current user ID:', currentUser?.id);
-    console.log('Teacher filter:', teacherFilter);
+    // Get the current week's date range
+    const startOfWeek = new Date(currentWeek);
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Start from Monday
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Sunday
     
-    const filteredSchedules = schedules.filter((s, index) => {
-      console.log(`\n--- Schedule ${index} ---`);
-      console.log('Schedule:', s);
-      console.log('Schedule day:', s.day);
-      console.log('Schedule teacherId:', s.teacherId);
-      console.log('Schedule studentId:', s.studentId);
-      
-      // Base day filtering
+    return schedules.filter(s => {
       const matchesDay = s.day === day;
+      const matchesTeacher = teacherFilter === "all" || s.teacherId === teacherFilter;
       
-      // Role-based filtering
-      let matchesRole = false;
-      if (currentUser?.role === 'admin') {
-        // Admin sees all schedules
-        matchesRole = true;
-      } else if (currentUser?.role === 'teacher') {
-        // Teacher sees only their assigned schedules
-        matchesRole = s.teacherId === currentUser.id;
-      } else if (currentUser?.role === 'student') {
-        // Student sees only their assigned schedules
-        matchesRole = s.studentId === currentUser.id;
+      // Week-based filtering - check if schedule falls within the selected week
+      let matchesWeek = true;
+      if (s.date) {
+        // If schedule has a specific date, check if it's within the selected week
+        const scheduleDate = new Date(s.date);
+        matchesWeek = scheduleDate >= startOfWeek && scheduleDate <= endOfWeek;
       } else {
-        // Default: no schedules for unknown roles
-        matchesRole = false;
+        // For backward compatibility - show schedules without dates for current week only
+        // This prevents showing the same classes in every week while maintaining existing data
+        const today = new Date();
+        const currentWeekStart = new Date(today);
+        currentWeekStart.setDate(today.getDate() - today.getDay() + 1);
+        const currentWeekEnd = new Date(currentWeekStart);
+        currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
+        
+        // Only show old schedules if currentWeek is the current week
+        const isCurrentWeek = currentWeek.toDateString() === currentWeekStart.toDateString();
+        matchesWeek = isCurrentWeek;
       }
       
-      // Additional teacher filter (for admin only)
-      const matchesTeacherFilter = teacherFilter === "all" || s.teacherId === teacherFilter;
+      // All roles can see all classes - no role-based filtering
+      let matchesRole = true;
       
-      console.log('Matches day:', matchesDay);
-      console.log('Matches role:', matchesRole);
-      console.log('Matches teacher filter:', matchesTeacherFilter);
-      
-      // Final result: must match day AND role AND teacher filter (if applicable)
-      const finalResult = matchesDay && matchesRole && 
-        (currentUser?.role === 'admin' ? matchesTeacherFilter : true);
-      
-      console.log('Final result:', finalResult);
-      console.log('--- End Schedule ---');
-      
-      return finalResult;
+      return matchesDay && matchesTeacher && matchesWeek && matchesRole;
     });
-    
-    console.log(`Filtered schedules for ${day}:`, filteredSchedules.length);
-    console.log('==============================');
-    
-    return filteredSchedules;
   };
 
   const handleAdd = (data: Omit<ClassSchedule, 'id'>) => {

@@ -14,65 +14,10 @@ const app = express();
 /* =========================
    SECURITY + MIDDLEWARE
 ========================= */
-
-// Comprehensive CORS configuration
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      "https://quran-acadamy-crm-production.up.railway.app",
-      "https://quran-academy-production.up.railway.app", 
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "http://localhost:8080"
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(null, true); // Temporarily allow all origins for debugging
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
-  exposedHeaders: ["X-Total-Count", "X-Page-Count"],
-  maxAge: 86400 // 24 hours
-};
-
-// Apply CORS middleware
-app.use(cors(corsOptions));
-
-// Manual preflight handling
-app.options('*', cors(corsOptions));
-
-// Add CORS headers manually as fallback
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400');
-  
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-    return;
-  }
-  next();
-});
-
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
-
-// Configure helmet to allow CORS
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  contentSecurityPolicy: false // Temporarily disable CSP for debugging
-}));
-
+app.use(cors({ origin: "*" }));
+app.use(helmet());
 app.use(compression());
 app.use(morgan("dev"));
 
@@ -166,48 +111,13 @@ app.use((err, req, res, next) => {
 ========================= */
 const PORT = process.env.PORT || 5000;
 
-console.log("=== SERVER STARTING ===");
-console.log("PORT:", PORT);
-console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log("Working directory:", process.cwd());
-console.log("Deployment timestamp:", new Date().toISOString());
-console.log("CORS configured for frontend domains");
-console.log("=====================");
-
-const server = app.listen(PORT, async () => {
-  console.log("Server running on port:", PORT);
+app.listen(PORT, async () => {
+  console.log("🚀 Server running on port:", PORT);
 
   try {
     await connectDB();
-    console.log(" MongoDB Connected");
-    console.log(" Server ready and accepting connections");
+    console.log("🟢 MongoDB Connected");
   } catch (err) {
-    console.error(" DB Connection Failed:", err.message);
-    console.error(" Server will continue running without database");
+    console.error("❌ DB Connection Failed:", err.message);
   }
-});
-
-// Handle server errors
-server.on('error', (err) => {
-  console.error(' Server error:', err);
-  if (err.code === 'EADDRINUSE') {
-    console.error(` Port ${PORT} is already in use`);
-  } else {
-    console.error(' Unknown server error:', err);
-  }
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log(' SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log(' Process terminated');
-  });
-});
-
-process.on('SIGINT', () => {
-  console.log(' SIGINT received, shutting down gracefully');
-  server.close(() => {
-    console.log(' Process terminated');
-  });
 });
