@@ -430,16 +430,39 @@ const getTeacherMeetings = async (req, res) => {
     const { teacherId } = req.params;
     const targetTeacherId = teacherId || req.user?.id;
     
+    console.log('=== TEACHER MEETINGS DEBUG ===');
+    console.log('Requested teacherId:', teacherId);
+    console.log('Target teacherId:', targetTeacherId);
+    console.log('User from req:', req.user);
+    
     // Fetch scheduled classes from Schedule collection
+    // Handle both ObjectId and string teacherId
+    let teacherIdQuery = targetTeacherId;
+    try {
+      // Try to convert to ObjectId for Schedule collection
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(targetTeacherId)) {
+        teacherIdQuery = new mongoose.Types.ObjectId(targetTeacherId);
+      }
+    } catch (err) {
+      console.log('Using string teacherId for Schedule query');
+    }
+    
     const scheduledClasses = await Schedule.find({
-      teacherId: targetTeacherId,
+      teacherId: teacherIdQuery,
       status: { $in: ['scheduled', 'rescheduled'] }
     }).sort({ createdAt: -1 });
+    
+    console.log('Scheduled classes found:', scheduledClasses.length);
+    console.log('Scheduled classes:', scheduledClasses);
     
     // Fetch meetings from Meeting collection
     const meetings = await Meeting.find({
       teacherId: targetTeacherId,
     }).sort({ createdAt: -1 });
+    
+    console.log('Meetings found:', meetings.length);
+    console.log('Meetings:', meetings);
 
     // Combine both and format scheduled classes to look like meetings
     const combinedMeetings = [];
@@ -481,6 +504,10 @@ const getTeacherMeetings = async (req, res) => {
 
     // Sort by creation date (newest first)
     combinedMeetings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    console.log('Final combined meetings:', combinedMeetings.length);
+    console.log('Combined meetings data:', combinedMeetings);
+    console.log('=== END TEACHER MEETINGS DEBUG ===');
 
     res.json({ success: true, meetings: combinedMeetings });
   } catch (err) {
