@@ -430,13 +430,62 @@ const getTeacherMeetings = async (req, res) => {
     const { teacherId } = req.params;
     const targetTeacherId = teacherId || req.user?.id;
     
+    // Fetch scheduled classes from Schedule collection
+    const scheduledClasses = await Schedule.find({
+      teacherId: targetTeacherId,
+      status: { $in: ['scheduled', 'rescheduled'] }
+    }).sort({ createdAt: -1 });
+    
+    // Fetch meetings from Meeting collection
     const meetings = await Meeting.find({
       teacherId: targetTeacherId,
     }).sort({ createdAt: -1 });
 
-    res.json({ success: true, meetings });
+    // Combine both and format scheduled classes to look like meetings
+    const combinedMeetings = [];
+    
+    // Add scheduled classes (formatted as meetings)
+    scheduledClasses.forEach(schedule => {
+      combinedMeetings.push({
+        _id: schedule._id,
+        meetingNumber: schedule.zoomMeetingId || `schedule-${schedule._id}`,
+        className: `${schedule.course} - ${schedule.studentName}`,
+        course: schedule.course,
+        teacherId: schedule.teacherId,
+        teacherName: schedule.teacherName,
+        studentId: schedule.studentId,
+        studentName: schedule.studentName,
+        time: schedule.time,
+        duration: schedule.duration,
+        status: schedule.meetingStatus === 'started' ? 'live' : 'scheduled',
+        zoomMeetingId: schedule.zoomMeetingId,
+        zoomPassword: schedule.zoomPassword,
+        zoomJoinUrl: schedule.zoomJoinUrl,
+        zoomStartUrl: schedule.zoomStartUrl,
+        joinUrl: schedule.zoomJoinUrl,
+        startUrl: schedule.zoomStartUrl,
+        createdAt: schedule.createdAt,
+        day: schedule.day,
+        isSchedule: true, // Flag to identify this is from Schedule collection
+        scheduleStatus: schedule.status
+      });
+    });
+    
+    // Add actual meetings
+    meetings.forEach(meeting => {
+      combinedMeetings.push({
+        ...meeting.toObject(),
+        isSchedule: false // Flag to identify this is from Meeting collection
+      });
+    });
+
+    // Sort by creation date (newest first)
+    combinedMeetings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.json({ success: true, meetings: combinedMeetings });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Failed" });
+    console.error('Error in getTeacherMeetings:', err);
+    res.status(500).json({ success: false, message: "Failed to fetch meetings" });
   }
 };
 
