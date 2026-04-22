@@ -111,17 +111,9 @@ export default function Schedule() {
         const scheduleDate = new Date(s.date);
         matchesWeek = scheduleDate >= startOfWeek && scheduleDate <= endOfWeek;
       } else {
-        // For backward compatibility - show schedules without dates for current week only
-        // This prevents showing the same classes in every week while maintaining existing data
-        const today = new Date();
-        const currentWeekStart = new Date(today);
-        currentWeekStart.setDate(today.getDate() - today.getDay() + 1);
-        const currentWeekEnd = new Date(currentWeekStart);
-        currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
-        
-        // Only show old schedules if currentWeek is the current week
-        const isCurrentWeek = currentWeek.toDateString() === currentWeekStart.toDateString();
-        matchesWeek = isCurrentWeek;
+        // Schedules without dates are recurring weekly schedules
+        // They should show in ALL weeks, not just the current week
+        matchesWeek = true;
       }
       
       // All roles can see all classes - no role-based filtering
