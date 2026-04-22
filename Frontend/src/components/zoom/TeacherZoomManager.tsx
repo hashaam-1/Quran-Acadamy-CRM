@@ -79,11 +79,16 @@ export default function TeacherZoomManager({
 
   const fetchTeacherMeetings = async () => {
     try {
+      console.log('Fetching meetings for teacher:', currentUser?.id);
       const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/teacher/${currentUser?.id}`);
       if (response.ok) {
         const data = await response.json();
+        console.log('Teacher meetings response:', data);
+        
         if (data.success) {
           const meetings = data.meetings || [];
+          console.log('Total meetings fetched:', meetings.length);
+          console.log('Meetings details:', meetings);
 
           const liveMeetings = meetings.filter(
             (m: Meeting) => m.status === "live"
@@ -93,9 +98,16 @@ export default function TeacherZoomManager({
             (m: Meeting) => m.status === "scheduled"
           );
 
+          console.log('Live meetings:', liveMeetings.length);
+          console.log('Scheduled meetings:', scheduledMeetings.length);
+
           setLiveMeetings(liveMeetings);
           setScheduledMeetings(scheduledMeetings);
+        } else {
+          console.error('API returned success=false:', data);
         }
+      } else {
+        console.error('API response not ok:', response.status, response.statusText);
       }
     } catch (err) {
       console.error('Error fetching teacher meetings:', err);
