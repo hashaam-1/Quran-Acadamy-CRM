@@ -4,6 +4,6 @@
   },
   "deploy": {
     "startCommand": "npm start",
-    "rootDirectory": "Frontend"
+    "rootDirectory": "."
   }
 }

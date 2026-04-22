@@ -9,7 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "serve": "serve -s dist -l 8080"
+    "serve": "serve -s dist -l 8080",
+    "start": "serve -s dist -l 8080"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
