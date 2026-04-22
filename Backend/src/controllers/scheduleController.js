@@ -195,9 +195,9 @@ exports.getSchedulesByStudent = async (req, res) => {
       students: s.students
     })));
     
-    res.json({ success: true, schedules });
+    res.json(schedules);
   } catch (error) {
     console.error('Error fetching student schedules:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };

@@ -14,27 +14,42 @@ export const useSchedules = () => {
       let data;
       
       if (!currentUser) {
+        console.log('❌ No current user - returning empty schedules');
         return [];
       }
       
+      console.log('🔍 Fetching schedules for user:', {
+        role: currentUser.role,
+        id: currentUser.id,
+        name: currentUser.name
+      });
+      
       // Admin, Sales Team, and Team Leader see all schedules
       if (currentUser.role === 'admin' || currentUser.role === 'sales_team' || currentUser.role === 'team_leader') {
+        console.log('👑 Admin/Sales/Team Leader - fetching ALL schedules');
         data = await schedulesApi.getAll();
       }
       // Teachers see only their assigned classes
       else if (currentUser.role === 'teacher') {
+        console.log('👨‍🏫 Teacher - fetching schedules for teacher ID:', currentUser.id);
         data = await schedulesApi.getByTeacher(currentUser.id);
       }
       // Students see only their classes
       else if (currentUser.role === 'student') {
+        console.log('👨‍🎓 Student - fetching schedules for student ID:', currentUser.id);
         data = await schedulesApi.getByStudent(currentUser.id);
       }
       // Default: show all (fallback)
       else {
+        console.log('⚠️ Unknown role - fetching ALL schedules');
         data = await schedulesApi.getAll();
       }
       
-      return Array.isArray(data) ? data : [];
+      const schedules = Array.isArray(data) ? data : [];
+      console.log('✅ Schedules fetched:', schedules.length, 'schedules');
+      console.log('📋 Schedule data sample:', schedules[0]);
+      
+      return schedules;
     },
     enabled: !!currentUser,
   });

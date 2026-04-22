@@ -67,6 +67,11 @@ export default function Schedule() {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [teacherFilter, setTeacherFilter] = useState("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
+
+  // Debug logging
+  console.log('📅 Schedule Page - Schedules:', schedules.length, 'schedules');
+  console.log('📅 Schedule Page - Loading:', schedulesLoading);
+  console.log('📅 Schedule Page - Current User:', currentUser?.role, currentUser?.name);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [current, setCurrent] = useState<ClassSchedule | null>(null);
@@ -95,7 +100,7 @@ export default function Schedule() {
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Sunday
     
-    return schedules.filter(s => {
+    const filtered = schedules.filter(s => {
       const matchesDay = s.day === day;
       const matchesTeacher = teacherFilter === "all" || s.teacherId === teacherFilter;
       
@@ -124,6 +129,9 @@ export default function Schedule() {
       
       return matchesDay && matchesTeacher && matchesWeek && matchesRole;
     });
+    
+    console.log(`📅 Filtered schedules for ${day}:`, filtered.length, 'out of', schedules.length);
+    return filtered;
   };
 
   const handleAdd = (data: Omit<ClassSchedule, 'id'>) => {
