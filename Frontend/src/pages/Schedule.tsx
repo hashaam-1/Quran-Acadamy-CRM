@@ -101,24 +101,48 @@ export default function Schedule() {
   const getSchedulesByDay = (day: string) => {
     console.log(`=== getSchedulesByDay DEBUG for ${day} ===`);
     console.log('Total schedules:', schedules.length);
+    console.log('Current user role:', currentUser?.role);
+    console.log('Current user ID:', currentUser?.id);
     console.log('Teacher filter:', teacherFilter);
     
-    // TEMPORARY: Simplified filtering to show all schedules by day only
     const filteredSchedules = schedules.filter((s, index) => {
       console.log(`\n--- Schedule ${index} ---`);
       console.log('Schedule:', s);
       console.log('Schedule day:', s.day);
-      console.log('Schedule date:', s.date);
+      console.log('Schedule teacherId:', s.teacherId);
+      console.log('Schedule studentId:', s.studentId);
       
+      // Base day filtering
       const matchesDay = s.day === day;
-      const matchesTeacher = teacherFilter === "all" || s.teacherId === teacherFilter;
+      
+      // Role-based filtering
+      let matchesRole = false;
+      if (currentUser?.role === 'admin') {
+        // Admin sees all schedules
+        matchesRole = true;
+      } else if (currentUser?.role === 'teacher') {
+        // Teacher sees only their assigned schedules
+        matchesRole = s.teacherId === currentUser.id;
+      } else if (currentUser?.role === 'student') {
+        // Student sees only their assigned schedules
+        matchesRole = s.studentId === currentUser.id;
+      } else {
+        // Default: no schedules for unknown roles
+        matchesRole = false;
+      }
+      
+      // Additional teacher filter (for admin only)
+      const matchesTeacherFilter = teacherFilter === "all" || s.teacherId === teacherFilter;
       
       console.log('Matches day:', matchesDay);
-      console.log('Matches teacher:', matchesTeacher);
+      console.log('Matches role:', matchesRole);
+      console.log('Matches teacher filter:', matchesTeacherFilter);
       
-      // TEMPORARY: Remove complex week filtering - just show by day and teacher
-      const finalResult = matchesDay && matchesTeacher;
-      console.log('Final result (simplified):', finalResult);
+      // Final result: must match day AND role AND teacher filter (if applicable)
+      const finalResult = matchesDay && matchesRole && 
+        (currentUser?.role === 'admin' ? matchesTeacherFilter : true);
+      
+      console.log('Final result:', finalResult);
       console.log('--- End Schedule ---');
       
       return finalResult;
