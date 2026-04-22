@@ -62,9 +62,9 @@ loadRoute("dashboardRoutes.js", "/api/dashboard");
 loadRoute("attendance.js", "/api/attendance");
 loadRoute("chat.js", "/api/chats");
 loadRoute("settingRoutes.js", "/api/settings");
-//loadRoute("syllabusRoutes.js", "/api/syllabus");
-//loadRoute("homeworkRoutes.js", "/api/homework");
-//loadRoute("meetingRoutes.js", "/api/meetings");
+loadRoute("syllabusRoutes.js", "/api/syllabus");
+loadRoute("homeworkRoutes.js", "/api/homework");
+loadRoute("meetingRoutes.js", "/api/meetings");
 
 /* =========================
    ZOOM ROUTE (IMPORTANT FIXED)
