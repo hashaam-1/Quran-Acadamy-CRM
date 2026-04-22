@@ -36,8 +36,10 @@ export const useSchedules = () => {
       }
       // Students see only their classes
       else if (currentUser.role === 'student') {
-        console.log('👨‍🎓 Student - fetching schedules for student ID:', currentUser.id);
+        console.log('Student - fetching schedules for student ID:', currentUser.id);
+        console.log('Student - full user object:', currentUser);
         data = await schedulesApi.getByStudent(currentUser.id);
+        console.log('Student - API response:', data);
       }
       // Default: show all (fallback)
       else {

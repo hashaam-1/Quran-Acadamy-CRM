@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -68,10 +68,23 @@ export default function Schedule() {
   const [teacherFilter, setTeacherFilter] = useState("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
 
-  // Debug logging
-  console.log('📅 Schedule Page - Schedules:', schedules.length, 'schedules');
-  console.log('📅 Schedule Page - Loading:', schedulesLoading);
-  console.log('📅 Schedule Page - Current User:', currentUser?.role, currentUser?.name);
+  useEffect(() => {
+    console.log('Schedule Page - Schedules:', schedules.length, 'schedules');
+    console.log('Schedule Page - Loading:', schedulesLoading);
+    console.log('Schedule Page - Current User:', currentUser?.role, currentUser?.name);
+  }, [schedules, schedulesLoading, currentUser]);
+
+  useEffect(() => {
+    schedules.forEach((slot, index) => {
+      console.log(`Schedule ${index}:`, {
+        role: currentUser?.role,
+        studentName: slot.studentName,
+        meetingNumber: slot.meetingNumber,
+        shouldShowJoinButton: currentUser?.role === 'teacher' || currentUser?.role === 'student'
+      });
+    });
+  }, [schedules, currentUser]);
+
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [current, setCurrent] = useState<ClassSchedule | null>(null);
