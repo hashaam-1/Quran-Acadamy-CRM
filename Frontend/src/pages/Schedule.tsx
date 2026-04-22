@@ -68,6 +68,8 @@ export default function Schedule() {
   console.log('Schedules count:', schedules.length);
   console.log('Schedules loading:', schedulesLoading);
   console.log('Current user:', currentUser);
+  console.log('Current user role:', currentUser?.role);
+  console.log('Current user ID:', currentUser?.id);
   console.log('====================');
   const createSchedule = useCreateSchedule();
   const updateScheduleMutation = useUpdateSchedule();

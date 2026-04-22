@@ -8,6 +8,11 @@ export const useSchedules = () => {
     queryKey: ['schedules'],
     queryFn: async () => {
       console.log('=== SCHEDULES API DEBUG ===');
+      
+      // Get current user info for debugging
+      const authData = localStorage.getItem('auth-storage');
+      console.log('Auth data from localStorage:', authData);
+      
       try {
         // Test basic API connection first
         const healthResponse = await fetch(`${import.meta.env.VITE_API_URL || 'https://quran-acadamy-crm-production.up.railway.app/api'}/health`);
@@ -17,6 +22,7 @@ export const useSchedules = () => {
           console.log('Health check data:', healthData);
         }
         
+        console.log('Making schedules API call...');
         const data = await schedulesApi.getAll();
         console.log('Raw API response:', data);
         console.log('Data type:', typeof data);
@@ -27,6 +33,7 @@ export const useSchedules = () => {
       } catch (error) {
         console.error('Schedules API error:', error);
         console.error('Error details:', error.response?.data || error.message);
+        console.error('Error status:', error.response?.status);
         throw error;
       }
     },
