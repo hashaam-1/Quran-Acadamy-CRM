@@ -37,6 +37,11 @@ export const schedulesApi = {
     return data;
   },
 
+  getByStudent: async (studentId: string) => {
+    const { data } = await api.get(`/schedules/student/${studentId}`);
+    return data;
+  },
+
   requestReschedule: async (id: string, request: any) => {
     const { data } = await api.post(`/schedules/${id}/reschedule`, request);
     return data;
