@@ -97,15 +97,29 @@ export default function Schedule() {
   const weekDates = getWeekDates();
 
   const getSchedulesByDay = (day: string) => {
+    console.log(`=== getSchedulesByDay DEBUG for ${day} ===`);
+    console.log('Total schedules:', schedules.length);
+    console.log('Teacher filter:', teacherFilter);
+    
     // Get the current week's date range
     const startOfWeek = new Date(currentWeek);
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Start from Monday
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Sunday
     
-    return schedules.filter(s => {
+    console.log('Week range:', startOfWeek.toDateString(), 'to', endOfWeek.toDateString());
+    
+    const filteredSchedules = schedules.filter((s, index) => {
+      console.log(`\n--- Schedule ${index} ---`);
+      console.log('Schedule:', s);
+      console.log('Schedule day:', s.day);
+      console.log('Schedule date:', s.date);
+      
       const matchesDay = s.day === day;
       const matchesTeacher = teacherFilter === "all" || s.teacherId === teacherFilter;
+      
+      console.log('Matches day:', matchesDay);
+      console.log('Matches teacher:', matchesTeacher);
       
       // Week-based filtering - check if schedule falls within the selected week
       let matchesWeek = true;
@@ -113,6 +127,7 @@ export default function Schedule() {
         // If schedule has a specific date, check if it's within the selected week
         const scheduleDate = new Date(s.date);
         matchesWeek = scheduleDate >= startOfWeek && scheduleDate <= endOfWeek;
+        console.log('Has date, matches week:', matchesWeek);
       } else {
         // For backward compatibility - show schedules without dates for current week only
         // This prevents showing the same classes in every week while maintaining existing data
@@ -125,13 +140,23 @@ export default function Schedule() {
         // Only show old schedules if currentWeek is the current week
         const isCurrentWeek = currentWeek.toDateString() === currentWeekStart.toDateString();
         matchesWeek = isCurrentWeek;
+        console.log('No date, is current week:', isCurrentWeek, 'matches week:', matchesWeek);
       }
       
       // All roles can see all classes - no role-based filtering
       let matchesRole = true;
       
-      return matchesDay && matchesTeacher && matchesWeek && matchesRole;
+      const finalResult = matchesDay && matchesTeacher && matchesWeek && matchesRole;
+      console.log('Final result (all conditions):', finalResult);
+      console.log('--- End Schedule ---');
+      
+      return finalResult;
     });
+    
+    console.log(`Filtered schedules for ${day}:`, filteredSchedules.length);
+    console.log('==============================');
+    
+    return filteredSchedules;
   };
 
   const handleAdd = (data: Omit<ClassSchedule, 'id'>) => {
