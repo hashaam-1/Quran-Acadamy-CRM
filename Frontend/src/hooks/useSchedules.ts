@@ -7,8 +7,28 @@ export const useSchedules = () => {
   return useQuery({
     queryKey: ['schedules'],
     queryFn: async () => {
-      const data = await schedulesApi.getAll();
-      return Array.isArray(data) ? data : [];
+      console.log('=== SCHEDULES API DEBUG ===');
+      try {
+        // Test basic API connection first
+        const healthResponse = await fetch(`${import.meta.env.VITE_API_URL || 'https://quran-acadamy-crm-production.up.railway.app/api'}/health`);
+        console.log('Health check status:', healthResponse.status);
+        if (healthResponse.ok) {
+          const healthData = await healthResponse.json();
+          console.log('Health check data:', healthData);
+        }
+        
+        const data = await schedulesApi.getAll();
+        console.log('Raw API response:', data);
+        console.log('Data type:', typeof data);
+        console.log('Is array:', Array.isArray(data));
+        console.log('Data length:', data?.length || 'N/A');
+        console.log('========================');
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        console.error('Schedules API error:', error);
+        console.error('Error details:', error.response?.data || error.message);
+        throw error;
+      }
     },
   });
 };

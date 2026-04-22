@@ -61,6 +61,14 @@ export default function Schedule() {
   const { data: schedules = [], isLoading: schedulesLoading } = useSchedules();
   const { data: teachers = [], isLoading: teachersLoading } = useTeachers();
   const { currentUser } = useAuthStore();
+
+  // Debug: Log fetched data
+  console.log('=== SCHEDULE DEBUG ===');
+  console.log('Schedules fetched:', schedules);
+  console.log('Schedules count:', schedules.length);
+  console.log('Schedules loading:', schedulesLoading);
+  console.log('Current user:', currentUser);
+  console.log('====================');
   const createSchedule = useCreateSchedule();
   const updateScheduleMutation = useUpdateSchedule();
   const deleteScheduleMutation = useDeleteSchedule();
