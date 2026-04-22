@@ -111,8 +111,14 @@ app.use((err, req, res, next) => {
 ========================= */
 const PORT = process.env.PORT || 5000;
 
+console.log("=== SERVER STARTING ===");
+console.log("PORT:", PORT);
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("Working directory:", process.cwd());
+console.log("=====================");
+
 app.listen(PORT, async () => {
-  console.log("🚀 Server running on port:", PORT);
+  console.log("Server running on port:", PORT);
 
   try {
     await connectDB();
