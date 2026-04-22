@@ -127,6 +127,8 @@ console.log("=== SERVER STARTING ===");
 console.log("PORT:", PORT);
 console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("Working directory:", process.cwd());
+console.log("Deployment timestamp:", new Date().toISOString());
+console.log("CORS configured for frontend domains");
 console.log("=====================");
 
 const server = app.listen(PORT, async () => {
