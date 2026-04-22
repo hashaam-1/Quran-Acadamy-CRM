@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 // Import Zoom Meeting SDK from npm package
 import { ZoomMtg } from '@zoom/meetingsdk';
+import ZoomScreenShare from './ZoomScreenShare';
 
 interface MeetingConfig {
   meetingNumber: string;
@@ -28,6 +29,7 @@ export default function ZoomMeetingClean() {
   const [meetingConfig, setMeetingConfig] = useState<MeetingConfig | null>(null);
   const [isJoined, setIsJoined] = useState(false);
   const [meeting, setMeeting] = useState<any>(null);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
   const zoomContainerRef = useRef<HTMLDivElement>(null);
   const { currentUser } = useAuthStore();
   const navigate = useNavigate();
@@ -306,11 +308,17 @@ export default function ZoomMeetingClean() {
   const leaveMeeting = () => {
     try {
       setIsJoined(false);
+      setIsScreenSharing(false);
       navigate('/schedule');
       toast.success('Left meeting');
     } catch (error) {
       console.error('Error leaving meeting:', error);
     }
+  };
+
+  const handleScreenShareStatusChange = (isSharing: boolean) => {
+    setIsScreenSharing(isSharing);
+    console.log('Screen sharing status changed:', isSharing);
   };
 
   return (
@@ -392,6 +400,16 @@ export default function ZoomMeetingClean() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Screen Sharing Manager - Only show when joined */}
+            {isJoined && (
+              <ZoomScreenShare
+                meeting={meeting}
+                isHost={role === 1}
+                currentUser={preservedUser || currentUser}
+                onShareStatusChange={handleScreenShareStatusChange}
+              />
+            )}
           </div>
         </div>
       </div>
