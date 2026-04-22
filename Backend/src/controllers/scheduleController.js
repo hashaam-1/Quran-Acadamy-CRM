@@ -3,12 +3,21 @@ const Schedule = require('../models/Schedule.js');
 // Get all schedules
 exports.getSchedules = async (req, res) => {
   try {
+    console.log('=== BACKEND SCHEDULES DEBUG ===');
+    console.log('Fetching all schedules...');
+    
     const schedules = await Schedule.find()
       .populate('studentId', 'name age')
       .populate('teacherId', 'name email')
       .sort({ day: 1, time: 1 });
+    
+    console.log('Schedules found:', schedules.length);
+    console.log('Schedules data:', JSON.stringify(schedules, null, 2));
+    console.log('============================');
+    
     res.json(schedules);
   } catch (error) {
+    console.error('Error fetching schedules:', error);
     res.status(500).json({ message: error.message });
   }
 };
