@@ -117,13 +117,40 @@ console.log("NODE_ENV:", process.env.NODE_ENV);
 console.log("Working directory:", process.cwd());
 console.log("=====================");
 
-app.listen(PORT, async () => {
+const server = app.listen(PORT, async () => {
   console.log("Server running on port:", PORT);
 
   try {
     await connectDB();
-    console.log("🟢 MongoDB Connected");
+    console.log(" MongoDB Connected");
+    console.log(" Server ready and accepting connections");
   } catch (err) {
-    console.error("❌ DB Connection Failed:", err.message);
+    console.error(" DB Connection Failed:", err.message);
+    console.error(" Server will continue running without database");
   }
+});
+
+// Handle server errors
+server.on('error', (err) => {
+  console.error(' Server error:', err);
+  if (err.code === 'EADDRINUSE') {
+    console.error(` Port ${PORT} is already in use`);
+  } else {
+    console.error(' Unknown server error:', err);
+  }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log(' SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log(' Process terminated');
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log(' SIGINT received, shutting down gracefully');
+  server.close(() => {
+    console.log(' Process terminated');
+  });
 });
