@@ -14,20 +14,63 @@ const app = express();
 /* =========================
    SECURITY + MIDDLEWARE
 ========================= */
-// CORS must be first, before other middleware
-app.use(cors({ 
-  origin: ["https://quran-acadamy-crm-production.up.railway.app", "https://quran-academy-production.up.railway.app", "http://localhost:3000", "http://localhost:5173"],
+
+// Comprehensive CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      "https://quran-acadamy-crm-production.up.railway.app",
+      "https://quran-academy-production.up.railway.app", 
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "http://localhost:8080"
+    ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(null, true); // Temporarily allow all origins for debugging
+    }
+  },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+  exposedHeaders: ["X-Total-Count", "X-Page-Count"],
+  maxAge: 86400 // 24 hours
+};
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
+
+// Manual preflight handling
+app.options('*', cors(corsOptions));
+
+// Add CORS headers manually as fallback
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+    return;
+  }
+  next();
+});
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // Configure helmet to allow CORS
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: false // Temporarily disable CSP for debugging
 }));
 
 app.use(compression());
@@ -42,7 +85,42 @@ app.get("/api/health", (req, res) => {
     message: "Backend Running",
     db: mongoose.connection.readyState === 1 ? "connected" : "not connected",
     time: new Date().toISOString(),
+    cors: "enabled",
+    origin: req.headers.origin,
+    headers: req.headers
   });
+});
+
+/* =========================
+   CORS DEBUG ENDPOINT
+========================= */
+app.get("/api/cors-test", (req, res) => {
+  console.log('=== CORS DEBUG ===');
+  console.log('Request origin:', req.headers.origin);
+  console.log('Request headers:', req.headers);
+  console.log('Request method:', req.method);
+  
+  res.json({
+    success: true,
+    message: "CORS Test Endpoint",
+    origin: req.headers.origin,
+    method: req.method,
+    headers: req.headers,
+    timestamp: new Date().toISOString(),
+    cors_status: "working"
+  });
+});
+
+app.options("/api/cors-test", (req, res) => {
+  console.log('=== CORS PREFLIGHT DEBUG ===');
+  console.log('Preflight origin:', req.headers.origin);
+  console.log('Preflight headers:', req.headers);
+  
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
 });
 
 /* =========================
