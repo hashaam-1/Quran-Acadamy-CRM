@@ -3,7 +3,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npx serve -s dist -l 8080",
-    "rootDirectory": "Frontend"
+    "startCommand": "npm start",
+    "rootDirectory": "Backend"
   }
 }
