@@ -185,9 +185,41 @@ export default function TeacherZoomManager({
   };
 
 
-  const handleJoinMeeting = (meeting: Meeting) => {
-    // Navigate to Zoom meeting - role will be determined by user type in ZoomMeetingClean component
-    navigate(`/zoom-join?meetingNumber=${meeting.meetingNumber}`);
+  const handleJoinMeeting = async (meeting: Meeting) => {
+    try {
+      // For scheduled classes, check if Zoom meeting needs to be created
+      if (meeting.isSchedule && !meeting.zoomMeetingId) {
+        setIsLoading(true);
+        
+        // Create Zoom meeting for scheduled class
+        const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/schedule/${meeting._id}/create-meeting`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          toast.success('Zoom meeting created for scheduled class');
+          // Refresh meetings list to get updated data
+          await fetchTeacherMeetings();
+          // Navigate to the newly created meeting
+          navigate(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}`);
+        } else {
+          toast.error('Failed to create Zoom meeting for scheduled class');
+        }
+      } else {
+        // For existing meetings or scheduled classes with Zoom meetings, navigate directly
+        navigate(`/zoom-join?meetingNumber=${meeting.meetingNumber}`);
+      }
+    } catch (err) {
+      console.error('Error joining meeting:', err);
+      toast.error('Failed to join meeting');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatTime = (dateString: string) => {
@@ -313,10 +345,18 @@ export default function TeacherZoomManager({
                         </div>
                       )}
 
+                      {meeting.day && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <BookOpen className="w-4 h-4 text-gray-400" />
+                          {meeting.day}
+                        </div>
+                      )}
+
                       {meeting.time && (
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Clock className="w-4 h-4 text-gray-400" />
                           {meeting.time}
+                          {meeting.duration && ` (${meeting.duration})`}
                         </div>
                       )}
 
@@ -324,6 +364,19 @@ export default function TeacherZoomManager({
                         <Clock className="w-4 h-4 text-gray-400" />
                         Created: {formatTime(meeting.createdAt)}
                       </div>
+
+                      {meeting.isSchedule && (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            Scheduled Class
+                          </Badge>
+                          {meeting.scheduleStatus === 'rescheduled' && (
+                            <Badge variant="secondary" className="text-xs">
+                              Rescheduled
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
