@@ -288,7 +288,7 @@ export default function Schedule() {
   <div
     key={slot.id}
     className={cn(
-      "relative overflow-hidden p-3 rounded-lg bg-card border-l-4 shadow-soft",
+      "relative overflow-hidden p-3 rounded-lg bg-card border-l-4 shadow-soft group hover:shadow-md transition-shadow cursor-pointer",
       statusConfig[slot.status].color
     )}
   >
@@ -317,6 +317,66 @@ export default function Schedule() {
         <span>â¢</span>
         <span>{slot.duration}</span>
       </div>
+    </div>
+
+    {/* Hover Actions - Role-based */}
+    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-20">
+      {/* Teacher: Join Class + Edit */}
+      {currentUser?.role === 'teacher' && (
+        <>
+          <JoinClassButton
+            meetingNumber={slot.meetingNumber}
+            className="bg-white text-black hover:bg-gray-100"
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-white text-black hover:bg-gray-100 border-white"
+            onClick={() => {
+              setCurrent(slot);
+              setIsEditOpen(true);
+            }}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        </>
+      )}
+
+      {/* Student: Join Class only */}
+      {currentUser?.role === 'student' && (
+        <JoinClassButton
+          meetingNumber={slot.meetingNumber}
+          className="bg-white text-black hover:bg-gray-100"
+        />
+      )}
+
+      {/* Admin/Sales Team/Team Leader: Edit + Delete */}
+      {(currentUser?.role === 'admin' || currentUser?.role === 'sales_team' || currentUser?.role === 'team_leader') && (
+        <>
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-white text-black hover:bg-gray-100 border-white"
+            onClick={() => {
+              setCurrent(slot);
+              setIsEditOpen(true);
+            }}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-white text-red-600 hover:bg-red-50 border-red-600"
+            onClick={() => {
+              setCurrent(slot);
+              setIsDeleteOpen(true);
+            }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </>
+      )}
     </div>
   </div>
   );
