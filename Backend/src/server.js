@@ -85,42 +85,7 @@ app.get("/api/health", (req, res) => {
     message: "Backend Running",
     db: mongoose.connection.readyState === 1 ? "connected" : "not connected",
     time: new Date().toISOString(),
-    cors: "enabled",
-    origin: req.headers.origin,
-    headers: req.headers
   });
-});
-
-/* =========================
-   CORS DEBUG ENDPOINT
-========================= */
-app.get("/api/cors-test", (req, res) => {
-  console.log('=== CORS DEBUG ===');
-  console.log('Request origin:', req.headers.origin);
-  console.log('Request headers:', req.headers);
-  console.log('Request method:', req.method);
-  
-  res.json({
-    success: true,
-    message: "CORS Test Endpoint",
-    origin: req.headers.origin,
-    method: req.method,
-    headers: req.headers,
-    timestamp: new Date().toISOString(),
-    cors_status: "working"
-  });
-});
-
-app.options("/api/cors-test", (req, res) => {
-  console.log('=== CORS PREFLIGHT DEBUG ===');
-  console.log('Preflight origin:', req.headers.origin);
-  console.log('Preflight headers:', req.headers);
-  
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.sendStatus(200);
 });
 
 /* =========================

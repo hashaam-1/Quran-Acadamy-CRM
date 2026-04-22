@@ -7,45 +7,11 @@ export const useSchedules = () => {
   return useQuery({
     queryKey: ['schedules'],
     queryFn: async () => {
-      console.log('=== SCHEDULES API DEBUG ===');
-      
-      // Get current user info for debugging
-      const authData = localStorage.getItem('auth-storage');
-      console.log('Auth data from localStorage:', authData);
-      
       try {
-        // Test CORS first
-        console.log('Testing CORS connection...');
-        const corsTestResponse = await fetch(`${import.meta.env.VITE_API_URL || 'https://quran-acadamy-crm-production.up.railway.app/api'}/cors-test`);
-        console.log('CORS test status:', corsTestResponse.status);
-        if (corsTestResponse.ok) {
-          const corsData = await corsTestResponse.json();
-          console.log('CORS test data:', corsData);
-        } else {
-          console.error('CORS test failed:', corsTestResponse.status, corsTestResponse.statusText);
-        }
-        
-        // Test basic API connection
-        const healthResponse = await fetch(`${import.meta.env.VITE_API_URL || 'https://quran-acadamy-crm-production.up.railway.app/api'}/health`);
-        console.log('Health check status:', healthResponse.status);
-        if (healthResponse.ok) {
-          const healthData = await healthResponse.json();
-          console.log('Health check data:', healthData);
-        }
-        
-        console.log('Making schedules API call...');
         const data = await schedulesApi.getAll();
-        console.log('Raw API response:', data);
-        console.log('Data type:', typeof data);
-        console.log('Is array:', Array.isArray(data));
-        console.log('Data length:', data?.length || 'N/A');
-        console.log('========================');
         return Array.isArray(data) ? data : [];
       } catch (error) {
         console.error('Schedules API error:', error);
-        console.error('Error details:', error.response?.data || error.message);
-        console.error('Error status:', error.response?.status);
-        console.error('Full error:', error);
         throw error;
       }
     },
