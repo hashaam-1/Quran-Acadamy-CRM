@@ -3,8 +3,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npm start",
-    "healthcheckPath": "/api/health",
-    "rootDirectory": "Backend"
+    "startCommand": "npx serve -s dist -l 8080",
+    "rootDirectory": "Frontend"
   }
 }
