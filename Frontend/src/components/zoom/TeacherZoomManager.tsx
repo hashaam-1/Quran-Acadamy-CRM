@@ -45,6 +45,10 @@ interface Meeting {
   }>;
   startedAt?: string;
   endedAt?: string;
+  // Additional properties for scheduled classes
+  isSchedule?: boolean;
+  day?: string;
+  scheduleStatus?: string;
 }
 
 export default function TeacherZoomManager({
