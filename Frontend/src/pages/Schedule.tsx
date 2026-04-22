@@ -101,14 +101,7 @@ export default function Schedule() {
     console.log('Total schedules:', schedules.length);
     console.log('Teacher filter:', teacherFilter);
     
-    // Get the current week's date range
-    const startOfWeek = new Date(currentWeek);
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Start from Monday
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Sunday
-    
-    console.log('Week range:', startOfWeek.toDateString(), 'to', endOfWeek.toDateString());
-    
+    // TEMPORARY: Simplified filtering to show all schedules by day only
     const filteredSchedules = schedules.filter((s, index) => {
       console.log(`\n--- Schedule ${index} ---`);
       console.log('Schedule:', s);
@@ -121,33 +114,9 @@ export default function Schedule() {
       console.log('Matches day:', matchesDay);
       console.log('Matches teacher:', matchesTeacher);
       
-      // Week-based filtering - check if schedule falls within the selected week
-      let matchesWeek = true;
-      if (s.date) {
-        // If schedule has a specific date, check if it's within the selected week
-        const scheduleDate = new Date(s.date);
-        matchesWeek = scheduleDate >= startOfWeek && scheduleDate <= endOfWeek;
-        console.log('Has date, matches week:', matchesWeek);
-      } else {
-        // For backward compatibility - show schedules without dates for current week only
-        // This prevents showing the same classes in every week while maintaining existing data
-        const today = new Date();
-        const currentWeekStart = new Date(today);
-        currentWeekStart.setDate(today.getDate() - today.getDay() + 1);
-        const currentWeekEnd = new Date(currentWeekStart);
-        currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
-        
-        // Only show old schedules if currentWeek is the current week
-        const isCurrentWeek = currentWeek.toDateString() === currentWeekStart.toDateString();
-        matchesWeek = isCurrentWeek;
-        console.log('No date, is current week:', isCurrentWeek, 'matches week:', matchesWeek);
-      }
-      
-      // All roles can see all classes - no role-based filtering
-      let matchesRole = true;
-      
-      const finalResult = matchesDay && matchesTeacher && matchesWeek && matchesRole;
-      console.log('Final result (all conditions):', finalResult);
+      // TEMPORARY: Remove complex week filtering - just show by day and teacher
+      const finalResult = matchesDay && matchesTeacher;
+      console.log('Final result (simplified):', finalResult);
       console.log('--- End Schedule ---');
       
       return finalResult;
