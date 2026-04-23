@@ -3,6 +3,11 @@ const Schedule = require('../models/Schedule.js');
 // Get all schedules
 exports.getSchedules = async (req, res) => {
   try {
+    // Prevent caching to ensure fresh data
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    
     const schedules = await Schedule.find()
       .populate('studentId', 'name age')
       .populate('teacherId', 'name email')
@@ -85,6 +90,11 @@ exports.getSchedulesByDay = async (req, res) => {
 // Get schedules by teacher
 exports.getSchedulesByTeacher = async (req, res) => {
   try {
+    // Prevent caching to ensure fresh data when meetings are created
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    
     const schedules = await Schedule.find({ teacherId: req.params.teacherId })
       .populate('studentId', 'name')
       .sort({ day: 1, time: 1 });
@@ -173,6 +183,11 @@ exports.getScheduleStats = async (req, res) => {
 // Get schedules by student
 exports.getSchedulesByStudent = async (req, res) => {
   try {
+    // Prevent caching to ensure fresh data when meetings are created
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    
     const { studentId } = req.params;
     
     const schedules = await Schedule.find({
