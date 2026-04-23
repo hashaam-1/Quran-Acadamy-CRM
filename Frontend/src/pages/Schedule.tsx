@@ -379,11 +379,13 @@ export default function Schedule() {
             <Button
               size="sm"
               variant="outline"
-              className="bg-white text-gray-500 hover:bg-gray-100 border-gray-400"
-              disabled
+              className="bg-white text-orange-600 hover:bg-orange-50 border-orange-600"
+              onClick={() => {
+                toast.info('Meeting not started yet. Your teacher will start the class soon.');
+              }}
             >
               <Video className="h-4 w-4 mr-1" />
-              No Meeting
+              Waiting for Teacher
             </Button>
           )}
         </div>
