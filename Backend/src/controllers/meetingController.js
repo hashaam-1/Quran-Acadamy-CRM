@@ -9,10 +9,13 @@ try {
 }
 
 /* =====================
-   GENERATE MEETING ID
+   GENERATE UNIQUE MEETING ID
 ===================== */
 const generateMeetingNumber = () => {
-  return Date.now().toString().slice(-10);
+  // Generate truly unique meeting number using timestamp + random suffix
+  const timestamp = Date.now().toString();
+  const randomSuffix = Math.random().toString(36).substring(2, 8);
+  return `${timestamp}${randomSuffix}`;
 };
 
 /* =====================

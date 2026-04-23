@@ -36,7 +36,19 @@ exports.getScheduleById = async (req, res) => {
 // Create schedule
 exports.createSchedule = async (req, res) => {
   try {
-    const schedule = new Schedule(req.body);
+    // Generate unique meeting number for this schedule
+    const generateMeetingNumber = () => {
+      const timestamp = Date.now().toString();
+      const randomSuffix = Math.random().toString(36).substring(2, 8);
+      return `${timestamp}${randomSuffix}`;
+    };
+    
+    const scheduleData = {
+      ...req.body,
+      meetingNumber: generateMeetingNumber() // Assign unique meeting number
+    };
+    
+    const schedule = new Schedule(scheduleData);
     const newSchedule = await schedule.save();
     res.status(201).json(newSchedule);
   } catch (error) {

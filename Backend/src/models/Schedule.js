@@ -64,6 +64,12 @@ const scheduleSchema = new mongoose.Schema({
     enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
   },
   rescheduleRequest: rescheduleRequestSchema,
+  // Unique meeting number for this specific class (CRITICAL for preventing host conflicts)
+  meetingNumber: {
+    type: String,
+    unique: true,
+    sparse: true // Allows null values for schedules without meetings yet
+  },
   // Zoom meeting fields for scheduled classes
   zoomMeetingId: {
     type: String
