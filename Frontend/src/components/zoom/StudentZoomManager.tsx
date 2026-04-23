@@ -96,37 +96,19 @@ export default function StudentZoomManager({
     }
   };
 
-  // Simple logic: If meeting number exists, show Join Class, otherwise show Waiting for Teacher
-  if (meetingNumber) {
-    return (
-      <div className="flex flex-col items-center">
-        <Button
-          size="sm"
-          variant="outline"
-          className="bg-white text-green-600 hover:bg-green-50 border-green-600"
-          onClick={handleJoinClass}
-          disabled={isLoading}
-        >
-          <Video className="h-4 w-4 mr-1" />
-          {isLoading ? 'Joining...' : 'Join Class'}
-        </Button>
-      </div>
-    );
-  } else {
-    return (
-      <div className="flex flex-col items-center">
-        <Button
-          size="sm"
-          variant="outline"
-          className="bg-white text-orange-600 hover:bg-orange-50 border-orange-600"
-          onClick={() => {
-            toast.info('Meeting not started yet. Your teacher will start the class soon.');
-          }}
-        >
-          <Clock className="h-4 w-4 mr-1" />
-          Waiting for Teacher
-        </Button>
-      </div>
-    );
-  }
+  // Always show Join Class button - backend will handle meeting creation/joining
+  return (
+    <div className="flex flex-col items-center">
+      <Button
+        size="sm"
+        variant="outline"
+        className="bg-white text-green-600 hover:bg-green-50 border-green-600"
+        onClick={handleJoinClass}
+        disabled={isLoading}
+      >
+        <Video className="h-4 w-4 mr-1" />
+        {isLoading ? 'Joining...' : 'Join Class'}
+      </Button>
+    </div>
+  );
 }
