@@ -353,7 +353,7 @@ export default function Schedule() {
       {currentUser?.role === 'student' && (
         <StudentZoomManager
           meetingNumber={slot.meetingNumber}
-          scheduleId={slot.id}
+          scheduleId={slot._id}
           className="bg-white text-black hover:bg-gray-100"
           teacherName={slot.teacherName}
           course={slot.course}
