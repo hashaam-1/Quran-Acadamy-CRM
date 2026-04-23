@@ -35,7 +35,10 @@ export default function StudentMeetingButton({
   }, [meetingNumber]);
 
   const checkMeetingStatus = async () => {
+    console.log('StudentMeetingButton - Checking meeting status:', { meetingNumber, teacherName });
+    
     if (!meetingNumber) {
+      console.log('StudentMeetingButton - No meeting number, setting no-meeting state');
       setMeetingState('no-meeting');
       return;
     }
@@ -47,8 +50,11 @@ export default function StudentMeetingButton({
         }
       });
 
+      console.log('StudentMeetingButton - API Response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('StudentMeetingButton - Meeting data:', data);
         setMeetingDetails(data.meeting);
         
         // Check if teacher has joined
@@ -61,6 +67,8 @@ export default function StudentMeetingButton({
           p.userId === currentUser?.id || p.email === currentUser?.email
         );
 
+        console.log('StudentMeetingButton - States:', { teacherJoined, studentJoined });
+
         if (studentJoined) {
           setMeetingState('student-joined');
         } else if (teacherJoined) {
@@ -69,10 +77,11 @@ export default function StudentMeetingButton({
           setMeetingState('teacher-not-joined');
         }
       } else {
+        console.log('StudentMeetingButton - API response not ok, setting no-meeting');
         setMeetingState('no-meeting');
       }
     } catch (error) {
-      console.error('Error checking meeting status:', error);
+      console.error('StudentMeetingButton - Error checking meeting status:', error);
       setMeetingState('no-meeting');
     }
   };
@@ -119,6 +128,8 @@ export default function StudentMeetingButton({
   };
 
   const renderButton = () => {
+    console.log('StudentMeetingButton - Current state:', meetingState);
+    
     switch (meetingState) {
       case 'no-meeting':
         return (
