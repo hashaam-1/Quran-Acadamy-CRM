@@ -4,6 +4,8 @@ import { Video, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 interface StudentMeetingButtonProps {
   meetingNumber?: string;
   scheduleId?: string;
@@ -22,20 +24,76 @@ export default function StudentMeetingButton({
   time
 }: StudentMeetingButtonProps) {
   const { currentUser } = useAuthStore();
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const handleJoinClass = async () => {
-    if (!meetingNumber || !currentUser) {
-      toast.error('Meeting number or user not available');
+    console.log('=== STUDENT MEETING BUTTON JOIN CLASS ===');
+    
+    if (!currentUser) {
+      toast.error("Please login to join class");
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      // Open Zoom meeting for student
-      window.open(`/zoom-join?meetingNumber=${meetingNumber}&role=0`, '_blank');
-      toast.success('Joining class...');
+      let response;
+      
+      // If meeting number exists, join existing meeting
+      if (meetingNumber) {
+        console.log('StudentMeetingButton - Joining existing meeting:', meetingNumber);
+        response = await fetch(`${API_BASE_URL}/meetings/${meetingNumber}/join`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            userName: currentUser.name,
+          })
+        });
+      } 
+      // Otherwise, create/join from schedule
+      else if (scheduleId) {
+        console.log('StudentMeetingButton - Creating/joining from schedule:', scheduleId);
+        const payload = {
+          scheduleId: scheduleId,
+          className: course || 'Class',
+          course: course,
+          teacherId: '',
+          teacherName: teacherName || '',
+          studentId: currentUser.id,
+          studentName: currentUser.name,
+          time: time || new Date().toISOString()
+        };
+
+        response = await fetch(`${API_BASE_URL}/meetings/start-class`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        throw new Error('No meeting number or schedule ID available');
+      }
+
+      const data = await response.json();
+      console.log('StudentMeetingButton - Join response:', data);
+
+      if (data.success) {
+        toast.success(data.rejoin ? "Rejoined existing class" : "Joined class successfully");
+        
+        // Navigate to Zoom meeting - student role (0)
+        window.open(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}&role=0`, '_blank');
+      } else {
+        throw new Error(data.message || 'Failed to join class');
+      }
     } catch (error) {
-      console.error('Error joining class:', error);
-      toast.error('Failed to join class');
+      console.error('StudentMeetingButton - Error joining class:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to join class');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,9 +106,10 @@ export default function StudentMeetingButton({
           variant="outline"
           className="bg-white text-green-600 hover:bg-green-50 border-green-600"
           onClick={handleJoinClass}
+          disabled={isLoading}
         >
           <Video className="h-4 w-4 mr-1" />
-          Join Class
+          {isLoading ? 'Joining...' : 'Join Class'}
         </Button>
       </div>
     );
