@@ -9,6 +9,8 @@ import { useAuthStore } from '@/lib/auth-store';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 interface JoinClassButtonProps {
   meetingNumber?: string;
   className?: string;
@@ -55,7 +57,7 @@ export default function JoinClassButton({
 
     try {
       // First, register the student as joining the meeting
-      const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${meetingNumber}`, {
+      const response = await fetch(`${API_BASE_URL}/meetings/join/${meetingNumber}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +89,7 @@ export default function JoinClassButton({
     if (!meetingNumber) return;
 
     try {
-      const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/${meetingNumber}`, {
+      const response = await fetch(`${API_BASE_URL}/meetings/${meetingNumber}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

@@ -35,6 +35,7 @@ import { useCRMStore, ClassSchedule } from "@/lib/store";
 import { ScheduleForm } from "@/components/forms/ScheduleForm";
 import StartClassButton from "@/components/zoom/StartClassButton";
 import JoinClassButton from "@/components/zoom/JoinClassButton";
+import StudentMeetingButton from "@/components/zoom/StudentMeetingButton";
 import { toast } from "sonner";
 import { useSchedules, useCreateSchedule, useUpdateSchedule, useDeleteSchedule } from "@/hooks/useSchedules";
 import { useTeachers } from "@/hooks/useTeachers";
@@ -369,26 +370,14 @@ export default function Schedule() {
 
       {/* Student: Join Class only */}
       {currentUser?.role === 'student' && (
-        <div className="flex flex-col items-center">
-          {slot.meetingNumber ? (
-            <JoinClassButton
-              meetingNumber={slot.meetingNumber}
-              className="bg-white text-black hover:bg-gray-100"
-            />
-          ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              className="bg-white text-orange-600 hover:bg-orange-50 border-orange-600"
-              onClick={() => {
-                toast.info('Meeting not started yet. Your teacher will start the class soon.');
-              }}
-            >
-              <Video className="h-4 w-4 mr-1" />
-              Waiting for Teacher
-            </Button>
-          )}
-        </div>
+        <StudentMeetingButton
+          meetingNumber={slot.meetingNumber}
+          scheduleId={slot.id}
+          className="bg-white text-black hover:bg-gray-100"
+          teacherName={slot.teacherName}
+          course={slot.course}
+          time={slot.time}
+        />
       )}
 
       {/* Admin/Sales Team/Team Leader: Edit + Delete */}
