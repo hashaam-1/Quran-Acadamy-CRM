@@ -196,10 +196,14 @@ const startClass = async (req, res) => {
       );
       
       if (!alreadyParticipant) {
+        // Assign role based on user role to prevent host conflicts
+        const userRole = req.user?.role || 'student';
+        const participantRole = userRole === 'teacher' ? 1 : 0; // Only teachers are hosts
+        
         existing.participants.push({
           userId: teacherId,
           name: teacherName,
-          role: 1, // Teacher/admin as host
+          role: participantRole, // Role based on user type
         });
         await existing.save();
       }
@@ -315,6 +319,10 @@ const startClass = async (req, res) => {
     let meeting;
 
     try {
+      // Assign role based on user role to prevent host conflicts
+      const userRole = req.user?.role || 'student';
+      const creatorRole = userRole === 'teacher' ? 1 : 0; // Only teachers are hosts
+      
       meeting = await Meeting.create({
         className,
         course,
@@ -332,7 +340,7 @@ const startClass = async (req, res) => {
           {
             userId: teacherId,
             name: teacherName,
-            role: 1,
+            role: creatorRole,
           },
         ],
       });
@@ -395,8 +403,8 @@ const joinClass = async (req, res) => {
       (p) => String(p.userId) === String(userId)
     );
 
-    // Set role based on user type - admins and teachers can be hosts
-    const participantRole = (userRole === 'admin' || userRole === 'teacher') ? 1 : 0;
+    // Set role based on user type - only teachers can be hosts
+    const participantRole = userRole === 'teacher' ? 1 : 0;
 
     if (!already) {
       meeting.participants.push({
