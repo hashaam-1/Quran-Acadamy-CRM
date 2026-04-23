@@ -343,18 +343,15 @@ export default function Schedule() {
               className="bg-white text-black hover:bg-gray-100"
             />
           ) : (
-            <Button
-              size="sm"
-              variant="outline"
+            <StartClassButton
+              scheduleId={slot.id}
+              meetingClassName={slot.className}
+              course={slot.course}
+              time={slot.time}
+              studentId={slot.studentId?._id}
+              studentName={slot.studentName}
               className="bg-white text-blue-600 hover:bg-blue-50 border-blue-600"
-              onClick={() => {
-                // Open create meeting dialog or show message
-                toast.info('Meeting not created yet. Please create a meeting for this class.');
-              }}
-            >
-              <Video className="h-4 w-4 mr-1" />
-              Create Meeting
-            </Button>
+            />
           )}
           <Button
             size="sm"
