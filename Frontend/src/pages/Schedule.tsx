@@ -35,7 +35,7 @@ import { useCRMStore, ClassSchedule } from "@/lib/store";
 import { ScheduleForm } from "@/components/forms/ScheduleForm";
 import StartClassButton from "@/components/zoom/StartClassButton";
 import JoinClassButton from "@/components/zoom/JoinClassButton";
-import StudentMeetingButton from "@/components/zoom/StudentMeetingButton";
+import StudentZoomManager from "@/components/zoom/StudentZoomManager";
 import { toast } from "sonner";
 import { useSchedules, useCreateSchedule, useUpdateSchedule, useDeleteSchedule } from "@/hooks/useSchedules";
 import { useTeachers } from "@/hooks/useTeachers";
@@ -370,7 +370,7 @@ export default function Schedule() {
 
       {/* Student: Join Class only */}
       {currentUser?.role === 'student' && (
-        <StudentMeetingButton
+        <StudentZoomManager
           meetingNumber={slot.meetingNumber}
           scheduleId={slot.id}
           className="bg-white text-black hover:bg-gray-100"
