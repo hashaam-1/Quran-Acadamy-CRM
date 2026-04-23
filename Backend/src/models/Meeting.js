@@ -102,6 +102,6 @@ const meetingSchema = new mongoose.Schema({
 // Index for faster queries
 meetingSchema.index({ teacherId: 1, date: 1 });
 meetingSchema.index({ status: 1 });
-meetingSchema.index({ meetingNumber: 1 });
+// meetingNumber already has unique: true in schema, no need for separate index
 
 module.exports = mongoose.model('Meeting', meetingSchema);
