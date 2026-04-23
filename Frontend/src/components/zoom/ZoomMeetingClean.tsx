@@ -109,6 +109,13 @@ export default function ZoomMeetingClean() {
   useEffect(() => {
     const initializeZoomSDK = () => {
       try {
+        // Prevent double SDK initialization
+        if ((ZoomMtg as any).inited) {
+          console.log('Zoom SDK already initialized, skipping...');
+          setSdkLoaded(true);
+          return;
+        }
+        
         console.log('Initializing Zoom SDK v6.0.0...');
         
         // Check if ZoomMtg is available

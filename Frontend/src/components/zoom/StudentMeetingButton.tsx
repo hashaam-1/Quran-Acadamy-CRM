@@ -84,8 +84,8 @@ export default function StudentMeetingButton({
       if (data.success) {
         toast.success(data.rejoin ? "Rejoined existing class" : "Joined class successfully");
         
-        // Navigate to Zoom meeting - student role (0)
-        window.open(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}&role=0`, '_blank');
+        // Navigate to Zoom meeting - student role (1 = participant)
+        window.open(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}&role=1`, '_blank');
       } else {
         throw new Error(data.message || 'Failed to join class');
       }

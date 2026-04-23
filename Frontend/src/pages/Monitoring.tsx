@@ -261,18 +261,21 @@ export default function Monitoring() {
         throw new Error('No meeting number available');
       }
 
-      // Join the meeting as observer (admin role = 0 for participant privileges)
+      // Join the meeting as observer (admin role = 1 for participant privileges)
       const joinResponse = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${meetingToJoin}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        },
+        body: JSON.stringify({
+          userId: currentUser?.id,
+          userName: currentUser?.name,
+        }),
       });
 
       if (joinResponse.ok) {
         toast.success('Joining class as observer');
-        navigate(`/zoom-join?meetingNumber=${meetingToJoin}&role=0`);
+        navigate(`/zoom-join?meetingNumber=${meetingToJoin}&role=1`);
       } else {
         const data = await joinResponse.json();
         throw new Error(data.error || data.message || 'Failed to join class');
