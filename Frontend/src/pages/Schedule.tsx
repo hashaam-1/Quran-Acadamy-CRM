@@ -108,34 +108,15 @@ export default function Schedule() {
   const weekDates = getWeekDates();
 
   const getSchedulesByDay = (day: string) => {
-    // Get the current week's date range
-    const startOfWeek = new Date(currentWeek);
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Start from Monday
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Sunday
-    
     const filtered = schedules.filter(s => {
-      const matchesDay = s.day === day;
+      const matchesDay = s.day?.trim().toLowerCase() === day.toLowerCase();
       const matchesTeacher = teacherFilter === "all" || s.teacherId === teacherFilter;
       
-      // Week-based filtering - check if schedule falls within the selected week
-      let matchesWeek = true;
-      if (s.date) {
-        // If schedule has a specific date, check if it's within the selected week
-        const scheduleDate = new Date(s.date);
-        matchesWeek = scheduleDate >= startOfWeek && scheduleDate <= endOfWeek;
-      } else {
-        // Schedules without dates are recurring weekly schedules
-        // They should show in ALL weeks, not just the current week
-        matchesWeek = true;
-      }
-      
-      // All roles can see all classes - no role-based filtering
-      let matchesRole = true;
-      
-      return matchesDay && matchesTeacher && matchesWeek && matchesRole;
+      // Always show schedules based on day (recurring weekly)
+      // Remove date filtering that was hiding all schedules
+      return matchesDay && matchesTeacher;
     });
-    
+
     console.log(`📅 Filtered schedules for ${day}:`, filtered.length, 'out of', schedules.length);
     return filtered;
   };
