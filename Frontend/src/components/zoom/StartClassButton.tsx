@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/lib/auth-store";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -30,6 +31,7 @@ export default function StartClassButton({
 }: StartClassButtonProps) {
   const { currentUser } = useAuthStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
   const handleStartClass = async () => {
@@ -73,6 +75,10 @@ export default function StartClassButton({
 
       if (data.success) {
         toast.success("Class started successfully");
+        
+        // Force refresh of schedules to update meetingNumber for students
+        queryClient.invalidateQueries({ queryKey: ['schedules'] });
+        
         navigate(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}&role=1`);
       } else {
         toast.error(data.message || "Failed to start class");

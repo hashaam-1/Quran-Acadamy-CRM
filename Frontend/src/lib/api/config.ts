@@ -10,12 +10,22 @@ export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
   },
 });
 
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
+    // Add timestamp to GET requests to prevent caching
+    if (config.method?.toLowerCase() === 'get' && config.url?.includes('/schedules')) {
+      const timestamp = new Date().getTime();
+      const separator = config.url.includes('?') ? '&' : '?';
+      config.url = `${config.url}${separator}_t=${timestamp}`;
+    }
+    
     // DEBUG: Log every API request
     console.log('FRONTEND DEBUG: API REQUEST =', config.method?.toUpperCase(), config.baseURL + config.url);
     console.log('FRONTEND DEBUG: FULL URL =', config.baseURL + config.url);
