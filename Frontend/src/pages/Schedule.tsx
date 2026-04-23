@@ -337,10 +337,22 @@ export default function Schedule() {
       {/* Teacher: Join Class + Edit */}
       {currentUser?.role === 'teacher' && (
         <>
-          <JoinClassButton
-            meetingNumber={slot.meetingNumber}
-            className="bg-white text-black hover:bg-gray-100"
-          />
+          {slot.meetingNumber ? (
+            <JoinClassButton
+              meetingNumber={slot.meetingNumber}
+              className="bg-white text-black hover:bg-gray-100"
+            />
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="bg-white text-gray-500 hover:bg-gray-100 border-gray-400"
+              disabled
+            >
+              <Video className="h-4 w-4 mr-1" />
+              No Meeting
+            </Button>
+          )}
           <Button
             size="sm"
             variant="outline"
@@ -357,10 +369,22 @@ export default function Schedule() {
 
       {/* Student: Join Class only */}
       {currentUser?.role === 'student' && (
-        <JoinClassButton
-          meetingNumber={slot.meetingNumber}
-          className="bg-white text-black hover:bg-gray-100"
-        />
+        slot.meetingNumber ? (
+          <JoinClassButton
+            meetingNumber={slot.meetingNumber}
+            className="bg-white text-black hover:bg-gray-100"
+          />
+        ) : (
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-white text-gray-500 hover:bg-gray-100 border-gray-400"
+            disabled
+          >
+            <Video className="h-4 w-4 mr-1" />
+            No Meeting
+          </Button>
+        )
       )}
 
       {/* Admin/Sales Team/Team Leader: Edit + Delete */}
