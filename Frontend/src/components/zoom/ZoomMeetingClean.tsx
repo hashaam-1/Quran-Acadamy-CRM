@@ -195,6 +195,7 @@ export default function ZoomMeetingClean() {
         body: JSON.stringify({
           meetingNumber: meetingNumber,
           role: role,
+          userRole: activeUser?.role,
           userName: activeUser?.name,
           userId: activeUser?.id,
           debug: meetingData.debug
