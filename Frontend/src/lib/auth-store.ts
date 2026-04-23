@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -41,7 +42,9 @@ const passwords: Record<string, string> = {
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
-export const useAuthStore = create<AuthStore>((set, get) => ({
+export const useAuthStore = create<AuthStore>()(
+  persist(
+    (set, get) => ({
   currentUser: null,
   isAuthenticated: false,
   users: initialUsers,
@@ -294,4 +297,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       return { success: false, error: 'Login failed' };
     }
   },
-}));
+}),
+    {
+      name: 'auth-storage', // localStorage key
+    }
+  )
+);
