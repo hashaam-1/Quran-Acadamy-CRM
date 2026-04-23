@@ -333,7 +333,7 @@ export default function Schedule() {
     </div>
 
     {/* Hover Actions - Role-based */}
-    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-20">
+    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 z-20">
       {/* Teacher: Join Class + Edit */}
       {currentUser?.role === 'teacher' && (
         <>
@@ -369,27 +369,29 @@ export default function Schedule() {
 
       {/* Student: Join Class only */}
       {currentUser?.role === 'student' && (
-        slot.meetingNumber ? (
-          <JoinClassButton
-            meetingNumber={slot.meetingNumber}
-            className="bg-white text-black hover:bg-gray-100"
-          />
-        ) : (
-          <Button
-            size="sm"
-            variant="outline"
-            className="bg-white text-gray-500 hover:bg-gray-100 border-gray-400"
-            disabled
-          >
-            <Video className="h-4 w-4 mr-1" />
-            No Meeting
-          </Button>
-        )
+        <div className="flex flex-col items-center">
+          {slot.meetingNumber ? (
+            <JoinClassButton
+              meetingNumber={slot.meetingNumber}
+              className="bg-white text-black hover:bg-gray-100"
+            />
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              className="bg-white text-gray-500 hover:bg-gray-100 border-gray-400"
+              disabled
+            >
+              <Video className="h-4 w-4 mr-1" />
+              No Meeting
+            </Button>
+          )}
+        </div>
       )}
 
       {/* Admin/Sales Team/Team Leader: Edit + Delete */}
       {(currentUser?.role === 'admin' || currentUser?.role === 'sales_team' || currentUser?.role === 'team_leader') && (
-        <>
+        <div className="flex flex-col items-center gap-2">
           <Button
             size="sm"
             variant="outline"
@@ -412,7 +414,7 @@ export default function Schedule() {
           >
             <Trash2 className="h-4 w-4" />
           </Button>
-        </>
+        </div>
       )}
     </div>
   </div>
