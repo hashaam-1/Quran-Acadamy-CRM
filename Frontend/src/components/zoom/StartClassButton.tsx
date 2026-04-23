@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/lib/auth-store";
 import { toast } from "sonner";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 interface StartClassButtonProps {
   scheduleId?: string;
   className?: string;
@@ -50,8 +52,11 @@ export default function StartClassButton({
         time,
       };
 
+      console.log('StartClassButton - Payload:', payload);
+      console.log('StartClassButton - API URL:', `${API_BASE_URL}/meetings/start-class`);
+
       const response = await fetch(
-        "https://quran-acadamy-crm-production.up.railway.app/api/meetings/start-class",
+        `${API_BASE_URL}/meetings/start-class`,
         {
           method: "POST",
           headers: {
@@ -62,6 +67,9 @@ export default function StartClassButton({
       );
 
       const data = await response.json();
+
+      console.log('StartClassButton - Response:', data);
+      console.log('StartClassButton - Response status:', response.status);
 
       if (data.success) {
         toast.success("Class started successfully");
