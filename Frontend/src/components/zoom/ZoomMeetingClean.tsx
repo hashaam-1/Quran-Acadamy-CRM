@@ -12,6 +12,8 @@ import { toast } from 'sonner';
 // Import Zoom Meeting SDK from npm package
 import { ZoomMtg } from '@zoom/meetingsdk';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 interface MeetingConfig {
   meetingNumber: string;
   userName: string;
@@ -180,18 +182,22 @@ export default function ZoomMeetingClean() {
         debug: meetingData.debug
       });
       
-      // Generate signature
-      const signatureUrl = 'https://quran-acadamy-crm-production.up.railway.app/api/zoom/signature-test';
+      // Generate signature - use consistent API URL and add auth
+      const signatureUrl = `${API_BASE_URL}/zoom/signature-test`;
       
+      const token = localStorage.getItem('token');
       const signatureResponse = await fetch(signatureUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           meetingNumber: meetingNumber,
           role: role,
-          userRole: activeUser?.role, // Send user role for proper Zoom role assignment
+          userName: activeUser?.name,
+          userId: activeUser?.id,
+          debug: meetingData.debug
         }),
       });
 

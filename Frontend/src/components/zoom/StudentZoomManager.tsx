@@ -39,6 +39,9 @@ export default function StudentZoomManager({
     try {
       let response;
       
+      // Get auth token
+      const token = localStorage.getItem('token');
+      
       // If meeting number exists, join existing meeting
       if (meetingNumber) {
         console.log('StudentZoomManager - Joining existing meeting:', meetingNumber);
@@ -46,6 +49,7 @@ export default function StudentZoomManager({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             userId: currentUser.id,
@@ -56,11 +60,22 @@ export default function StudentZoomManager({
       // Otherwise, create/join from schedule
       else if (scheduleId) {
         console.log('StudentZoomManager - Creating/joining from schedule:', scheduleId);
+        
+        // Get teacherId from the schedule data - we need to fetch it first
+        const scheduleResponse = await fetch(`${API_BASE_URL}/schedules/${scheduleId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const scheduleData = await scheduleResponse.json();
+        const actualTeacherId = scheduleData.teacherId || '';
+        
         const payload = {
           scheduleId: scheduleId,
           className: course || 'Class',
           course: course,
-          teacherId: '',
+          teacherId: actualTeacherId, // ✅ Use actual teacher ID instead of empty string
           teacherName: teacherName || '',
           studentId: currentUser.id,
           studentName: currentUser.name,
@@ -71,6 +86,7 @@ export default function StudentZoomManager({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(payload)
         });

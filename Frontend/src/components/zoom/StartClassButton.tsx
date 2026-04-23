@@ -57,12 +57,14 @@ export default function StartClassButton({
       console.log('StartClassButton - Payload:', payload);
       console.log('StartClassButton - API URL:', `${API_BASE_URL}/meetings/start-class`);
 
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${API_BASE_URL}/meetings/start-class`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify(payload),
         }
