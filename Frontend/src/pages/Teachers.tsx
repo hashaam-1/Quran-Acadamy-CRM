@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Search, Star, Users, Clock, Calendar, Phone, MessageSquare, Award, CheckCircle, Pencil, Trash2, Key, Eye, EyeOff, Mail } from "lucide-react";
+import { Search, Star, Users, Clock, Calendar, Phone, MessageSquare, Award, CheckCircle, Pencil, Trash2, Key, Eye, EyeOff, Mail, Copy, Check } from "lucide-react";
 import { Teacher } from "@/lib/store";
 import { useTeachers, useUpdateTeacher, useDeleteTeacher } from "@/hooks/useTeachers";
 import { toast } from "sonner";
@@ -36,6 +36,7 @@ export default function Teachers() {
   const [current, setCurrent] = useState<Teacher | null>(null);
   const [formData, setFormData] = useState(emptyTeacher);
   const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
+  const [copiedItems, setCopiedItems] = useState<Set<string>>(new Set());
 
   console.log('Teachers data from API:', teachers);
   const filtered = teachers.filter((t) => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -50,6 +51,23 @@ export default function Teachers() {
       }
       return newSet;
     });
+  };
+
+  const copyToClipboard = async (text: string, itemId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedItems(prev => new Set(prev).add(itemId));
+      toast.success('Copied to clipboard');
+      setTimeout(() => {
+        setCopiedItems(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(itemId);
+          return newSet;
+        });
+      }, 2000);
+    } catch (error) {
+      toast.error('Failed to copy');
+    }
   };
 
   if (isLoading) {
@@ -129,6 +147,18 @@ export default function Teachers() {
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Mail className="h-4 w-4" />
                         <span className="truncate">{teacher.email}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 ml-auto"
+                          onClick={() => copyToClipboard(teacher.email, `email-${teacher.id}`)}
+                        >
+                          {copiedItems.has(`email-${teacher.id}`) ? (
+                            <Check className="h-3 w-3 text-green-500" />
+                          ) : (
+                            <Copy className="h-3 w-3" />
+                          )}
+                        </Button>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Phone className="h-4 w-4" />
@@ -142,18 +172,18 @@ export default function Teachers() {
                         <div className="flex items-center gap-2 text-sm">
                           <Key className="h-4 w-4 text-muted-foreground" />
                           <span className="font-mono text-xs">
-                            {visiblePasswords.has(teacher.id) ? (teacher as any).plainPassword : '••••••••'}
+                            {'••••••••'}
                           </span>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 ml-auto"
-                            onClick={() => togglePasswordVisibility(teacher.id)}
+                            onClick={() => copyToClipboard((teacher as any).plainPassword, `password-${teacher.id}`)}
                           >
-                            {visiblePasswords.has(teacher.id) ? (
-                              <EyeOff className="h-3 w-3" />
+                            {copiedItems.has(`password-${teacher.id}`) ? (
+                              <Check className="h-3 w-3 text-green-500" />
                             ) : (
-                              <Eye className="h-3 w-3" />
+                              <Copy className="h-3 w-3" />
                             )}
                           </Button>
                         </div>

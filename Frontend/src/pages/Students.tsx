@@ -102,6 +102,7 @@ export default function Students() {
   const [credentials, setCredentials] = useState<{ userId: string; password: string } | null>(null);
   const [sentStatus, setSentStatus] = useState<{ email: boolean; sms: boolean }>({ email: false, sms: false });
   const [copiedField, setCopiedField] = useState<"userId" | "password" | null>(null);
+  const [copiedItems, setCopiedItems] = useState<Set<string>>(new Set());
 
   const filtered = students.filter((s) => {
     const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -292,6 +293,23 @@ export default function Students() {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
+  const copyToClipboard = async (text: string, itemId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedItems(prev => new Set(prev).add(itemId));
+      toast.success('Copied to clipboard');
+      setTimeout(() => {
+        setCopiedItems(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(itemId);
+          return newSet;
+        });
+      }, 2000);
+    } catch (error) {
+      toast.error('Failed to copy');
+    }
+  };
+
   const handleTeacherChange = (teacherName: string) => {
     const teacher = teachers.find(t => t.name === teacherName);
     const teacherId = (teacher as any)?._id || teacher?.id || '';
@@ -364,6 +382,18 @@ export default function Students() {
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <User className="h-4 w-4" />
                           <span className="text-xs">{(student as any).email}</span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 ml-auto"
+                            onClick={() => copyToClipboard((student as any).email, `email-${student.id}`)}
+                          >
+                            {copiedItems.has(`email-${student.id}`) ? (
+                              <Check className="h-3 w-3 text-green-500" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </Button>
                         </div>
                       )}
                       
@@ -372,26 +402,18 @@ export default function Students() {
                         <div className="flex items-center gap-2 text-sm">
                           <Key className="h-4 w-4 text-muted-foreground" />
                           <span className="font-mono text-xs">
-                            {visiblePasswords.has(student.id) ? (student as any).plainPassword : '•••••••••'}
+                            {'•••••••••'}
                           </span>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 ml-auto"
-                            onClick={() => {
-                              const newVisible = new Set(visiblePasswords);
-                              if (newVisible.has(student.id)) {
-                                newVisible.delete(student.id);
-                              } else {
-                                newVisible.add(student.id);
-                              }
-                              setVisiblePasswords(newVisible);
-                            }}
+                            onClick={() => copyToClipboard((student as any).plainPassword, `password-${student.id}`)}
                           >
-                            {visiblePasswords.has(student.id) ? (
-                              <EyeOff className="h-3 w-3" />
+                            {copiedItems.has(`password-${student.id}`) ? (
+                              <Check className="h-3 w-3 text-green-500" />
                             ) : (
-                              <Eye className="h-3 w-3" />
+                              <Copy className="h-3 w-3" />
                             )}
                           </Button>
                         </div>

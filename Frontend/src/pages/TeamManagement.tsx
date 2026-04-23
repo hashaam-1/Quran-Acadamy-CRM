@@ -104,6 +104,7 @@ export default function TeamManagement() {
   const [selectedMember, setSelectedMember] = useState<any>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
+  const [copiedItems, setCopiedItems] = useState<Set<string>>(new Set());
 
   const isLoading = teamLoading || teachersLoading;
 
@@ -128,6 +129,23 @@ export default function TeamManagement() {
     setCopiedId(userId);
     toast.success("User ID copied to clipboard");
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const copyToClipboard = async (text: string, itemId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedItems(prev => new Set(prev).add(itemId));
+      toast.success('Copied to clipboard');
+      setTimeout(() => {
+        setCopiedItems(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(itemId);
+          return newSet;
+        });
+      }, 2000);
+    } catch (error) {
+      toast.error('Failed to copy');
+    }
   };
 
   const togglePasswordVisibility = (memberId: string) => {
@@ -404,6 +422,18 @@ export default function TeamManagement() {
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Mail className="h-4 w-4" />
                           <span className="truncate">{member.email}</span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 ml-auto"
+                            onClick={() => copyToClipboard(member.email, `email-${member.id}`)}
+                          >
+                            {copiedItems.has(`email-${member.id}`) ? (
+                              <Check className="h-3 w-3 text-green-500" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </Button>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Phone className="h-4 w-4" />
@@ -413,18 +443,18 @@ export default function TeamManagement() {
                           <div className="flex items-center gap-2 text-sm">
                             <Key className="h-4 w-4 text-muted-foreground" />
                             <span className="font-mono text-xs">
-                              {visiblePasswords.has(member.id) ? (member as any).plainPassword : '••••••••'}
+                              {'••••••••'}
                             </span>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-6 w-6 ml-auto"
-                              onClick={() => togglePasswordVisibility(member.id)}
+                              onClick={() => copyToClipboard((member as any).plainPassword, `password-${member.id}`)}
                             >
-                              {visiblePasswords.has(member.id) ? (
-                                <EyeOff className="h-3 w-3" />
+                              {copiedItems.has(`password-${member.id}`) ? (
+                                <Check className="h-3 w-3 text-green-500" />
                               ) : (
-                                <Eye className="h-3 w-3" />
+                                <Copy className="h-3 w-3" />
                               )}
                             </Button>
                           </div>
