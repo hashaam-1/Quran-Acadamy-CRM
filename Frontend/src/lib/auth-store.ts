@@ -23,6 +23,7 @@ export interface User {
 interface AuthStore {
   currentUser: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   users: User[];
   login: (email: string, password: string) => { success: boolean; error?: string };
   logout: () => void;
@@ -47,6 +48,7 @@ export const useAuthStore = create<AuthStore>()(
     (set, get) => ({
   currentUser: null,
   isAuthenticated: false,
+  isLoading: true,
   users: initialUsers,
   
   login: (email, password) => {
@@ -300,6 +302,17 @@ export const useAuthStore = create<AuthStore>()(
 }),
     {
       name: 'auth-storage', // localStorage key
+      onRehydrateStorage: () => (state) => {
+        console.log('🔄 Auth store rehydrating:', state);
+        // Set loading to false when rehydration is complete
+        if (state) {
+          state.isLoading = false;
+          console.log('✅ Auth state restored for user:', state.currentUser?.role, state.currentUser?.email);
+        } else {
+          console.log('❌ No auth state found on refresh');
+        }
+        return state;
+      },
     }
   )
 );
