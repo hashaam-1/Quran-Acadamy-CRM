@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Video, Clock } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
@@ -24,6 +25,7 @@ export default function StudentZoomManager({
   time
 }: StudentZoomManagerProps) {
   const { currentUser } = useAuthStore();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleJoinClass = async () => {
@@ -84,7 +86,7 @@ export default function StudentZoomManager({
         
         // Navigate to Zoom meeting - student role (0)
         const meetingNum = data.meeting?.meetingNumber || meetingNumber;
-        window.open(`/zoom-join?meetingNumber=${meetingNum}&role=0`, '_blank');
+        navigate(`/zoom-join?meetingNumber=${meetingNum}&role=0`);
       } else {
         throw new Error(data.message || 'Failed to join class');
       }
