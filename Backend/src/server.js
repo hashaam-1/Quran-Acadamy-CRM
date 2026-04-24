@@ -56,9 +56,9 @@ loadRoute("teacherRoutes.js", "/api/teachers");
 
 // ✅ CRITICAL FIX: Load schedules route explicitly to ensure it works
 try {
-  const scheduleRoutes = require("./routes/scheduleRoutes.js");
+  const scheduleRoutes = require("./routes/testSchedules.js");
   app.use("/api/schedules", scheduleRoutes);
-  console.log("✅ EXPLICITLY Loaded: /api/schedules");
+  console.log("✅ EXPLICITLY Loaded: /api/schedules (TEST VERSION)");
 } catch (err) {
   console.error("❌ FAILED to load schedules route:", err.message);
 }
