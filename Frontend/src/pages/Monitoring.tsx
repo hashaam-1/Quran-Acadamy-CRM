@@ -77,15 +77,21 @@ export default function Monitoring() {
   const { currentUser } = useAuthStore();
 
   // Fetch today's scheduled classes
-  const { data: schedules = [], isLoading, refetch } = useQuery({
+  const { data: response, isLoading, refetch } = useQuery({
     queryKey: ['schedules'],
     queryFn: schedulesApi.getAll,
   });
 
+  // ✅ FIXED: Extract data field from API response
+  const schedules = Array.isArray(response) ? response : (response?.data || []);
+
   // Process schedules to get today's classes and calculate status
   const processSchedules = (schedules: ClassSchedule[]) => {
+    // ✅ SAFETY: Ensure schedules is always an array
+    const schedulesArray = Array.isArray(schedules) ? schedules : [];
+    
     const today = format(new Date(), 'yyyy-MM-dd');
-    const todaySchedules = schedules.filter(schedule => {
+    const todaySchedules = schedulesArray.filter(schedule => {
       // Check if schedule is for today based on day field AND date
       const scheduleDay = format(new Date(), 'EEEE').toLowerCase();
       const matchesDay = schedule.day.toLowerCase() === scheduleDay;
@@ -99,7 +105,7 @@ export default function Monitoring() {
       return matchesDay && matchesDate;
     });
 
-    const liveClasses: LiveClass[] = todaySchedules.map(schedule => {
+    const liveClasses: LiveClass[] = (todaySchedules || []).map(schedule => {
       const now = new Date();
       const startTime = parse(schedule.time, 'HH:mm', new Date());
       const endTime = addMinutes(startTime, parseInt(schedule.duration) || 30);
@@ -149,20 +155,23 @@ export default function Monitoring() {
       };
     });
 
-    // Calculate summary
+    // Calculate summary with safety checks
+    const safeLiveClasses = liveClasses || [];
+    const safeTodaySchedules = todaySchedules || [];
+    
     const summary: ClassSummary = {
-      total: todaySchedules.length,
-      completed: liveClasses.filter(c => c.status === 'ended').length,
-      ongoing: liveClasses.filter(c => c.status === 'live').length,
-      upcoming: liveClasses.filter(c => c.status === 'upcoming').length,
-      missed: liveClasses.filter(c => c.status === 'late').length,
-      late: liveClasses.filter(c => c.status === 'late').length,
+      total: safeTodaySchedules.length,
+      completed: safeLiveClasses.filter(c => c.status === 'ended').length,
+      ongoing: safeLiveClasses.filter(c => c.status === 'live').length,
+      upcoming: safeLiveClasses.filter(c => c.status === 'upcoming').length,
+      missed: safeLiveClasses.filter(c => c.status === 'late').length,
+      late: safeLiveClasses.filter(c => c.status === 'late').length,
     };
 
     // Calculate teacher performance
     const teacherMap = new Map<string, TeacherPerformance>();
     
-    todaySchedules.forEach(schedule => {
+    safeTodaySchedules.forEach(schedule => {
       const teacherId = schedule.teacherId;
       const teacherName = schedule.teacherName;
       
@@ -190,7 +199,7 @@ export default function Monitoring() {
 
     // Calculate performance metrics for each teacher
     teacherMap.forEach(teacher => {
-      const onTimeClasses = todaySchedules.filter(s => 
+      const onTimeClasses = safeTodaySchedules.filter(s => 
         s.teacherId === teacher.id && s.status !== 'completed'
       ).length;
       
@@ -198,12 +207,12 @@ export default function Monitoring() {
         ? Math.round((teacher.classesCompleted / teacher.totalClasses) * 100)
         : 0;
       
-      teacher.liveClasses = liveClasses.filter(c => 
-        todaySchedules.find(s => s.id === c.scheduleId)?.teacherId === teacher.id && c.status === 'live'
+      teacher.liveClasses = safeLiveClasses.filter(c => 
+        safeTodaySchedules.find(s => s.id === c.scheduleId)?.teacherId === teacher.id && c.status === 'live'
       ).length;
       
-      teacher.upcomingClasses = liveClasses.filter(c => 
-        todaySchedules.find(s => s.id === c.scheduleId)?.teacherId === teacher.id && c.status === 'upcoming'
+      teacher.upcomingClasses = safeLiveClasses.filter(c => 
+        safeTodaySchedules.find(s => s.id === c.scheduleId)?.teacherId === teacher.id && c.status === 'upcoming'
       ).length;
       
       if (teacher.onTimeRate >= 95) {
@@ -484,7 +493,7 @@ export default function Monitoring() {
       </div>
 
       {/* Alerts Section */}
-      {liveClasses.filter(c => c.status === 'late').length > 0 && (
+      {safeLiveClasses.filter(c => c.status === 'late').length > 0 && (
         <Card className="mt-6 animate-slide-up border-warning/50 bg-warning/5">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-warning">
@@ -494,7 +503,7 @@ export default function Monitoring() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {liveClasses.filter(c => c.status === 'late').map((session) => (
+              {safeLiveClasses.filter(c => c.status === 'late').map((session) => (
                 <div key={session.id} className="flex items-center justify-between p-3 rounded-lg bg-card border">
                   <div className="flex items-center gap-3">
                     <XCircle className="h-5 w-5 text-destructive" />
