@@ -14,16 +14,15 @@ router.post("/signature-test", (req, res) => {
     const { meetingNumber, role = 0, userRole } = req.body;
     
     // Assign proper Zoom role based on user role
-    // CRITICAL: Zoom SDK uses role=0 for HOST, role=1 for PARTICIPANT
-    // Priority: userRole overrides role parameter to prevent conflicts
-    let zoomRole = 1; // Default to participant (role=1)
+    // REVERSED: teacher=1 (host), admin/student=0 (participant) as requested
+    let zoomRole = 0; // Default to participant (role=0)
     if (userRole === 'teacher') {
-      zoomRole = 0; // Only teachers can be hosts (role=0)
+      zoomRole = 1; // Teachers are hosts (role=1)
     } else if (userRole === 'admin' || userRole === 'student' || userRole === 'sales_team' || userRole === 'team_leader') {
-      zoomRole = 1; // All other roles are participants (role=1)
-    } else if (role === 0 && !userRole) {
-      // Fallback: if no userRole but role=0 explicitly set (legacy support)
-      zoomRole = 0;
+      zoomRole = 0; // All other roles are participants (role=0)
+    } else if (role === 1 && !userRole) {
+      // Fallback: if no userRole but role=1 explicitly set (legacy support)
+      zoomRole = 1;
     }
 
     const sdkKey = process.env.ZOOM_SDK_KEY;
