@@ -1,7 +1,5 @@
 const express = require('express');
 
-console.log('� SCHEDULE ROUTES LOADED - This should appear in logs');
-
 const {
   getSchedules,
   getScheduleById,
@@ -16,12 +14,6 @@ const {
   getScheduleStats,
   cleanupFakeMeetings
 } = require('../controllers/scheduleController.js');
-
-console.log('🔍 DEBUG: scheduleController functions imported:', {
-  getSchedules: typeof getSchedules,
-  getScheduleById: typeof getScheduleById,
-  createSchedule: typeof createSchedule
-});
 
 const router = express.Router();
 
