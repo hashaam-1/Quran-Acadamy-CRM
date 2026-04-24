@@ -48,7 +48,6 @@ router.delete("/:meetingNumber", deleteMeeting);
 /* New Teacher and Student Routes */
 router.get("/teacher/:teacherId", getTeacherMeetings);
 router.get("/student/available", getStudentMeetings);
-router.post("/:meetingId/join", joinClass);
 router.post("/:meetingId/end", endClass);
 
 module.exports = router;

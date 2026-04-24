@@ -333,9 +333,9 @@ const startClass = async (req, res) => {
         scheduleId,
         teacherId,
         teacherName,
-        meetingNumber: zoom.id, // Use real Zoom meeting ID
+        meetingNumber: String(zoom.id), // Use real Zoom meeting ID as string
         status: "live",
-        zoomMeetingId: zoom.id, // Use real Zoom meeting ID
+        zoomMeetingId: String(zoom.id), // Use real Zoom meeting ID as string
         zoomPassword: zoom.password || "123456",
         plainPassword: zoom.password || "123456",
         zoomJoinUrl: zoom.join_url,
@@ -405,8 +405,15 @@ const joinClass = async (req, res) => {
     }
     
     let meeting = await Meeting.findOne(
-      meetingNumber ? { meetingNumber } : { _id: meetingId }
+      meetingNumber ? { meetingNumber: String(meetingNumber) } : { _id: meetingId }
     );
+    
+    console.log('🔍 Meeting lookup result:', {
+      meetingNumber,
+      meetingNumberType: typeof meetingNumber,
+      meetingFound: !!meeting,
+      meetingId: meeting?._id
+    });
 
     console.log('📋 Meeting found:', meeting ? 'Yes' : 'No');
     console.log('👤 User role for meeting:', userRole);
@@ -429,7 +436,7 @@ const joinClass = async (req, res) => {
 
         // Create new meeting
         meeting = new Meeting({
-          meetingNumber: meetingNumber,
+          meetingNumber: String(meetingNumber),
           scheduleId: scheduleId,
           teacherId: schedule.teacherId,
           teacherName: teacherName || schedule.teacherName,
