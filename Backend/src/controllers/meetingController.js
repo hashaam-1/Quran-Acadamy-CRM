@@ -415,6 +415,23 @@ const joinClass = async (req, res) => {
       meetingId: meeting?._id
     });
 
+    // 🔍 DEBUG: Show all meetings in database
+    console.log('🔍 ALL MEETINGS CHECK:');
+    const allMeetings = await Meeting.find({});
+    console.log('📋 All meetings in DB:', allMeetings.map(m => ({
+      meetingNumber: m.meetingNumber,
+      meetingNumberType: typeof m.meetingNumber,
+      _id: m._id,
+      status: m.status,
+      scheduleId: m.scheduleId
+    })));
+
+    // 🔍 DEBUG: Check exact match
+    const matchingMeetings = allMeetings.filter(m => 
+      String(m.meetingNumber) === String(meetingNumber)
+    );
+    console.log('🔍 Matching meetings for:', meetingNumber, matchingMeetings.length, 'found');
+
     console.log('📋 Meeting found:', meeting ? 'Yes' : 'No');
     console.log('👤 User role for meeting:', userRole);
 
