@@ -148,15 +148,15 @@ export default function JoinClassButton({
     }
   };
 
-  // Only students can join classes (but admins can too for testing)
-  if (currentUser?.role !== 'student' && currentUser?.role !== 'admin') {
+  // All authenticated users can join classes
+  if (!currentUser) {
     return null;
   }
 
   return (
     <Button
       type="button"
-      disabled={disabled || isLoading}
+      disabled={disabled || isLoading || (!meetingNumber && !scheduleId)}
       className={`${customClassName} bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200`}
       size="sm"
       onClick={async (e) => {
