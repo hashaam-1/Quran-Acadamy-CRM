@@ -291,7 +291,7 @@ exports.cleanupFakeMeetings = async (req, res) => {
 };
 
 module.exports = {
-  getSchedules,
+  getSchedules, // ✅ FIXED: Add missing getSchedules export
   getScheduleById,
   createSchedule,
   updateSchedule,
