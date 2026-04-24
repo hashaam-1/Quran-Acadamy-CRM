@@ -182,6 +182,9 @@ export default function JoinClassButton({
         try {
           let meetingToJoin = meetingNumber;
 
+          // Get current user info
+          const { currentUser } = useAuthStore.getState();
+
           // If no meeting number exists, create one first
           if (!meetingNumber && scheduleId) {
             console.log('No meeting number, creating meeting for schedule:', scheduleId);
@@ -225,13 +228,22 @@ export default function JoinClassButton({
             return;
           }
 
-          // Join the meeting
+          // Join the meeting with all required data
           const joinResponse = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${meetingToJoin}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+            },
+            body: JSON.stringify({
+              scheduleId: scheduleId,
+              teacherName: teacherName,
+              course: course,
+              time: time,
+              studentName: studentName,
+              studentId: studentId,
+              userRole: currentUser?.role || 'teacher'
+            })
           });
 
           const joinData = await joinResponse.json();

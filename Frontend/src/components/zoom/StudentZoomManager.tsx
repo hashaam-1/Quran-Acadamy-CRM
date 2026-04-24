@@ -54,6 +54,13 @@ export default function StudentZoomManager({
           body: JSON.stringify({
             userId: currentUser.id,
             userName: currentUser.name,
+            scheduleId: scheduleId,
+            teacherName: teacherName,
+            course: course,
+            time: time,
+            studentName: currentUser.name,
+            studentId: currentUser.id,
+            userRole: currentUser?.role || 'student'
           })
         });
       } 
