@@ -267,17 +267,17 @@ export default function Schedule() {
                 )}
               >
                 {getSchedulesByDay(day).map((slot) => {
-  // Debug logging for student schedule data
-  if (currentUser?.role === 'student') {
-    console.log('Student schedule slot:', {
-      id: slot.id,
-      status: slot.status,
-      meetingNumber: slot.meetingNumber,
-      course: slot.course,
-      studentName: slot.studentName,
-      teacherName: slot.teacherName
-    });
-  }
+  // Debug logging for all schedule data to identify Join Class button issues
+  console.log('Schedule slot debug:', {
+    id: slot.id,
+    status: slot.status,
+    meetingNumber: slot.meetingNumber,
+    course: slot.course,
+    studentName: slot.studentName,
+    teacherName: slot.teacherName,
+    currentUserRole: currentUser?.role,
+    shouldShowJoinClass: currentUser?.role === 'teacher'
+  });
 
   return (
   <div
@@ -319,28 +319,17 @@ export default function Schedule() {
       {/* Teacher: Join Class + Edit */}
       {currentUser?.role === 'teacher' && (
         <>
-          {slot.status === 'scheduled' && !slot.meetingNumber ? (
-            <StartClassButton
-              scheduleId={slot.id}
-              meetingClassName={slot.className || `${slot.course || 'Quran'} Class`}
-              course={slot.course || 'General'}
-              time={slot.time}
-              studentId={slot.studentId?._id}
-              studentName={slot.studentName}
-              className="bg-white text-blue-600 hover:bg-blue-50 border-blue-600"
-            />
-          ) : (
-            <JoinClassButton
-              meetingNumber={slot.meetingNumber}
-              scheduleId={slot.id}
-              teacherName={slot.teacherName}
-              course={slot.course || 'General'}
-              time={slot.time}
-              studentId={slot.studentId?._id}
-              studentName={slot.studentName}
-              className="bg-white text-black hover:bg-gray-100"
-            />
-          )}
+          {/* Always show Join Class for scheduled classes */}
+          <JoinClassButton
+            meetingNumber={slot.meetingNumber}
+            scheduleId={slot.id}
+            teacherName={slot.teacherName}
+            course={slot.course || 'General'}
+            time={slot.time}
+            studentId={slot.studentId?._id}
+            studentName={slot.studentName}
+            className="bg-white text-black hover:bg-gray-100"
+          />
           <Button
             size="sm"
             variant="outline"

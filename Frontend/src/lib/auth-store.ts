@@ -302,14 +302,39 @@ export const useAuthStore = create<AuthStore>()(
 }),
     {
       name: 'auth-storage', // localStorage key
+      version: 1, // Add version to handle schema changes
       onRehydrateStorage: () => (state) => {
         console.log('🔄 Auth store rehydrating:', state);
-        // Set loading to false when rehydration is complete
-        if (state) {
+        
+        // CRITICAL: Validate and clean up auth state to prevent role switching
+        if (state && state.currentUser) {
+          // Validate required fields
+          if (!state.currentUser.email || !state.currentUser.role) {
+            console.log('❌ Invalid auth state detected - clearing corrupted data');
+            state.currentUser = null;
+            state.isAuthenticated = false;
+            state.isLoading = false;
+            return state;
+          }
+          
+          // Ensure role is valid
+          const validRoles = ['admin', 'teacher', 'student', 'sales_team', 'team_leader'];
+          if (!validRoles.includes(state.currentUser.role)) {
+            console.log('❌ Invalid role detected - clearing auth state');
+            state.currentUser = null;
+            state.isAuthenticated = false;
+            state.isLoading = false;
+            return state;
+          }
+          
+          // Set loading to false when rehydration is complete
           state.isLoading = false;
-          console.log('✅ Auth state restored for user:', state.currentUser?.role, state.currentUser?.email);
+          console.log('✅ Auth state validated and restored for user:', state.currentUser.role, state.currentUser.email);
         } else {
           console.log('❌ No auth state found on refresh');
+          state.currentUser = null;
+          state.isAuthenticated = false;
+          state.isLoading = false;
         }
         return state;
       },
