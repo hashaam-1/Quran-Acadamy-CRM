@@ -63,6 +63,17 @@ try {
   console.error("🔥 STACK:", err.stack);
 }
 
+// ✅ LAST RESORT: Inline auth route definition to ensure it works
+try {
+  console.log("🔍 Adding inline auth route as backup...");
+  const { unifiedLogin } = require("./controllers/authController.js");
+  app.post("/api/auth/unified-login", unifiedLogin);
+  console.log("✅ Inline auth route added: POST /api/auth/unified-login");
+} catch (err) {
+  console.error("❌ Inline auth route failed:", err);
+  console.error("🔥 FULL ERROR:", err);
+}
+
 loadRoute("leadRoutes.js", "/api/leads");
 loadRoute("studentRoutes.js", "/api/students");
 loadRoute("teacherRoutes.js", "/api/teachers");
