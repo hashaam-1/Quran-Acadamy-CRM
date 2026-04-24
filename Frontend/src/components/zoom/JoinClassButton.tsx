@@ -72,8 +72,8 @@ export default function JoinClassButton({
         setMeeting(data.meeting);
         toast.success('Joined class successfully!');
         
-        // Open Zoom meeting - backend will determine role from userRole
-        window.open(`/zoom-join?meetingNumber=${meetingNumber}`, '_blank');
+        // Open Zoom meeting with student role (0 = participant)
+        window.open(`/zoom-join?meetingNumber=${meetingNumber}&role=0`, '_blank');
       } else {
         throw new Error(data.error || 'Failed to join class');
       }
@@ -189,8 +189,8 @@ export default function JoinClassButton({
           if (joinResponse.ok) {
             toast.success('Joined class successfully!');
             
-            // Open Zoom meeting directly - backend will determine role from userRole
-            const zoomUrl = `/zoom-join?meetingNumber=${meetingToJoin}`;
+            // Open Zoom meeting directly with student role (0 = participant)
+            const zoomUrl = `/zoom-join?meetingNumber=${meetingToJoin}&role=0`;
             console.log('Opening Zoom in same tab:', zoomUrl);
             navigate(zoomUrl);
           } else {

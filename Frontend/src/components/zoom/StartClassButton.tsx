@@ -81,7 +81,7 @@ export default function StartClassButton({
         // Force refresh of schedules to update meetingNumber for students
         queryClient.invalidateQueries({ queryKey: ['schedules'] });
         
-        navigate(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}`);
+        navigate(`/zoom-join?meetingNumber=${data.meeting.meetingNumber}&role=1`);
       } else {
         toast.error(data.message || "Failed to start class");
       }
