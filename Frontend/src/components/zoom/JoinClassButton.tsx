@@ -48,34 +48,73 @@ export default function JoinClassButton({
       return;
     }
 
-    if (!meetingNumber) {
-      toast.error('Meeting number is required');
-      return;
-    }
-
     setIsLoading(true);
     setError('');
 
     try {
-      // First, register the student as joining the meeting
-      const response = await fetch(`${API_BASE_URL}/meetings/join/${meetingNumber}`, {
+      let currentMeetingNumber = meetingNumber;
+      let meetingData = null;
+
+      // If no meetingNumber provided, create a new meeting first
+      if (!currentMeetingNumber && scheduleId) {
+        console.log('No meeting number provided, creating new meeting for schedule:', scheduleId);
+        
+        const createResponse = await fetch(`${API_BASE_URL}/meetings`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            scheduleId: scheduleId,
+            teacherName: teacherName || currentUser.name,
+            course: course || 'General',
+            time: time || new Date().toISOString(),
+            studentName: studentName || 'Student',
+            studentId: studentId
+          })
+        });
+
+        const createData = await createResponse.json();
+        
+        if (createResponse.ok && createData.success) {
+          currentMeetingNumber = createData.meeting.meetingNumber;
+          meetingData = createData.meeting;
+          toast.success('Meeting created successfully!');
+        } else {
+          throw new Error(createData.error || 'Failed to create meeting');
+        }
+      }
+
+      if (!currentMeetingNumber) {
+        throw new Error('Meeting number is required and could not be created');
+      }
+
+      // Register the user as joining the meeting
+      const joinResponse = await fetch(`${API_BASE_URL}/meetings/join/${currentMeetingNumber}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          userName: currentUser.name,
+        })
       });
 
-      const data = await response.json();
+      const joinData = await joinResponse.json();
 
-      if (response.ok) {
-        setMeeting(data.meeting);
+      if (joinResponse.ok) {
+        setMeeting(joinData.meeting || meetingData);
         toast.success('Joined class successfully!');
         
-        // Open Zoom meeting with student role (0 = participant)
-        window.open(`/zoom-join?meetingNumber=${meetingNumber}&role=0`, '_blank');
+        // Open Zoom meeting with appropriate role based on user type
+        const userRole = currentUser.role;
+        const role = (userRole === 'teacher') ? 1 : 0; // teacher=1 (host), others=0 (participant)
+        window.open(`/zoom-join?meetingNumber=${currentMeetingNumber}&role=${role}`, '_blank');
       } else {
-        throw new Error(data.error || 'Failed to join class');
+        throw new Error(joinData.error || 'Failed to join class');
       }
     } catch (err) {
       console.error('Error joining class:', err);

@@ -319,12 +319,7 @@ export default function Schedule() {
       {/* Teacher: Join Class + Edit */}
       {currentUser?.role === 'teacher' && (
         <>
-          {slot.meetingNumber ? (
-            <JoinClassButton
-              meetingNumber={slot.meetingNumber}
-              className="bg-white text-black hover:bg-gray-100"
-            />
-          ) : (
+          {slot.status === 'scheduled' && !slot.meetingNumber ? (
             <StartClassButton
               scheduleId={slot.id}
               meetingClassName={slot.className || `${slot.course || 'Quran'} Class`}
@@ -333,6 +328,17 @@ export default function Schedule() {
               studentId={slot.studentId?._id}
               studentName={slot.studentName}
               className="bg-white text-blue-600 hover:bg-blue-50 border-blue-600"
+            />
+          ) : (
+            <JoinClassButton
+              meetingNumber={slot.meetingNumber}
+              scheduleId={slot.id}
+              teacherName={slot.teacherName}
+              course={slot.course || 'General'}
+              time={slot.time}
+              studentId={slot.studentId?._id}
+              studentName={slot.studentName}
+              className="bg-white text-black hover:bg-gray-100"
             />
           )}
           <Button
