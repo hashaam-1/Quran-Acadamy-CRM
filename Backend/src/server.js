@@ -51,16 +51,16 @@ const loadRoute = (routePath, urlPath) => {
 /* =========================
    ROUTES
 ========================= */
-console.log("🔍 Loading auth route...");
-loadRoute("authRoutes.js", "/api/auth"); // ✅ FIXED: Unified auth endpoint
-
-// ✅ FALLBACK: Force direct mount if loadRoute fails
+// ✅ FIXED: Direct mount auth route to ensure it works
 try {
+  console.log("🔍 Loading auth route directly...");
   const authRoutes = require("./routes/authRoutes.js");
   app.use("/api/auth", authRoutes);
-  console.log("✅ Auth route mounted directly as fallback");
+  console.log("✅ Auth route mounted directly: /api/auth");
 } catch (err) {
-  console.error("❌ Direct auth route mount failed:", err.message);
+  console.error("❌ Auth route mount failed:", err);
+  console.error("🔥 FULL ERROR:", err);
+  console.error("🔥 STACK:", err.stack);
 }
 
 loadRoute("leadRoutes.js", "/api/leads");
