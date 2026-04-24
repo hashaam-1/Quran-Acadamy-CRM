@@ -4,7 +4,7 @@ const TeamMember = require('../models/TeamMember');
 const bcrypt = require('bcryptjs');
 
 // ✅ UNIFIED LOGIN - Single endpoint for all roles
-exports.unifiedLogin = async (req, res) => {
+const unifiedLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     
@@ -227,3 +227,7 @@ exports.unifiedLogin = async (req, res) => {
   }
 };
 
+// ✅ FIXED: Proper module.exports
+module.exports = {
+  unifiedLogin
+};

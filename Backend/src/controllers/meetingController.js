@@ -755,6 +755,7 @@ module.exports = {
   getStudentMeetings,
   endClass,
   getMeetingDetails,
+  createZoomMeeting,
   createScheduledMeeting,
   deleteMeeting,
   testZoomCredentials,
