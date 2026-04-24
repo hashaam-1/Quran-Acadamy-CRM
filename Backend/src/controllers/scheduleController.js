@@ -71,6 +71,29 @@ const createSchedule = async (req, res) => {
     
     console.log('✅ Real Zoom meeting created:', zoomMeeting.id);
     
+    // ✅ Save meeting to Meeting collection as well
+    const Meeting = require('../models/Meeting');
+    const meeting = new Meeting({
+      meetingNumber: zoomMeeting.id.toString(), // ✅ REAL Zoom meeting ID as string
+      zoomMeetingId: zoomMeeting.id.toString(),
+      joinUrl: zoomMeeting.join_url,
+      startUrl: zoomMeeting.start_url,
+      password: zoomMeeting.password || "123456",
+      topic: `${req.body.course || 'Quran'} Class - ${req.body.studentName || 'Student'}`,
+      teacherId: req.body.teacherId,
+      studentId: req.body.studentId,
+      teacherName: req.body.teacherName,
+      studentName: req.body.studentName,
+      course: req.body.course,
+      time: req.body.time,
+      duration: parseInt(req.body.duration) || 60,
+      status: 'scheduled',
+      participants: []
+    });
+    
+    await meeting.save();
+    console.log('✅ Meeting saved to Meeting collection:', meeting.meetingNumber);
+    
     // Ensure required fields have fallbacks to prevent undefined data
     const scheduleData = {
       ...req.body,
