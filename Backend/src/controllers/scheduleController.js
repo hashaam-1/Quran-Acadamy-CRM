@@ -36,24 +36,43 @@ exports.getScheduleById = async (req, res) => {
 // Create schedule
 exports.createSchedule = async (req, res) => {
   try {
-    // Generate unique meeting number for this schedule
-    const generateMeetingNumber = () => {
-      const timestamp = Date.now().toString();
-      const randomSuffix = Math.random().toString(36).substring(2, 8);
-      return `${timestamp}${randomSuffix}`;
-    };
+    const { createZoomMeeting } = require('./meetingController');
+    
+    // ✅ Create REAL Zoom meeting first
+    const meetingDateTime = new Date();
+    meetingDateTime.setHours(meetingDateTime.getHours() + 1); // 1 hour from now
+    
+    const zoomMeeting = await createZoomMeeting({
+      topic: `${req.body.course || 'Quran'} Class - ${req.body.studentName || 'Student'}`,
+      startTime: meetingDateTime.toISOString(),
+      duration: parseInt(req.body.duration) || 60
+    });
+    
+    if (!zoomMeeting || !zoomMeeting.id) {
+      return res.status(500).json({ 
+        success: false, 
+        message: "Failed to create Zoom meeting" 
+      });
+    }
+    
+    console.log('✅ Real Zoom meeting created:', zoomMeeting.id);
     
     // Ensure required fields have fallbacks to prevent undefined data
     const scheduleData = {
       ...req.body,
       className: req.body.className || `${req.body.course || 'Quran'} Class`,
-      meetingNumber: generateMeetingNumber() // Assign unique meeting number
+      meetingNumber: zoomMeeting.id.toString(), // ✅ REAL Zoom meeting ID
+      joinUrl: zoomMeeting.join_url,
+      startUrl: zoomMeeting.start_url,
+      zoomMeetingId: zoomMeeting.id
     };
     
     const schedule = new Schedule(scheduleData);
     const newSchedule = await schedule.save();
+    console.log('✅ Schedule created with real meeting ID:', newSchedule.meetingNumber);
     res.status(201).json(newSchedule);
   } catch (error) {
+    console.error(' Schedule creation error:', error);
     res.status(400).json({ message: error.message });
   }
 };

@@ -10,7 +10,8 @@ const {
   getSchedulesByStudent,
   requestReschedule,
   handleReschedule,
-  getScheduleStats
+  getScheduleStats,
+  cleanupFakeMeetings
 } = require('../controllers/scheduleController.js');
 
 const router = express.Router();
@@ -26,5 +27,6 @@ router.put('/:id', updateSchedule);
 router.delete('/:id', deleteSchedule);
 router.post('/:id/reschedule', requestReschedule);
 router.put('/:id/reschedule/handle', handleReschedule);
+router.post('/cleanup-fake-meetings', cleanupFakeMeetings);
 
 module.exports = router;

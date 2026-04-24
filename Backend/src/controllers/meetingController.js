@@ -387,6 +387,16 @@ const joinClass = async (req, res) => {
 
     // Support both meetingNumber and meetingId
     const identifier = meetingNumber || meetingId;
+    
+    // 🛡️ Validate meeting ID format - must be numeric (real Zoom ID)
+    if (meetingNumber && !/^\d+$/.test(meetingNumber)) {
+      console.log('❌ Invalid meeting ID format:', meetingNumber);
+      return res.status(400).json({
+        success: false,
+        message: "Invalid meeting ID format - must be numeric"
+      });
+    }
+    
     let meeting = await Meeting.findOne(
       meetingNumber ? { meetingNumber } : { _id: meetingId }
     );
