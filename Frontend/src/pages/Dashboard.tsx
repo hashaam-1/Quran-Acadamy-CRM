@@ -46,7 +46,18 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
-  const { currentUser } = useAuthStore();
+  const { currentUser, isLoading: isAuthLoading } = useAuthStore();
+  
+  // Show loading state while auth is rehydrating to prevent role fallback
+  if (isAuthLoading) {
+    return (
+      <MainLayout title="Loading..." subtitle="Restoring your session...">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </MainLayout>
+    );
+  }
   const { data: leadsData = [], isLoading: leadsLoading } = useLeads();
   const { data: studentsData = [], isLoading: studentsLoading } = useStudents();
   const { data: teachersData = [], isLoading: teachersLoading } = useTeachers();
@@ -69,9 +80,9 @@ export default function Dashboard() {
   const homeworkList = Array.isArray(homeworkListData) ? homeworkListData : [];
   const studentProgressData = progressRecords;
 
-  const isLoading = leadsLoading || studentsLoading || teachersLoading || invoicesLoading || schedulesLoading;
+  const isDataLoading = leadsLoading || studentsLoading || teachersLoading || invoicesLoading || schedulesLoading;
 
-  if (isLoading) {
+  if (isDataLoading) {
     return (
       <MainLayout title="Dashboard" subtitle="Loading...">
         <div className="flex items-center justify-center h-96">
@@ -171,7 +182,26 @@ export default function Dashboard() {
   const paidInvoices = filteredData.invoices.filter(i => i.status === 'paid').length;
   const unpaidInvoices = filteredData.invoices.filter(i => i.status !== 'paid').length;
 
-  const role = currentUser?.role || 'admin';
+  // CRITICAL: No role fallback - if currentUser is null, show error instead of defaulting to admin
+  if (!currentUser || !currentUser.role) {
+    return (
+      <MainLayout title="Authentication Error" subtitle="Please log in again">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">Authentication error. Please log in again.</p>
+            <button 
+              onClick={() => window.location.href = '/auth'}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  const role = currentUser.role;
 
   // Admin Dashboard
   if (role === 'admin') {
