@@ -155,23 +155,20 @@ export default function Monitoring() {
       };
     });
 
-    // Calculate summary with safety checks
-    const safeLiveClasses = liveClasses || [];
-    const safeTodaySchedules = todaySchedules || [];
-    
+    // Calculate summary
     const summary: ClassSummary = {
-      total: safeTodaySchedules.length,
-      completed: safeLiveClasses.filter(c => c.status === 'ended').length,
-      ongoing: safeLiveClasses.filter(c => c.status === 'live').length,
-      upcoming: safeLiveClasses.filter(c => c.status === 'upcoming').length,
-      missed: safeLiveClasses.filter(c => c.status === 'late').length,
-      late: safeLiveClasses.filter(c => c.status === 'late').length,
+      total: todaySchedules.length,
+      completed: liveClasses.filter(c => c.status === 'ended').length,
+      ongoing: liveClasses.filter(c => c.status === 'live').length,
+      upcoming: liveClasses.filter(c => c.status === 'upcoming').length,
+      missed: liveClasses.filter(c => c.status === 'late').length,
+      late: liveClasses.filter(c => c.status === 'late').length,
     };
 
     // Calculate teacher performance
     const teacherMap = new Map<string, TeacherPerformance>();
     
-    safeTodaySchedules.forEach(schedule => {
+    todaySchedules.forEach(schedule => {
       const teacherId = schedule.teacherId;
       const teacherName = schedule.teacherName;
       
@@ -199,7 +196,7 @@ export default function Monitoring() {
 
     // Calculate performance metrics for each teacher
     teacherMap.forEach(teacher => {
-      const onTimeClasses = safeTodaySchedules.filter(s => 
+      const onTimeClasses = todaySchedules.filter(s => 
         s.teacherId === teacher.id && s.status !== 'completed'
       ).length;
       
@@ -207,12 +204,12 @@ export default function Monitoring() {
         ? Math.round((teacher.classesCompleted / teacher.totalClasses) * 100)
         : 0;
       
-      teacher.liveClasses = safeLiveClasses.filter(c => 
-        safeTodaySchedules.find(s => s.id === c.scheduleId)?.teacherId === teacher.id && c.status === 'live'
+      teacher.liveClasses = liveClasses.filter(c => 
+        todaySchedules.find(s => s.id === c.scheduleId)?.teacherId === teacher.id && c.status === 'live'
       ).length;
       
-      teacher.upcomingClasses = safeLiveClasses.filter(c => 
-        safeTodaySchedules.find(s => s.id === c.scheduleId)?.teacherId === teacher.id && c.status === 'upcoming'
+      teacher.upcomingClasses = liveClasses.filter(c => 
+        todaySchedules.find(s => s.id === c.scheduleId)?.teacherId === teacher.id && c.status === 'upcoming'
       ).length;
       
       if (teacher.onTimeRate >= 95) {
@@ -228,6 +225,10 @@ export default function Monitoring() {
   };
 
   const { liveClasses, summary, teacherPerformance } = processSchedules(schedules);
+
+  // ✅ FIXED: Define safe arrays in proper scope for render section
+  const safeLiveClasses = Array.isArray(liveClasses) ? liveClasses : [];
+  const safeTodaySchedules = Array.isArray(schedules) ? schedules : [];
 
   // Handle observe button click - join or create zoom meeting
   const handleObserve = async (liveClass: LiveClass) => {
