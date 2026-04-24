@@ -100,9 +100,9 @@ export default function StudentZoomManager({
       if (data.success) {
         toast.success(data.rejoin ? "Rejoined existing class" : "Joined class successfully");
         
-        // Navigate to Zoom meeting - student role (1 = participant)
+        // Navigate to Zoom meeting - backend will determine role from userRole
         const meetingNum = data.meeting?.meetingNumber || meetingNumber;
-        navigate(`/zoom-join?meetingNumber=${meetingNum}&role=1`);
+        navigate(`/zoom-join?meetingNumber=${meetingNum}`);
       } else {
         throw new Error(data.message || 'Failed to join class');
       }

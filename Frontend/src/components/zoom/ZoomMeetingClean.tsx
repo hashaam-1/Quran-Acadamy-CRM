@@ -156,7 +156,10 @@ export default function ZoomMeetingClean() {
 
       // Use preserved user session instead of current user to prevent logout
       const activeUser = preservedUser || currentUser;
-      console.log('Generating signature for meeting:', meetingNumber, 'role:', role, 'user:', activeUser?.name);
+      console.log('Generating signature for meeting:', meetingNumber, 'user:', activeUser?.name, 'userRole:', activeUser?.role);
+      
+      // IMPORTANT: Do NOT use role from URL - let backend determine role based on userRole
+      // This prevents role conflicts and ensures proper host assignment
       
       if (!activeUser) {
         throw new Error('No user session found');
@@ -201,7 +204,7 @@ export default function ZoomMeetingClean() {
         },
         body: JSON.stringify({
           meetingNumber: meetingNumber,
-          role: role,
+          // ❌ DO NOT send role - let backend determine based on userRole
           userRole: activeUser?.role,
           userName: activeUser?.name,
           userId: activeUser?.id,

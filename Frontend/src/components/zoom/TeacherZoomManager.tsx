@@ -142,9 +142,9 @@ export default function TeacherZoomManager({
         setMeeting(data.meeting);
         toast.success(data.rejoin ? "Rejoined existing class" : "Class started successfully");
 
-        // Navigate to Zoom meeting with teacher role (0 = host)
+        // Navigate to Zoom meeting - backend will determine role from userRole
         const meetingNumber = data.meeting.meetingNumber;
-        navigate(`/zoom-join?meetingNumber=${meetingNumber}&role=0`);
+        navigate(`/zoom-join?meetingNumber=${meetingNumber}`);
 
         // Refresh meetings list
         fetchTeacherMeetings();
