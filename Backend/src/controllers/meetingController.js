@@ -383,7 +383,7 @@ const startClass = async (req, res) => {
 const joinClass = async (req, res) => {
   try {
     const { meetingNumber, meetingId } = req.params;
-    const { userId: bodyUserId, userName: bodyUserName, scheduleId, teacherName, course, time, studentName, studentId, userRole } = req.body;
+    const { userId: bodyUserId, userName: bodyUserName, scheduleId, teacherName, course, time, studentName, studentId, userRole } = req.body || {};
 
     console.log('🔍 Join class request:', { meetingNumber, meetingId, scheduleId, userRole });
 
@@ -463,12 +463,14 @@ const joinClass = async (req, res) => {
         });
 
         await meeting.save();
-        console.log("New meeting created successfully:", meeting.meetingNumber);
+        console.log("✅ Fallback meeting created successfully:", meeting.meetingNumber);
       } catch (createError) {
-        console.log("Error creating meeting:", createError.message);
+        console.log("❌ Meeting creation error:", createError.message);
+        console.log("❌ Full error details:", createError);
         return res.status(500).json({
           success: false,
           message: "Failed to create meeting",
+          error: createError.message
         });
       }
     }
@@ -490,21 +492,42 @@ const joinClass = async (req, res) => {
     );
 
     // Set role based on user type - only teachers can be hosts
-    const participantRole = userRole === 'teacher' ? 1 : 0;
+    // Check if there's already a host in the meeting
+    const existingHost = meeting.participants.find(p => p.role === 1);
+    const participantRole = (userRole === 'teacher' && !existingHost) ? 1 : 0;
 
     if (!already) {
       meeting.participants.push({
         userId,
-        name: userName,
+        userName,
         role: participantRole,
+        joinedAt: new Date(),
       });
-
-      await meeting.save();
+    } else {
+      // Update existing participant role if needed (demote if there's already a host)
+      if (existingHost && existingHost.userId !== userId && already.role === 1) {
+        already.role = 0; // Demote to participant
+        console.log(`👤 Demoted ${userName} from host to participant (host conflict)`);
+      }
     }
+    await meeting.save();
+
+    const signature = await generateZoomSignature({
+      meetingNumber: meeting.meetingNumber,
+      role: participantRole,
+    });
 
     res.json({
       success: true,
-      meeting,
+      message: "Joined class successfully",
+      meeting: {
+        id: meeting._id,
+        meetingNumber: meeting.meetingNumber,
+        password: meeting.password,
+        topic: meeting.topic,
+        signature,
+        participantRole,
+      },
     });
   } catch (err) {
     console.log("JOIN ERROR:", err.message);
