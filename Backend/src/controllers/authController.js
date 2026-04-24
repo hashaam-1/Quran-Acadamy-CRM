@@ -143,3 +143,8 @@ exports.unifiedLogin = async (req, res) => {
     });
   }
 };
+
+// ✅ FIXED: Explicit module.exports for proper import
+module.exports = {
+  unifiedLogin
+};
