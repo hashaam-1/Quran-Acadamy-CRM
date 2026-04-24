@@ -48,10 +48,18 @@ export const useSchedules = () => {
       }
       
       const schedules = Array.isArray(data) ? data : [];
-      console.log('✅ Schedules fetched:', schedules.length, 'schedules');
-      console.log('📋 Schedule data sample:', schedules[0]);
       
-      return schedules;
+      // 🚨 Fix broken ID mapping - transform _id to id
+      const formattedSchedules = schedules.map(s => ({
+        id: s._id || s.id,
+        ...s
+      }));
+      
+      console.log('✅ Schedules fetched:', formattedSchedules.length, 'schedules');
+      console.log('📋 Schedule data sample:', formattedSchedules[0]);
+      console.log('🔍 ID mapping check:', formattedSchedules.map(s => ({ id: s.id, meetingNumber: s.meetingNumber })));
+      
+      return formattedSchedules;
     },
     enabled: !!currentUser,
   });

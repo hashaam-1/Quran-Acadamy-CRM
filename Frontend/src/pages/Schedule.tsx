@@ -318,9 +318,23 @@ export default function Schedule() {
     {/* Hover Actions - Role-based */}
     <div className="absolute inset-0 z-20 bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
       {/* Teacher: Join Class + Edit */}
-      {currentUser?.role === 'teacher' && (
+      {(() => {
+        const canJoin = 
+          slot.status === 'scheduled' && 
+          slot.meetingNumber && 
+          currentUser?.role === 'teacher';
+        
+        console.log('🔍 Join Class button condition check:', {
+          slotStatus: slot.status,
+          meetingNumber: slot.meetingNumber,
+          userRole: currentUser?.role,
+          canJoin,
+          slotId: slot.id
+        });
+        
+        return canJoin;
+      })() && (
         <>
-          {/* Always show Join Class for scheduled classes */}
           <JoinClassButton
             meetingNumber={slot.meetingNumber}
             scheduleId={slot.id}

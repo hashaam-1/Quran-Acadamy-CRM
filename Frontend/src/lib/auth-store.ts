@@ -1,5 +1,16 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+
+// 🔥 Clear stale auth on deploy/version change
+const AUTH_VERSION = "v2"; // change on deploy
+const storedVersion = localStorage.getItem("auth_version");
+
+if (storedVersion !== AUTH_VERSION) {
+  console.log('🔄 Auth version changed, clearing stale data...');
+  localStorage.clear();
+  sessionStorage.clear();
+  localStorage.setItem("auth_version", AUTH_VERSION);
+}
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
