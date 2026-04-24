@@ -386,6 +386,9 @@ const joinClass = async (req, res) => {
     const { userId: bodyUserId, userName: bodyUserName, scheduleId, teacherName, course, time, studentName, studentId, userRole } = req.body || {};
 
     console.log('🔍 Join class request:', { meetingNumber, meetingId, scheduleId, userRole });
+    console.log('🔍 DEBUG: Full req.body:', req.body);
+    console.log('🔍 DEBUG: req.body type:', typeof req.body);
+    console.log('🔍 DEBUG: req.body keys:', req.body ? Object.keys(req.body) : 'undefined');
 
     // ✅ PERFECT: Better validation with role context
     if (!meetingNumber && !meetingId) {
@@ -449,8 +452,23 @@ const joinClass = async (req, res) => {
         }
 
         // Create fallback meeting with available data
+        console.log('🔍 DEBUG: Creating fallback meeting with data:', {
+          meetingNumber: String(meetingNumber),
+          scheduleId: scheduleId || null,
+          teacherId: schedule?.teacherId || "unknown",
+          teacherName: teacherName || schedule?.teacherName || "Unknown Teacher",
+          course: course || schedule?.course || "General",
+          time: time || schedule?.time || "",
+          studentId: studentId || schedule?.studentId || null,
+          studentName: studentName || schedule?.studentName || "Student",
+          status: "live",
+          participants: []
+        });
+
         meeting = new Meeting({
           meetingNumber: String(meetingNumber),
+          zoomMeetingId: String(meetingNumber), // ✅ REQUIRED: Add missing field
+          className: course || schedule?.course || "General Class", // ✅ REQUIRED: Add missing field
           scheduleId: scheduleId || null,
           teacherId: schedule?.teacherId || "unknown",
           teacherName: teacherName || schedule?.teacherName || "Unknown Teacher",
