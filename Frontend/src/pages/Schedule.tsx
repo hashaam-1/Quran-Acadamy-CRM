@@ -319,9 +319,8 @@ export default function Schedule() {
     <div className="absolute inset-0 z-20 bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
       {/* Teacher: Join Class + Edit */}
       {(() => {
-        // ✅ FIXED: Consistent button logic
+        // ✅ FIXED: Teachers should see button for scheduled classes, even without meetingNumber
         const shouldShowJoinButton = 
-          !!slot.meetingNumber && 
           slot.status === 'scheduled' &&
           currentUser?.role === 'teacher';
         
@@ -332,7 +331,7 @@ export default function Schedule() {
           userRole: currentUser?.role,
           shouldShowJoinButton,
           slotId: slot.id,
-          isNumeric: /^\d+$/.test(slot.meetingNumber)
+          isNumeric: slot.meetingNumber ? /^\d+$/.test(slot.meetingNumber) : false
         });
         
         return shouldShowJoinButton;

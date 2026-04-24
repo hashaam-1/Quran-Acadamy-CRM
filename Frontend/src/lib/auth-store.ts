@@ -151,162 +151,75 @@ export const useAuthStore = create<AuthStore>()(
 
   loginWithBackend: async (email, password) => {
     try {
-      console.log('🔐 Attempting login for:', email);
-      console.log('ℹ️ Note: 404 errors during login are expected - the system tries student → teacher → team member login in sequence');
+      console.log('🔐 Attempting unified login for:', email);
       
-      // Silent fetch wrapper to suppress console errors for expected 404s
-      const silentFetch = async (url: string, options: RequestInit) => {
-        try {
-          return await fetch(url, options);
-        } catch (error) {
-          // Suppress fetch errors - they'll be handled by response status
-          return null;
-        }
+      // ✅ FIXED: Clear any existing auth state to prevent role overwrite
+      const { currentUser } = get();
+      if (currentUser) {
+        console.log('🔄 Clearing existing auth state to prevent role overwrite');
+        set({ currentUser: null, isAuthenticated: false });
+      }
+      
+      // ✅ FIXED: Single unified login endpoint instead of multi-role fallback
+      const response = await fetch(`${API_BASE_URL}/auth/unified-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return { success: false, error: errorData.message || 'Login failed' };
+      }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        return { success: false, error: data.message || 'Login failed' };
+      }
+
+      // ✅ FIXED: Store only the returned role explicitly
+      const user = {
+        id: data.user._id || data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        phone: data.user.phone || '',
+        role: data.user.role, // ✅ Explicit role from backend
+        createdAt: data.user.createdAt,
+        ...(data.user.studentId && { studentId: data.user.studentId }),
+        ...(data.user.teacherId && { teacherId: data.user.teacherId }),
       };
+
+      set({ currentUser: user, isAuthenticated: true });
+      console.log('✅ Unified login successful:', { role: user.role, email: user.email });
       
-      // Check if it's the admin user (special case)
-      if (email.toLowerCase() === 'hashaamamz1@gmail.com' && password === 'hashaam@123') {
-        const adminUser = {
-          id: '1',
-          name: 'Admin',
-          email: 'hashaamamz1@gmail.com',
-          phone: '+92300111222',
-          role: 'admin' as const,
-          createdAt: '2023-01-01',
-        };
-        set({ currentUser: adminUser, isAuthenticated: true });
-        return { success: true, user: adminUser };
-      }
-
-      // Try student login (404 is expected if not a student)
+      // Role-specific auto check-in
       try {
-        const studentResponse = await silentFetch(`${API_BASE_URL}/students/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        
-        if (!studentResponse) {
-          // Fetch failed, continue to next login type
-          throw new Error('Student login failed');
+        if (user.role === 'student') {
+          await fetch(`${API_BASE_URL}/attendance/mark`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              studentId: user.id,
+              status: 'present'
+            }),
+          });
+          console.log('Student auto check-in successful');
+        } else if (user.role === 'teacher') {
+          await fetch(`${API_BASE_URL}/teachers/checkin`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ teacherId: user.id }),
+          });
+          console.log('Teacher auto check-in successful');
         }
-        
-        if (studentResponse.ok) {
-          const studentData = await studentResponse.json();
-          const user = {
-            id: studentData._id,
-            name: studentData.name,
-            email: studentData.email,
-            phone: studentData.phone || '',
-            role: 'student' as const,
-            createdAt: studentData.createdAt,
-            studentId: studentData._id,
-          };
-          set({ currentUser: user, isAuthenticated: true });
-          console.log('Student login successful:', user);
-          
-          // Auto check-in student on login
-          try {
-            await fetch(`${API_BASE_URL}/attendance/mark`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                studentId: studentData._id,
-                status: 'present'
-              }),
-            });
-            console.log('Student auto check-in successful');
-          } catch (error) {
-            console.error('Error auto checking in student:', error);
-          }
-          
-          return { success: true, user };
-        } else if (studentResponse.status !== 404) {
-          // If it's not a 404, it's a real error (invalid credentials, etc.)
-          const errorData = await studentResponse.json().catch(() => ({}));
-          return { success: false, error: errorData.message || 'Student login failed' };
-        }
-        // 404 is expected - user is not a student, continue to next login type
-      } catch (studentError) {
-        // Suppress error logging for expected 404s
-        if (studentError && (studentError as any).status !== 404) {
-          console.log('Student login failed, trying teacher...');
-        }
+      } catch (error) {
+        console.error('Error auto checking in:', error);
       }
-
-      // Try teacher login (404 is expected if not a teacher)
-      try {
-        const teacherResponse = await silentFetch(`${API_BASE_URL}/teachers/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        
-        if (!teacherResponse) {
-          // Fetch failed, continue to next login type
-          throw new Error('Teacher login failed');
-        }
-        
-        if (teacherResponse.ok) {
-          const teacherData = await teacherResponse.json();
-          const user = {
-            id: teacherData._id,
-            name: teacherData.name,
-            email: teacherData.email,
-            phone: teacherData.phone || '',
-            role: 'teacher' as const,
-            createdAt: teacherData.createdAt,
-            teacherId: teacherData._id,
-          };
-          set({ currentUser: user, isAuthenticated: true });
-          console.log('Teacher login successful:', user);
-          
-          // Note: Teacher attendance is automatically marked by the backend during login
-          // No need for separate frontend API call
-          
-          return { success: true, user };
-        } else if (teacherResponse.status !== 404) {
-          // If it's not a 404, it's a real error (invalid credentials, etc.)
-          const errorData = await teacherResponse.json().catch(() => ({}));
-          return { success: false, error: errorData.message || 'Teacher login failed' };
-        }
-        // 404 is expected - user is not a teacher, continue to next login type
-      } catch (teacherError) {
-        // Suppress error logging for expected 404s
-        if (teacherError && (teacherError as any).status !== 404) {
-          console.log('Teacher login failed, trying team member...');
-        }
-      }
-
-      // Try team member login (sales_team, team_leader)
-      try {
-        const teamResponse = await fetch(`${API_BASE_URL}/team-members/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        
-        if (teamResponse.ok) {
-          const teamData = await teamResponse.json();
-          const user = {
-            id: teamData._id,
-            name: teamData.name,
-            email: teamData.email,
-            phone: teamData.phone || '',
-            role: teamData.role as UserRole,
-            createdAt: teamData.createdAt,
-          };
-          set({ currentUser: user, isAuthenticated: true });
-          console.log('Team member login successful:', user);
-          return { success: true, user };
-        }
-      } catch (teamError) {
-        console.log('Team member login failed');
-      }
-
-      return { success: false, error: 'Invalid credentials' };
+      
+      return { success: true, user };
     } catch (error) {
-      console.error('Backend login error:', error);
+      console.error('Unified login error:', error);
       return { success: false, error: 'Login failed' };
     }
   },
