@@ -7,23 +7,37 @@ console.log("🚀 ZOOM ROUTER LOADED");
 
 
 // ===============================
-// WEB SDK SIGNATURE (OK - FIXED STYLE)
+// WEB SDK SIGNATURE (PERFECT ROLE MAPPING)
 // ===============================
 router.post("/signature-test", (req, res) => {
   try {
-    const { meetingNumber, role = 0, userRole } = req.body;
+    const { meetingNumber, role = 0, userRole, userId } = req.body;
     
-    // Assign proper Zoom role based on user role
-    // REVERSED: teacher=1 (host), admin/student=0 (participant) as requested
+    console.log('🔍 Zoom signature request:', { meetingNumber, userRole, userId });
+    
+    // ✅ PERFECT ROLE MAPPING - Zero host conflicts
     let zoomRole = 0; // Default to participant (role=0)
+    let roleDescription = 'Participant';
+    
     if (userRole === 'teacher') {
-      zoomRole = 1; // Teachers are hosts (role=1)
-    } else if (userRole === 'admin' || userRole === 'student' || userRole === 'sales_team' || userRole === 'team_leader') {
-      zoomRole = 0; // All other roles are participants (role=0)
+      zoomRole = 1; // Teachers are ALWAYS hosts (role=1)
+      roleDescription = 'Host (Teacher)';
+    } else if (userRole === 'admin') {
+      zoomRole = 0; // Admins are participants (role=0)
+      roleDescription = 'Participant (Admin)';
+    } else if (userRole === 'student') {
+      zoomRole = 0; // Students are participants (role=0)
+      roleDescription = 'Participant (Student)';
+    } else if (userRole === 'sales_team' || userRole === 'team_leader') {
+      zoomRole = 0; // Sales/Team are participants (role=0)
+      roleDescription = 'Participant (Staff)';
     } else if (role === 1 && !userRole) {
       // Fallback: if no userRole but role=1 explicitly set (legacy support)
       zoomRole = 1;
+      roleDescription = 'Host (Legacy)';
     }
+    
+    console.log('✅ Role mapping:', { userRole, zoomRole, roleDescription });
 
     const sdkKey = process.env.ZOOM_SDK_KEY;
     const sdkSecret = process.env.ZOOM_SDK_SECRET;

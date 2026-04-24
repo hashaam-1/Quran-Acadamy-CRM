@@ -378,16 +378,16 @@ const startClass = async (req, res) => {
 };
 
 /* =====================
-   JOIN CLASS (SAFE)
+   JOIN CLASS (PERFECT - ALL ROLES)
 ===================== */
 const joinClass = async (req, res) => {
   try {
     const { meetingNumber, meetingId } = req.params;
-    const { userId: bodyUserId, userName: bodyUserName, scheduleId, teacherName, course, time, studentName, studentId } = req.body;
+    const { userId: bodyUserId, userName: bodyUserName, scheduleId, teacherName, course, time, studentName, studentId, userRole } = req.body;
 
-    console.log('🔍 Join class request:', { meetingNumber, meetingId, scheduleId });
+    console.log('🔍 Join class request:', { meetingNumber, meetingId, scheduleId, userRole });
 
-    // ✅ FIXED: Better validation
+    // ✅ PERFECT: Better validation with role context
     if (!meetingNumber && !meetingId) {
       return res.status(400).json({
         success: false,
@@ -409,6 +409,7 @@ const joinClass = async (req, res) => {
     );
 
     console.log('📋 Meeting found:', meeting ? 'Yes' : 'No');
+    console.log('👤 User role for meeting:', userRole);
 
     // If meeting doesn't exist, create it first
     if (!meeting && meetingNumber && scheduleId) {

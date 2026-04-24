@@ -302,6 +302,5 @@ module.exports = {
   requestReschedule,
   handleReschedule,
   getScheduleStats,
-  getSchedulesByStudent,
   cleanupFakeMeetings
 };
