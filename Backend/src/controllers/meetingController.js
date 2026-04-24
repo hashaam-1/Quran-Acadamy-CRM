@@ -109,15 +109,16 @@ const createZoomMeeting = async ({ topic, startTime, duration = 60 }) => {
 
     const meetingRequest = {
       topic,
-      type: 1, // Scheduled meeting
+      type: 2, // Scheduled meeting (more unique than type=1)
       start_time: startTime,
       duration: duration,
       settings: {
-        join_before_host: true,
+        join_before_host: true, // IMPORTANT: Allow participants to join before host
         participant_video: true,
         host_video: true,
         mute_upon_entry: false,
-        waiting_room: false
+        waiting_room: false, // IMPORTANT: No waiting room to prevent conflicts
+        auto_recording: 'none'
       }
     };
 
