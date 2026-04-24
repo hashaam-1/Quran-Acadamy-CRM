@@ -297,7 +297,7 @@ export default function Schedule() {
             courseColors[slot.course as keyof typeof courseColors]
           )}
         >
-          {slot.course}
+          {slot.course || 'General'}
         </Badge>
       </div>
 
@@ -327,8 +327,8 @@ export default function Schedule() {
           ) : (
             <StartClassButton
               scheduleId={slot.id}
-              meetingClassName={slot.className}
-              course={slot.course}
+              meetingClassName={slot.className || `${slot.course || 'Quran'} Class`}
+              course={slot.course || 'General'}
               time={slot.time}
               studentId={slot.studentId?._id}
               studentName={slot.studentName}
