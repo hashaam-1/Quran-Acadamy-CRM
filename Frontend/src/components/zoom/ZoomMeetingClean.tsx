@@ -192,14 +192,49 @@ export default function ZoomMeetingClean() {
         throw new Error('Meeting not found or join failed');
       }
       
-      // Use the password from join response (this is the REAL Zoom password)
-      const meetingPassword = joinData.meeting.password;
+      // COMPREHENSIVE PASSWORD HANDLING
+      let meetingPassword = joinData.meeting.password;
       
-      console.log('Meeting password extracted:', meetingPassword);
-      console.log('Password debug:', {
+      // Validate password and create fallback if needed
+      if (!meetingPassword || meetingPassword === "123456") {
+        console.log('⚠️ Using fallback password, attempting to get real password...');
+        
+        // Try to get meeting details separately to get real password
+        try {
+          const detailsResponse = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/details/${meetingNumber}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            }
+          });
+          
+          if (detailsResponse.ok) {
+            const detailsData = await detailsResponse.json();
+            if (detailsData.success && detailsData.meeting) {
+              const realPassword = detailsData.meeting.zoomPassword || detailsData.meeting.plainPassword;
+              if (realPassword && realPassword !== "123456") {
+                meetingPassword = realPassword;
+                console.log('✅ Retrieved real password from details API:', meetingPassword);
+              }
+            }
+          }
+        } catch (detailsErr) {
+          console.log('⚠️ Could not get details, using join password:', detailsErr.message);
+        }
+      }
+      
+      // Final password validation
+      if (!meetingPassword) {
+        meetingPassword = "123456"; // Ultimate fallback
+        console.log('⚠️ Using ultimate fallback password:', meetingPassword);
+      }
+      
+      console.log('🔍 Final password debug:', {
         joinPassword: joinData.meeting.password,
+        finalPassword: meetingPassword,
         joinSignature: joinData.meeting.signature ? 'present' : 'missing',
-        joinSdkKey: joinData.meeting.sdkKey ? 'present' : 'missing'
+        joinSdkKey: joinData.meeting.sdkKey ? 'present' : 'missing',
+        passwordLength: meetingPassword.length,
+        passwordType: meetingPassword === "123456" ? 'fallback' : 'real'
       });
       
       // Use signature and SDK key from join response
