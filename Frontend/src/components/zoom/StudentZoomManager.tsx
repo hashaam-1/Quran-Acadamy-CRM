@@ -45,7 +45,7 @@ export default function StudentZoomManager({
       // If meeting number exists, join existing meeting
       if (meetingNumber) {
         console.log('StudentZoomManager - Joining existing meeting:', meetingNumber);
-        response = await fetch(`${API_BASE_URL}/meetings/${meetingNumber}/join`, {
+        response = await fetch(`${API_BASE_URL}/meetings/join/${meetingNumber}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
