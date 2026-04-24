@@ -1,7 +1,7 @@
 const Student = require('../models/Student');
 const Teacher = require('../models/Teacher');
 const TeamMember = require('../models/TeamMember');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 // ✅ UNIFIED LOGIN - Single endpoint for all roles
 exports.unifiedLogin = async (req, res) => {
