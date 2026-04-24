@@ -34,6 +34,17 @@ app.get("/api/health", (req, res) => {
 });
 
 /* =========================
+   AUTH TEST ROUTE
+========================= */
+app.get("/api/auth-test", (req, res) => {
+  res.json({
+    success: true,
+    message: "Auth route test working",
+    timestamp: new Date().toISOString()
+  });
+});
+
+/* =========================
    ROUTE LOADER
 ========================= */
 const loadRoute = (routePath, urlPath) => {
