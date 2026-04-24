@@ -382,13 +382,54 @@ const startClass = async (req, res) => {
 const joinClass = async (req, res) => {
   try {
     const { meetingNumber, meetingId } = req.params;
-    const { userId: bodyUserId, userName: bodyUserName } = req.body;
+    const { userId: bodyUserId, userName: bodyUserName, scheduleId, teacherName, course, time, studentName, studentId } = req.body;
 
     // Support both meetingNumber and meetingId
     const identifier = meetingNumber || meetingId;
-    const meeting = await Meeting.findOne(
+    let meeting = await Meeting.findOne(
       meetingNumber ? { meetingNumber } : { _id: meetingId }
     );
+
+    // If meeting doesn't exist, create it first
+    if (!meeting && meetingNumber && scheduleId) {
+      console.log("Meeting not found, creating new meeting for schedule:", scheduleId);
+      
+      try {
+        // Get schedule details
+        const Schedule = require('../models/Schedule');
+        const schedule = await Schedule.findById(scheduleId);
+        
+        if (!schedule) {
+          return res.status(404).json({
+            success: false,
+            message: "Schedule not found",
+          });
+        }
+
+        // Create new meeting
+        meeting = new Meeting({
+          meetingNumber: meetingNumber,
+          scheduleId: scheduleId,
+          teacherId: schedule.teacherId,
+          teacherName: teacherName || schedule.teacherName,
+          course: course || schedule.course,
+          time: time || schedule.time,
+          studentId: studentId || schedule.studentId,
+          studentName: studentName || schedule.studentName,
+          status: 'live',
+          participants: []
+        });
+
+        await meeting.save();
+        console.log("New meeting created successfully:", meeting.meetingNumber);
+      } catch (createError) {
+        console.log("Error creating meeting:", createError.message);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to create meeting",
+        });
+      }
+    }
 
     if (!meeting) {
       return res.status(404).json({
