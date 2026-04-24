@@ -338,7 +338,7 @@ const startClass = async (req, res) => {
           start_time: new Date().toISOString(),
           duration: 60,
           timezone: "Asia/Karachi",
-          password: "123456",
+          password: crypto.randomBytes(3).toString('hex'), // Generate random 6-char password
           settings: {
             host_video: true,
             participant_video: true,
@@ -603,16 +603,27 @@ const joinClass = async (req, res) => {
       role: participantRole,
     });
 
+    // Return the REAL Zoom password from the meeting
+    const realPassword = meeting.zoomPassword || meeting.plainPassword || "123456";
+    
+    console.log('🔍 Password debug:', {
+      zoomPassword: meeting.zoomPassword,
+      plainPassword: meeting.plainPassword,
+      realPassword: realPassword,
+      meetingNumber: meeting.meetingNumber
+    });
+
     res.json({
       success: true,
       message: "Joined class successfully",
       meeting: {
         id: meeting._id,
         meetingNumber: meeting.meetingNumber,
-        password: meeting.password,
-        topic: meeting.topic,
+        password: realPassword, // ✅ Use REAL Zoom password
+        topic: meeting.className || meeting.course || "Quran Class",
         signature,
         participantRole,
+        sdkKey: process.env.ZOOM_SDK_KEY, // ✅ Include SDK key for frontend
       },
     });
   } catch (err) {
