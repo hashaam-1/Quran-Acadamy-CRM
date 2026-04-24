@@ -12,6 +12,8 @@ exports.unifiedLogin = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
     
     console.log('🔐 Unified login attempt:', normalizedEmail);
+    console.log('🔐 Password provided:', password ? 'YES' : 'NO');
+    console.log('🔐 Request body:', JSON.stringify(req.body));
     
     if (!email || !password) {
       return res.status(400).json({
@@ -45,6 +47,15 @@ exports.unifiedLogin = async (req, res) => {
     const student = await Student.findOne({ email: normalizedEmail });
     console.log('🔍 Student found:', !!student);
     if (student) {
+      console.log('🔍 Student details:', {
+        name: student.name,
+        email: student.email,
+        hasPassword: !!student.password,
+        hasPlainPassword: !!student.plainPassword,
+        passwordLength: student.password ? student.password.length : 0,
+        plainPasswordLength: student.plainPassword ? student.plainPassword.length : 0
+      });
+      
       console.log('🔍 Comparing passwords for student:', student.name);
       let isPasswordMatch = false;
       
@@ -54,8 +65,16 @@ exports.unifiedLogin = async (req, res) => {
         console.log('🔍 Bcrypt password match result:', isPasswordMatch);
       } catch (error) {
         console.log('🔍 Bcrypt failed, trying plain text comparison');
+        console.log('🔍 Bcrypt error:', error.message);
         isPasswordMatch = password === student.plainPassword || password === student.password;
         console.log('🔍 Plain text password match result:', isPasswordMatch);
+        console.log('🔍 Password comparison:', {
+          inputPassword: password,
+          plainPassword: student.plainPassword,
+          directPassword: student.password,
+          plainMatch: password === student.plainPassword,
+          directMatch: password === student.password
+        });
       }
       
       if (isPasswordMatch) {
@@ -84,6 +103,15 @@ exports.unifiedLogin = async (req, res) => {
     const teacher = await Teacher.findOne({ email: normalizedEmail });
     console.log('🔍 Teacher found:', !!teacher);
     if (teacher) {
+      console.log('🔍 Teacher details:', {
+        name: teacher.name,
+        email: teacher.email,
+        hasPassword: !!teacher.password,
+        hasPlainPassword: !!teacher.plainPassword,
+        passwordLength: teacher.password ? teacher.password.length : 0,
+        plainPasswordLength: teacher.plainPassword ? teacher.plainPassword.length : 0
+      });
+      
       console.log('🔍 Comparing passwords for teacher:', teacher.name);
       let isPasswordMatch = false;
       
@@ -93,8 +121,16 @@ exports.unifiedLogin = async (req, res) => {
         console.log('🔍 Bcrypt password match result:', isPasswordMatch);
       } catch (error) {
         console.log('🔍 Bcrypt failed, trying plain text comparison');
+        console.log('🔍 Bcrypt error:', error.message);
         isPasswordMatch = password === teacher.plainPassword || password === teacher.password;
         console.log('🔍 Plain text password match result:', isPasswordMatch);
+        console.log('🔍 Password comparison:', {
+          inputPassword: password,
+          plainPassword: teacher.plainPassword,
+          directPassword: teacher.password,
+          plainMatch: password === teacher.plainPassword,
+          directMatch: password === teacher.password
+        });
       }
       
       if (isPasswordMatch) {
@@ -123,6 +159,16 @@ exports.unifiedLogin = async (req, res) => {
     const teamMember = await TeamMember.findOne({ email: normalizedEmail });
     console.log('🔍 Team member found:', !!teamMember);
     if (teamMember) {
+      console.log('🔍 Team member details:', {
+        name: teamMember.name,
+        email: teamMember.email,
+        role: teamMember.role,
+        hasPassword: !!teamMember.password,
+        hasPlainPassword: !!teamMember.plainPassword,
+        passwordLength: teamMember.password ? teamMember.password.length : 0,
+        plainPasswordLength: teamMember.plainPassword ? teamMember.plainPassword.length : 0
+      });
+      
       console.log('🔍 Comparing passwords for team member:', teamMember.name);
       let isPasswordMatch = false;
       
@@ -132,8 +178,16 @@ exports.unifiedLogin = async (req, res) => {
         console.log('🔍 Bcrypt password match result:', isPasswordMatch);
       } catch (error) {
         console.log('🔍 Bcrypt failed, trying plain text comparison');
+        console.log('🔍 Bcrypt error:', error.message);
         isPasswordMatch = password === teamMember.plainPassword || password === teamMember.password;
         console.log('🔍 Plain text password match result:', isPasswordMatch);
+        console.log('🔍 Password comparison:', {
+          inputPassword: password,
+          plainPassword: teamMember.plainPassword,
+          directPassword: teamMember.password,
+          plainMatch: password === teamMember.plainPassword,
+          directMatch: password === teamMember.password
+        });
       }
       
       if (isPasswordMatch) {
