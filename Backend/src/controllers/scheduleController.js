@@ -43,8 +43,10 @@ exports.createSchedule = async (req, res) => {
       return `${timestamp}${randomSuffix}`;
     };
     
+    // Ensure required fields have fallbacks to prevent undefined data
     const scheduleData = {
       ...req.body,
+      className: req.body.className || `${req.body.course || 'Quran'} Class`,
       meetingNumber: generateMeetingNumber() // Assign unique meeting number
     };
     
@@ -203,12 +205,7 @@ exports.getSchedulesByStudent = async (req, res) => {
     const { studentId } = req.params;
     
     const schedules = await Schedule.find({
-      $or: [
-        { studentId: studentId },
-        { 'students._id': studentId },
-        { 'students.id': studentId },
-        { 'students': studentId }
-      ]
+      studentId: studentId
     })
       .populate('studentId', 'name age')
       .populate('teacherId', 'name email')
