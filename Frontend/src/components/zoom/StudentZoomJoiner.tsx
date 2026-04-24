@@ -207,8 +207,8 @@ export default function StudentZoomJoiner({
 
     try {
       // If joining a specific meeting, use meeting endpoint
-      if (meetingId) {
-        const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/${meetingId}/join`, {
+      if (meetingId && meetingId !== "undefined" && meetingId.trim() !== "") {
+        const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${meetingId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

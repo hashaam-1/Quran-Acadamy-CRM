@@ -219,6 +219,12 @@ export default function JoinClassButton({
             throw new Error('No meeting number available');
           }
 
+          // Validate meeting number before joining
+          if (!meetingToJoin || meetingToJoin === "undefined" || meetingToJoin.trim() === "") {
+            toast.error("Meeting not ready yet");
+            return;
+          }
+
           // Join the meeting
           const joinResponse = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${meetingToJoin}`, {
             method: 'POST',

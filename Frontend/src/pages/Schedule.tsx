@@ -319,10 +319,13 @@ export default function Schedule() {
     <div className="absolute inset-0 z-20 bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
       {/* Teacher: Join Class + Edit */}
       {(() => {
-        // ✅ FIXED: Teachers should see button for scheduled classes, even without meetingNumber
+        // ✅ FIXED: Only show Join button if meeting exists and is valid
         const shouldShowJoinButton = 
           slot.status === 'scheduled' &&
-          currentUser?.role === 'teacher';
+          currentUser?.role === 'teacher' &&
+          typeof slot.meetingNumber === 'string' &&
+          slot.meetingNumber.trim() !== '' &&
+          /^\d+$/.test(slot.meetingNumber);
         
         console.log('🔍 Join Class button condition check:', {
           slotStatus: slot.status,
@@ -361,8 +364,12 @@ export default function Schedule() {
         </>
       )}
 
-      {/* Student: Join Class only for scheduled classes */}
-      {currentUser?.role === 'student' && slot.status === 'scheduled' && (
+      {/* Student: Join Class only for scheduled classes with valid meeting */}
+      {currentUser?.role === 'student' && 
+       slot.status === 'scheduled' && 
+       typeof slot.meetingNumber === 'string' && 
+       slot.meetingNumber.trim() !== '' && 
+       /^\d+$/.test(slot.meetingNumber) && (
         <StudentZoomManager
           meetingNumber={slot.meetingNumber}
           scheduleId={slot.id}
