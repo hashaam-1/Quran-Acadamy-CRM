@@ -462,7 +462,7 @@ const joinClass = async (req, res) => {
     // Use provided user info or fallback to req.user
     const userId = bodyUserId || req.user?.id || "guest";
     const userName = bodyUserName || req.user?.name || "Guest";
-    const userRole = req.user?.role || "student";
+    // userRole is already destructured from req.body above
 
     const already = meeting.participants.find(
       (p) => String(p.userId) === String(userId)

@@ -361,11 +361,11 @@ export default function Schedule() {
         </>
       )}
 
-      {/* Student: Join Class only */}
-      {currentUser?.role === 'student' && (
+      {/* Student: Join Class only for scheduled classes */}
+      {currentUser?.role === 'student' && slot.status === 'scheduled' && (
         <StudentZoomManager
           meetingNumber={slot.meetingNumber}
-          scheduleId={slot._id}
+          scheduleId={slot.id}
           className="bg-white text-black hover:bg-gray-100"
           teacherName={slot.teacherName}
           course={slot.course}

@@ -128,7 +128,13 @@ const getSchedulesByDay = async (req, res) => {
       .populate('studentId', 'name')
       .populate('teacherId', 'name')
       .sort({ time: 1 });
-    res.json(schedules);
+    
+    // ✅ FIXED: Return consistent response format
+    res.json({
+      success: true,
+      data: schedules,
+      count: schedules.length
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -145,7 +151,13 @@ const getSchedulesByTeacher = async (req, res) => {
     const schedules = await Schedule.find({ teacherId: req.params.teacherId })
       .populate('studentId', 'name')
       .sort({ day: 1, time: 1 });
-    res.json(schedules);
+    
+    // ✅ FIXED: Return consistent response format
+    res.json({
+      success: true,
+      data: schedules,
+      count: schedules.length
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -252,7 +264,12 @@ const getSchedulesByStudent = async (req, res) => {
       students: s.students
     })));
     
-    res.json(schedules);
+    // ✅ FIXED: Return consistent response format
+    res.json({
+      success: true,
+      data: schedules,
+      count: schedules.length
+    });
   } catch (error) {
     console.error('Error fetching student schedules:', error);
     res.status(500).json({ message: error.message });

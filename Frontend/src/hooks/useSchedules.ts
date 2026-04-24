@@ -47,7 +47,8 @@ export const useSchedules = () => {
         data = await schedulesApi.getAll();
       }
       
-      const schedules = Array.isArray(data) ? data : [];
+      // ✅ FIXED: Extract data field from API response
+      const schedules = Array.isArray(data) ? data : (data?.data || []);
       
       // 🚨 Fix broken ID mapping - transform _id to id
       const formattedSchedules = schedules.map(s => ({
@@ -70,7 +71,8 @@ export const useSchedulesByDay = (day: string) => {
     queryKey: ['schedules', 'day', day],
     queryFn: async () => {
       const data = await schedulesApi.getByDay(day);
-      return Array.isArray(data) ? data : [];
+      // ✅ FIXED: Extract data field from API response
+      return Array.isArray(data) ? data : (data?.data || []);
     },
     enabled: !!day,
   });
@@ -81,7 +83,8 @@ export const useSchedulesByTeacher = (teacherId: string) => {
     queryKey: ['schedules', 'teacher', teacherId],
     queryFn: async () => {
       const data = await schedulesApi.getByTeacher(teacherId);
-      return Array.isArray(data) ? data : [];
+      // ✅ FIXED: Extract data field from API response
+      return Array.isArray(data) ? data : (data?.data || []);
     },
     enabled: !!teacherId,
   });
