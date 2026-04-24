@@ -164,76 +164,56 @@ export default function ZoomMeetingClean() {
         throw new Error('No user session found');
       }
       
-      // First, get meeting details to extract password
-      const meetingDetailsUrl = `https://quran-acadamy-crm-production.up.railway.app/api/meetings/${meetingNumber}`;
-      
-      const meetingResponse = await fetch(meetingDetailsUrl);
-      if (!meetingResponse.ok) {
-        throw new Error('Failed to fetch meeting details');
-      }
-      
-      const meetingData = await meetingResponse.json();
-      console.log('Meeting details fetched:', meetingData);
-      
-      if (!meetingData.success || !meetingData.meeting) {
-        throw new Error('Meeting not found or invalid');
-      }
-      
-      const meeting = meetingData.meeting;
-      // Use the password from API response first, then meeting plainPassword, then fallback
-      const meetingPassword = meetingData.password || meetingData.meeting.plainPassword || meetingData.meeting.zoomPassword || "123456";
-      
-      console.log('Meeting password extracted:', meetingPassword);
-      console.log('Password debug:', {
-        apiPassword: meetingData.password,
-        plainPassword: meetingData.meeting.plainPassword,
-        zoomPassword: meetingData.meeting.zoomPassword,
-        debug: meetingData.debug
-      });
-      
-      // Generate signature - use consistent API URL and add auth
-      const signatureUrl = `${API_BASE_URL}/zoom/signature-test`;
+      // Join the meeting to get signature and password in one call
+      const joinUrl = `https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${meetingNumber}`;
       
       const token = localStorage.getItem('token');
-      const signatureResponse = await fetch(signatureUrl, {
+      const joinResponse = await fetch(joinUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          meetingNumber: meetingNumber,
-          role: role,
-          userRole: activeUser?.role,
-          userName: activeUser?.name,
           userId: activeUser?.id,
-          debug: meetingData.debug
-        }),
+          userName: activeUser?.name,
+          userRole: activeUser?.role
+        })
       });
-
-      if (signatureResponse.ok) {
-        const signatureData = await signatureResponse.json();
-        console.log('Backend signature generated successfully');
-        
-        if (!signatureData.signature) {
-          throw new Error('No signature returned from backend');
-        }
-        
-        const config: MeetingConfig = {
-          meetingNumber: meetingNumber,
-          userName: activeUser?.name || 'User',
-          role: role,
-          signature: signatureData.signature,
-          sdkKey: process.env.VITE_ZOOM_SDK_KEY || 'YNdDIn95StmFL25wVBoGQ',
-          password: meetingPassword
-        };
-        
-        setMeetingConfig(config);
-        console.log('Zoom meeting config prepared:', config);
-      } else {
-        const errorData = await signatureResponse.json();
-        throw new Error(`Signature generation failed: ${errorData.error || signatureResponse.statusText}`);
+      
+      if (!joinResponse.ok) {
+        throw new Error('Failed to join meeting');
       }
+      
+      const joinData = await joinResponse.json();
+      console.log('Join response received:', joinData);
+      
+      if (!joinData.success || !joinData.meeting) {
+        throw new Error('Meeting not found or join failed');
+      }
+      
+      // Use the password from join response (this is the REAL Zoom password)
+      const meetingPassword = joinData.meeting.password;
+      
+      console.log('Meeting password extracted:', meetingPassword);
+      console.log('Password debug:', {
+        joinPassword: joinData.meeting.password,
+        joinSignature: joinData.meeting.signature ? 'present' : 'missing',
+        joinSdkKey: joinData.meeting.sdkKey ? 'present' : 'missing'
+      });
+      
+      // Use signature and SDK key from join response
+      const config: MeetingConfig = {
+        meetingNumber: meetingNumber,
+        userName: activeUser?.name || 'User',
+        role: role,
+        signature: joinData.meeting.signature,
+        sdkKey: joinData.meeting.sdkKey || process.env.VITE_ZOOM_SDK_KEY || 'YNdDIn95StmFL25wVBoGQ',
+        password: meetingPassword
+      };
+      
+      setMeetingConfig(config);
+      console.log('Zoom meeting config prepared:', config);
     } catch (err) {
       console.error('Error generating signature:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate meeting signature. Please try again.');
