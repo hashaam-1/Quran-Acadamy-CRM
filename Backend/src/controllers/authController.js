@@ -46,9 +46,18 @@ exports.unifiedLogin = async (req, res) => {
     console.log('🔍 Student found:', !!student);
     if (student) {
       console.log('🔍 Comparing passwords for student:', student.name);
-      // ✅ FIXED: Use bcrypt for password comparison
-      const isPasswordMatch = await bcrypt.compare(password, student.password);
-      console.log('🔍 Password match result:', isPasswordMatch);
+      let isPasswordMatch = false;
+      
+      // ✅ FIXED: Try bcrypt first, then plain text fallback
+      try {
+        isPasswordMatch = await bcrypt.compare(password, student.password);
+        console.log('🔍 Bcrypt password match result:', isPasswordMatch);
+      } catch (error) {
+        console.log('🔍 Bcrypt failed, trying plain text comparison');
+        isPasswordMatch = password === student.plainPassword || password === student.password;
+        console.log('🔍 Plain text password match result:', isPasswordMatch);
+      }
+      
       if (isPasswordMatch) {
         const user = {
           _id: student._id,
@@ -76,9 +85,18 @@ exports.unifiedLogin = async (req, res) => {
     console.log('🔍 Teacher found:', !!teacher);
     if (teacher) {
       console.log('🔍 Comparing passwords for teacher:', teacher.name);
-      // ✅ FIXED: Use bcrypt for password comparison
-      const isPasswordMatch = await bcrypt.compare(password, teacher.password);
-      console.log('🔍 Password match result:', isPasswordMatch);
+      let isPasswordMatch = false;
+      
+      // ✅ FIXED: Try bcrypt first, then plain text fallback
+      try {
+        isPasswordMatch = await bcrypt.compare(password, teacher.password);
+        console.log('🔍 Bcrypt password match result:', isPasswordMatch);
+      } catch (error) {
+        console.log('🔍 Bcrypt failed, trying plain text comparison');
+        isPasswordMatch = password === teacher.plainPassword || password === teacher.password;
+        console.log('🔍 Plain text password match result:', isPasswordMatch);
+      }
+      
       if (isPasswordMatch) {
         const user = {
           _id: teacher._id,
@@ -106,9 +124,18 @@ exports.unifiedLogin = async (req, res) => {
     console.log('🔍 Team member found:', !!teamMember);
     if (teamMember) {
       console.log('🔍 Comparing passwords for team member:', teamMember.name);
-      // ✅ FIXED: Use bcrypt for password comparison
-      const isPasswordMatch = await bcrypt.compare(password, teamMember.password);
-      console.log('🔍 Password match result:', isPasswordMatch);
+      let isPasswordMatch = false;
+      
+      // ✅ FIXED: Try bcrypt first, then plain text fallback
+      try {
+        isPasswordMatch = await bcrypt.compare(password, teamMember.password);
+        console.log('🔍 Bcrypt password match result:', isPasswordMatch);
+      } catch (error) {
+        console.log('🔍 Bcrypt failed, trying plain text comparison');
+        isPasswordMatch = password === teamMember.plainPassword || password === teamMember.password;
+        console.log('🔍 Plain text password match result:', isPasswordMatch);
+      }
+      
       if (isPasswordMatch) {
         const user = {
           _id: teamMember._id,
