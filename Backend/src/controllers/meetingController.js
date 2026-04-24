@@ -435,33 +435,30 @@ const joinClass = async (req, res) => {
     console.log('📋 Meeting found:', meeting ? 'Yes' : 'No');
     console.log('👤 User role for meeting:', userRole);
 
-    // If meeting doesn't exist, create it first
-    if (!meeting && meetingNumber && scheduleId) {
-      console.log("Meeting not found, creating new meeting for schedule:", scheduleId);
+    // If meeting doesn't exist, create fallback meeting
+    if (!meeting && meetingNumber) {
+      console.log("⚠️ Meeting not found, creating fallback meeting...");
       
       try {
-        // Get schedule details
-        const Schedule = require('../models/Schedule');
-        const schedule = await Schedule.findById(scheduleId);
+        let schedule = null;
         
-        if (!schedule) {
-          return res.status(404).json({
-            success: false,
-            message: "Schedule not found",
-          });
+        // Try to get schedule details if scheduleId is provided
+        if (scheduleId) {
+          const Schedule = require('../models/Schedule');
+          schedule = await Schedule.findById(scheduleId);
         }
 
-        // Create new meeting
+        // Create fallback meeting with available data
         meeting = new Meeting({
           meetingNumber: String(meetingNumber),
-          scheduleId: scheduleId,
-          teacherId: schedule.teacherId,
-          teacherName: teacherName || schedule.teacherName,
-          course: course || schedule.course,
-          time: time || schedule.time,
-          studentId: studentId || schedule.studentId,
-          studentName: studentName || schedule.studentName,
-          status: 'live',
+          scheduleId: scheduleId || null,
+          teacherId: schedule?.teacherId || "unknown",
+          teacherName: teacherName || schedule?.teacherName || "Unknown Teacher",
+          course: course || schedule?.course || "General",
+          time: time || schedule?.time || "",
+          studentId: studentId || schedule?.studentId || null,
+          studentName: studentName || schedule?.studentName || "Student",
+          status: "live",
           participants: []
         });
 
