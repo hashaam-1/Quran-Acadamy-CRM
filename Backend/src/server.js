@@ -53,7 +53,16 @@ loadRoute("authRoutes.js", "/api/auth"); // ✅ FIXED: Unified auth endpoint
 loadRoute("leadRoutes.js", "/api/leads");
 loadRoute("studentRoutes.js", "/api/students");
 loadRoute("teacherRoutes.js", "/api/teachers");
-loadRoute("scheduleRoutes.js", "/api/schedules");
+
+// ✅ CRITICAL FIX: Load schedules route explicitly to ensure it works
+try {
+  const scheduleRoutes = require("./routes/scheduleRoutes.js");
+  app.use("/api/schedules", scheduleRoutes);
+  console.log("✅ EXPLICITLY Loaded: /api/schedules");
+} catch (err) {
+  console.error("❌ FAILED to load schedules route:", err.message);
+}
+
 loadRoute("invoiceRoutes.js", "/api/invoices");
 loadRoute("progressRoutes.js", "/api/progress");
 loadRoute("messageRoutes.js", "/api/messages");
