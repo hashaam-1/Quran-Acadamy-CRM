@@ -244,3 +244,50 @@ exports.getSchedulesByStudent = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Clean up fake meeting numbers (one-time cleanup)
+exports.cleanupFakeMeetings = async (req, res) => {
+  try {
+    console.log('🧹 Starting cleanup of fake meeting numbers...');
+    
+    // Remove fake meetingNumbers and related fields from all schedules
+    const result = await Schedule.updateMany(
+      { meetingNumber: { $regex: /^[a-zA-Z]/ } }, // Find schedules with non-numeric meetingNumbers
+      { 
+        $unset: { 
+          meetingNumber: "", 
+          joinUrl: "", 
+          startUrl: "", 
+          zoomMeetingId: "" 
+        }
+      }
+    );
+    
+    console.log(`✅ Cleaned up ${result.modifiedCount} schedules with fake meeting numbers`);
+    
+    res.json({
+      success: true,
+      message: `Cleaned up ${result.modifiedCount} schedules with fake meeting numbers`,
+      cleaned: result.modifiedCount
+    });
+  } catch (error) {
+    console.error('❌ Cleanup error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  getSchedules,
+  getScheduleById,
+  createSchedule,
+  updateSchedule,
+  deleteSchedule,
+  getSchedulesByDay,
+  getSchedulesByTeacher,
+  getSchedulesByStudent,
+  requestReschedule,
+  handleReschedule,
+  getScheduleStats,
+  getSchedulesByStudent,
+  cleanupFakeMeetings
+};
