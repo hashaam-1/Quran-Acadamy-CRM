@@ -1,5 +1,6 @@
 const Meeting = require("../models/Meeting");
 const Schedule = require("../models/Schedule");
+const crypto = require("crypto");
 
 let axios = null;
 try {
@@ -9,13 +10,93 @@ try {
 }
 
 /* =====================
-   GENERATE UNIQUE MEETING ID
+   GENERATE ZOOM SIGNATURE (CRITICAL - WAS MISSING)
+===================== */
+const generateZoomSignature = async ({ meetingNumber, role = 0 }) => {
+  try {
+    console.log('🔍 Generating Zoom signature:', { meetingNumber, role });
+    
+    // Check environment variables
+    const sdkKey = process.env.ZOOM_SDK_KEY;
+    const sdkSecret = process.env.ZOOM_SDK_SECRET;
+    
+    console.log('🔍 Zoom ENV check:', {
+      hasSdkKey: !!sdkKey,
+      hasSdkSecret: !!sdkSecret,
+      sdkKeyPrefix: sdkKey ? sdkKey.substring(0, 10) + "..." : "undefined"
+    });
+    
+    if (!sdkKey || !sdkSecret) {
+      console.error('❌ Missing Zoom SDK credentials');
+      throw new Error('Missing Zoom SDK credentials');
+    }
+    
+    if (!meetingNumber) {
+      console.error('❌ Missing meeting number');
+      throw new Error('Meeting number is required');
+    }
+    
+    // Validate meeting number format
+    if (!/^\d+$/.test(meetingNumber)) {
+      console.error('❌ Invalid meeting number format:', meetingNumber);
+      throw new Error('Invalid meeting number format - must be numeric');
+    }
+    
+    // Generate JWT signature
+    const iat = Math.floor(Date.now() / 1000) - 30; // Issue 30 seconds ago
+    const exp = iat + 60 * 60 * 2; // Expire in 2 hours
+    
+    const header = Buffer.from(
+      JSON.stringify({ alg: "HS256", typ: "JWT" })
+    ).toString("base64url");
+    
+    const payload = Buffer.from(
+      JSON.stringify({
+        sdkKey,
+        mn: meetingNumber,
+        role: role,
+        iat,
+        exp,
+        appKey: sdkKey,
+        tokenExp: exp,
+        video_webrtc_mode: 1, // Enable WebRTC mode
+      })
+    ).toString("base64url");
+    
+    const msg = `${header}.${payload}`;
+    
+    const hash = crypto
+      .createHmac("sha256", sdkSecret)
+      .update(msg)
+      .digest("base64url");
+    
+    const signature = `${msg}.${hash}`;
+    
+    console.log('✅ Zoom signature generated successfully:', {
+      meetingNumber,
+      role,
+      signatureLength: signature.length,
+      signaturePreview: signature.substring(0, 50) + "..."
+    });
+    
+    return signature;
+    
+  } catch (error) {
+    console.error('❌ Error generating Zoom signature:', error.message);
+    throw error;
+  }
+};
+
+/* =====================
+   GENERATE UNIQUE MEETING ID (FIXED - NUMERIC ONLY)
 ===================== */
 const generateMeetingNumber = () => {
-  // Generate truly unique meeting number using timestamp + random suffix
+  // Generate VALID numeric meeting number (9-11 digits like real Zoom)
   const timestamp = Date.now().toString();
-  const randomSuffix = Math.random().toString(36).substring(2, 8);
-  return `${timestamp}${randomSuffix}`;
+  const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  // Take last 9-11 digits to ensure valid Zoom format
+  const fullNumber = timestamp + randomSuffix;
+  return fullNumber.slice(-11); // Return last 11 digits
 };
 
 /* =====================
@@ -438,68 +519,25 @@ const joinClass = async (req, res) => {
     console.log('📋 Meeting found:', meeting ? 'Yes' : 'No');
     console.log('👤 User role for meeting:', userRole);
 
-    // If meeting doesn't exist, create fallback meeting
-    if (!meeting && meetingNumber) {
-      console.log("⚠️ Meeting not found, creating fallback meeting...");
-      
-      try {
-        let schedule = null;
-        
-        // Try to get schedule details if scheduleId is provided
-        if (scheduleId) {
-          const Schedule = require('../models/Schedule');
-          schedule = await Schedule.findById(scheduleId);
-        }
-
-        // Create fallback meeting with available data
-        console.log('🔍 DEBUG: Creating fallback meeting with data:', {
-          meetingNumber: String(meetingNumber),
-          scheduleId: scheduleId || null,
-          teacherId: schedule?.teacherId || "unknown",
-          teacherName: teacherName || schedule?.teacherName || "Unknown Teacher",
-          course: course || schedule?.course || "General",
-          time: time || schedule?.time || "",
-          studentId: studentId || schedule?.studentId || null,
-          studentName: studentName || schedule?.studentName || "Student",
-          status: "live",
-          participants: []
-        });
-
-        meeting = new Meeting({
-          meetingNumber: String(meetingNumber),
-          zoomMeetingId: String(meetingNumber), // ✅ REQUIRED: Add missing field
-          className: course || schedule?.course || "General Class", // ✅ REQUIRED: Add missing field
-          scheduleId: scheduleId || null,
-          teacherId: schedule?.teacherId || "unknown",
-          teacherName: teacherName || schedule?.teacherName || "Unknown Teacher",
-          course: course || schedule?.course || "General",
-          time: time || schedule?.time || "",
-          studentId: studentId || schedule?.studentId || null,
-          studentName: studentName || schedule?.studentName || "Student",
-          status: "live",
-          participants: []
-        });
-
-        await meeting.save();
-        console.log("✅ Fallback meeting created successfully:", meeting.meetingNumber);
-      } catch (createError) {
-        console.log("❌ Meeting creation error:", createError.message);
-        console.log("❌ Full error details:", createError);
-        return res.status(500).json({
-          success: false,
-          message: "Failed to create meeting",
-          error: createError.message
-        });
-      }
-    }
-
+    // If meeting doesn't exist, return error instead of creating meeting
     if (!meeting) {
+      console.log("❌ Meeting not found - cannot join non-existent meeting");
       return res.status(404).json({
         success: false,
-        message: "Meeting not found",
+        message: "Meeting not found. Please create the meeting first or check the meeting number.",
+        debug: {
+          meetingNumber,
+          meetingNumberType: typeof meetingNumber,
+          availableMeetings: allMeetings.map(m => ({
+            meetingNumber: m.meetingNumber,
+            status: m.status,
+            _id: m._id
+          }))
+        }
       });
     }
 
+    
     // Use provided user info or fallback to req.user
     const userId = bodyUserId || req.user?.id || "guest";
     const userName = bodyUserName || req.user?.name || "Guest";
@@ -510,9 +548,37 @@ const joinClass = async (req, res) => {
     );
 
     // Set role based on user type - only teachers can be hosts
-    // Check if there's already a host in the meeting
-    const existingHost = meeting.participants.find(p => p.role === 1);
-    const participantRole = (userRole === 'teacher' && !existingHost) ? 1 : 0;
+    // PERFECT HOST CONFLICT RESOLUTION
+    let participantRole = 0; // Default to participant
+    let roleDescription = 'Participant';
+    
+    if (userRole === 'teacher') {
+      // Check if there's already a host in the meeting
+      const existingHost = meeting.participants.find(p => p.role === 1);
+      
+      if (!existingHost) {
+        // No host exists - this teacher becomes the host
+        participantRole = 1;
+        roleDescription = 'Host (Teacher)';
+        console.log(`👑 ${userName} promoted to host (first teacher)`);
+      } else {
+        // Host already exists - this teacher remains a participant
+        participantRole = 0;
+        roleDescription = 'Participant (Teacher)';
+        console.log(`👤 ${userName} remains participant (host exists: ${existingHost.userName})`);
+      }
+    } else if (userRole === 'admin') {
+      participantRole = 0; // Admins are always participants
+      roleDescription = 'Participant (Admin)';
+    } else if (userRole === 'student') {
+      participantRole = 0; // Students are always participants
+      roleDescription = 'Participant (Student)';
+    } else {
+      participantRole = 0; // Default to participant for other roles
+      roleDescription = 'Participant (Other)';
+    }
+    
+    console.log(`🔍 Role assignment: ${userName} -> ${roleDescription} (${participantRole})`);
 
     if (!already) {
       meeting.participants.push({
@@ -521,11 +587,13 @@ const joinClass = async (req, res) => {
         role: participantRole,
         joinedAt: new Date(),
       });
+      console.log(`✅ Added ${userName} to meeting as ${roleDescription}`);
     } else {
-      // Update existing participant role if needed (demote if there's already a host)
-      if (existingHost && existingHost.userId !== userId && already.role === 1) {
-        already.role = 0; // Demote to participant
-        console.log(`👤 Demoted ${userName} from host to participant (host conflict)`);
+      // Update existing participant if role needs to change
+      if (already.role !== participantRole) {
+        const oldRole = already.role === 1 ? 'Host' : 'Participant';
+        console.log(`� Updated ${userName} role: ${oldRole} -> ${roleDescription}`);
+        already.role = participantRole;
       }
     }
     await meeting.save();
@@ -821,4 +889,5 @@ module.exports = {
   createScheduledMeeting,
   deleteMeeting,
   testZoomCredentials,
+  generateZoomSignature, // ✅ CRITICAL: Add missing function
 };
