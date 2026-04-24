@@ -1,7 +1,10 @@
 const Schedule = require('../models/Schedule.js');
 
+console.log('🔍 DEBUG: scheduleController.js loaded successfully');
+
 // Get all schedules
 exports.getSchedules = async (req, res) => {
+  console.log('🔍 DEBUG: getSchedules function called');
   try {
     console.log('🔍 Fetching all schedules...');
     

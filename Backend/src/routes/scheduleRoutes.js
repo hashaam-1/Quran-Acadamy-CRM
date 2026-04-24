@@ -1,4 +1,7 @@
 const express = require('express');
+
+console.log('🔍 DEBUG: scheduleRoutes.js loading...');
+
 const {
   getSchedules,
   getScheduleById,
@@ -13,6 +16,12 @@ const {
   getScheduleStats,
   cleanupFakeMeetings
 } = require('../controllers/scheduleController.js');
+
+console.log('🔍 DEBUG: scheduleController functions imported:', {
+  getSchedules: typeof getSchedules,
+  getScheduleById: typeof getScheduleById,
+  createSchedule: typeof createSchedule
+});
 
 const router = express.Router();
 
