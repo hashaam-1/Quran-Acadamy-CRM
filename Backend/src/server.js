@@ -49,6 +49,7 @@ const loadRoute = (routePath, urlPath) => {
 /* =========================
    ROUTES
 ========================= */
+loadRoute("authRoutes.js", "/api/auth"); // ✅ FIXED: Unified auth endpoint
 loadRoute("leadRoutes.js", "/api/leads");
 loadRoute("studentRoutes.js", "/api/students");
 loadRoute("teacherRoutes.js", "/api/teachers");

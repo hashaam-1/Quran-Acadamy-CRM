@@ -3,6 +3,8 @@ const Schedule = require('../models/Schedule.js');
 // Get all schedules
 exports.getSchedules = async (req, res) => {
   try {
+    console.log('🔍 Fetching all schedules...');
+    
     // Prevent caching to ensure fresh data
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.set('Pragma', 'no-cache');
@@ -12,9 +14,21 @@ exports.getSchedules = async (req, res) => {
       .populate('studentId', 'name age')
       .populate('teacherId', 'name email')
       .sort({ day: 1, time: 1 });
-    res.json(schedules);
+    
+    console.log('✅ Found schedules:', schedules.length);
+    
+    // ✅ FIXED: Return consistent response format
+    res.json({
+      success: true,
+      data: schedules,
+      count: schedules.length
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('❌ Error fetching schedules:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 };
 

@@ -385,8 +385,15 @@ const joinClass = async (req, res) => {
     const { meetingNumber, meetingId } = req.params;
     const { userId: bodyUserId, userName: bodyUserName, scheduleId, teacherName, course, time, studentName, studentId } = req.body;
 
-    // Support both meetingNumber and meetingId
-    const identifier = meetingNumber || meetingId;
+    console.log('🔍 Join class request:', { meetingNumber, meetingId, scheduleId });
+
+    // ✅ FIXED: Better validation
+    if (!meetingNumber && !meetingId) {
+      return res.status(400).json({
+        success: false,
+        message: "Meeting number or ID is required"
+      });
+    }
     
     // 🛡️ Validate meeting ID format - must be numeric (real Zoom ID)
     if (meetingNumber && !/^\d+$/.test(meetingNumber)) {
@@ -400,6 +407,8 @@ const joinClass = async (req, res) => {
     let meeting = await Meeting.findOne(
       meetingNumber ? { meetingNumber } : { _id: meetingId }
     );
+
+    console.log('📋 Meeting found:', meeting ? 'Yes' : 'No');
 
     // If meeting doesn't exist, create it first
     if (!meeting && meetingNumber && scheduleId) {
