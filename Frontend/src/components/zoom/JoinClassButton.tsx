@@ -100,6 +100,12 @@ export default function JoinClassButton({
         body: JSON.stringify({
           userId: currentUser.id,
           userName: currentUser.name,
+          scheduleId: scheduleId,
+          teacherName: teacherName,
+          course: course,
+          time: time,
+          studentName: studentName,
+          studentId: studentId
         })
       });
 
