@@ -1,6 +1,6 @@
 const express = require('express');
 
-console.log('🔍 DEBUG: scheduleRoutes.js loading...');
+console.log('� SCHEDULE ROUTES LOADED - This should appear in logs');
 
 const {
   getSchedules,
