@@ -408,6 +408,9 @@ const startClass = async (req, res) => {
       const userRole = req.user?.role || 'student';
       const creatorRole = userRole === 'teacher' ? 1 : 0; // Only teachers are hosts
       
+      // ENSURE REAL PASSWORD IS STORED
+      const actualPassword = zoom.password || crypto.randomBytes(3).toString('hex');
+      
       meeting = await Meeting.create({
         className,
         course,
@@ -417,8 +420,8 @@ const startClass = async (req, res) => {
         meetingNumber: String(zoom.id), // Use real Zoom meeting ID as string
         status: "live",
         zoomMeetingId: String(zoom.id), // Use real Zoom meeting ID as string
-        zoomPassword: zoom.password || "123456",
-        plainPassword: zoom.password || "123456",
+        zoomPassword: actualPassword, // ✅ Store actual password
+        plainPassword: actualPassword, // ✅ Store actual password
         zoomJoinUrl: zoom.join_url,
         zoomStartUrl: zoom.start_url,
         participants: [
@@ -603,14 +606,59 @@ const joinClass = async (req, res) => {
       role: participantRole,
     });
 
-    // Return the REAL Zoom password from the meeting
-    const realPassword = meeting.zoomPassword || meeting.plainPassword || "123456";
+    // COMPREHENSIVE PASSWORD RETRIEVAL SYSTEM
+    let realPassword = "123456"; // Ultimate fallback
     
-    console.log('🔍 Password debug:', {
+    // Priority 1: Use zoomPassword from database (stored from Zoom API)
+    if (meeting.zoomPassword && meeting.zoomPassword !== "123456") {
+      realPassword = meeting.zoomPassword;
+      console.log('✅ Using zoomPassword from database:', realPassword);
+    }
+    // Priority 2: Use plainPassword from database (stored from Zoom API)
+    else if (meeting.plainPassword && meeting.plainPassword !== "123456") {
+      realPassword = meeting.plainPassword;
+      console.log('✅ Using plainPassword from database:', realPassword);
+    }
+    // Priority 3: Try to fetch from Zoom API if meetingNumber is valid
+    else if (meeting.meetingNumber && /^\d+$/.test(meeting.meetingNumber)) {
+      try {
+        console.log('🔄 Fetching password from Zoom API for meeting:', meeting.meetingNumber);
+        const accessToken = await getZoomAccessToken();
+        if (accessToken) {
+          const zoomResponse = await axios.get(
+            `https://api.zoom.us/v2/meetings/${meeting.meetingNumber}`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json"
+              }
+            }
+          );
+          
+          if (zoomResponse.data && zoomResponse.data.password) {
+            realPassword = zoomResponse.data.password;
+            console.log('✅ Retrieved password from Zoom API:', realPassword);
+            
+            // Update database with real password
+            meeting.zoomPassword = realPassword;
+            meeting.plainPassword = realPassword;
+            await meeting.save();
+            console.log('💾 Updated database with real password');
+          }
+        }
+      } catch (zoomErr) {
+        console.log('⚠️ Could not fetch from Zoom API, using fallback:', zoomErr.message);
+      }
+    }
+    
+    console.log('🔍 Final password debug:', {
       zoomPassword: meeting.zoomPassword,
       plainPassword: meeting.plainPassword,
       realPassword: realPassword,
-      meetingNumber: meeting.meetingNumber
+      meetingNumber: meeting.meetingNumber,
+      passwordSource: meeting.zoomPassword && meeting.zoomPassword !== "123456" ? 'database_zoomPassword' : 
+                    meeting.plainPassword && meeting.plainPassword !== "123456" ? 'database_plainPassword' : 
+                    'fallback_or_api'
     });
 
     res.json({

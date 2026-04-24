@@ -42,6 +42,7 @@ router.get("/student/meetings", getStudentMeetings);
 router.put("/end-class/:meetingNumber", endClass);
 router.get("/test-zoom", testZoomCredentials);
 router.get("/:meetingNumber", getMeetingDetails);
+router.get("/details/:meetingNumber", getMeetingDetails); // ✅ Add details route for frontend
 router.post("/schedule/:scheduleId/create-meeting", createScheduledMeeting);
 router.delete("/:meetingNumber", deleteMeeting);
 
