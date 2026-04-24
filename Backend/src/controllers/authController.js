@@ -1,13 +1,17 @@
 const Student = require('../models/Student');
 const Teacher = require('../models/Teacher');
 const TeamMember = require('../models/TeamMember');
+const bcrypt = require('bcrypt');
 
 // ✅ UNIFIED LOGIN - Single endpoint for all roles
 exports.unifiedLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    console.log('🔐 Unified login attempt:', email);
+    // ✅ FIXED: Normalize email to lowercase and trim
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    console.log('🔐 Unified login attempt:', normalizedEmail);
     
     if (!email || !password) {
       return res.status(400).json({
@@ -17,7 +21,7 @@ exports.unifiedLogin = async (req, res) => {
     }
     
     // ✅ FIXED: Try admin first (special case)
-    if (email.toLowerCase() === 'hashaamamz1@gmail.com' && password === 'hashaam@123') {
+    if (normalizedEmail === 'hashaamamz1@gmail.com' && password === 'hashaam@123') {
       const adminUser = {
         _id: '1',
         id: '1',
@@ -36,9 +40,16 @@ exports.unifiedLogin = async (req, res) => {
       });
     }
     
-    // ✅ FIXED: Check student role
-    const student = await Student.findOne({ email });
-    if (student && student.password === password) {
+    // ✅ FIXED: Check student role with normalized email
+    console.log('🔍 Looking for student with email:', normalizedEmail);
+    const student = await Student.findOne({ email: normalizedEmail });
+    console.log('🔍 Student found:', !!student);
+    if (student) {
+      console.log('🔍 Comparing passwords for student:', student.name);
+      // ✅ FIXED: Use bcrypt for password comparison
+      const isPasswordMatch = await bcrypt.compare(password, student.password);
+      console.log('🔍 Password match result:', isPasswordMatch);
+      if (isPasswordMatch) {
       const user = {
         _id: student._id,
         id: student._id,
@@ -58,31 +69,46 @@ exports.unifiedLogin = async (req, res) => {
       });
     }
     
-    // ✅ FIXED: Check teacher role
-    const teacher = await Teacher.findOne({ email });
-    if (teacher && teacher.password === password) {
-      const user = {
-        _id: teacher._id,
-        id: teacher._id,
-        name: teacher.name,
-        email: teacher.email,
-        phone: teacher.phone || '',
-        role: 'teacher',
-        createdAt: teacher.createdAt,
-        teacherId: teacher._id
-      };
-      
-      console.log('✅ Teacher login successful');
-      return res.json({
-        success: true,
-        user: user,
-        message: 'Teacher login successful'
-      });
+    // ✅ FIXED: Check teacher role with normalized email
+    console.log('🔍 Looking for teacher with email:', normalizedEmail);
+    const teacher = await Teacher.findOne({ email: normalizedEmail });
+    console.log('🔍 Teacher found:', !!teacher);
+    if (teacher) {
+      console.log('🔍 Comparing passwords for teacher:', teacher.name);
+      // ✅ FIXED: Use bcrypt for password comparison
+      const isPasswordMatch = await bcrypt.compare(password, teacher.password);
+      console.log('🔍 Password match result:', isPasswordMatch);
+      if (isPasswordMatch) {
+        const user = {
+          _id: teacher._id,
+          id: teacher._id,
+          name: teacher.name,
+          email: teacher.email,
+          phone: teacher.phone || '',
+          role: 'teacher',
+          createdAt: teacher.createdAt,
+          teacherId: teacher._id
+        };
+        
+        console.log('✅ Teacher login successful');
+        return res.json({
+          success: true,
+          user: user,
+          message: 'Teacher login successful'
+        });
+      }
     }
     
-    // ✅ FIXED: Check team member role
-    const teamMember = await TeamMember.findOne({ email });
-    if (teamMember && teamMember.password === password) {
+    // ✅ FIXED: Check team member role with normalized email
+    console.log('🔍 Looking for team member with email:', normalizedEmail);
+    const teamMember = await TeamMember.findOne({ email: normalizedEmail });
+    console.log('🔍 Team member found:', !!teamMember);
+    if (teamMember) {
+      console.log('🔍 Comparing passwords for team member:', teamMember.name);
+      // ✅ FIXED: Use bcrypt for password comparison
+      const isPasswordMatch = await bcrypt.compare(password, teamMember.password);
+      console.log('🔍 Password match result:', isPasswordMatch);
+      if (isPasswordMatch) {
       const user = {
         _id: teamMember._id,
         id: teamMember._id,

@@ -151,7 +151,10 @@ export const useAuthStore = create<AuthStore>()(
 
   loginWithBackend: async (email, password) => {
     try {
-      console.log('🔐 Attempting unified login for:', email);
+      // ✅ FIXED: Normalize email to lowercase and trim before sending
+      const normalizedEmail = email.toLowerCase().trim();
+      
+      console.log('🔐 Attempting unified login for:', normalizedEmail);
       
       // ✅ FIXED: Clear any existing auth state to prevent role overwrite
       const { currentUser } = get();
@@ -160,11 +163,11 @@ export const useAuthStore = create<AuthStore>()(
         set({ currentUser: null, isAuthenticated: false });
       }
       
-      // ✅ FIXED: Single unified login endpoint instead of multi-role fallback
+      // ✅ FIXED: Single unified login endpoint with normalized email
       const response = await fetch(`${API_BASE_URL}/auth/unified-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email: normalizedEmail, password })
       });
 
       if (!response.ok) {
