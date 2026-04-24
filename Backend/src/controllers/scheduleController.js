@@ -1,10 +1,7 @@
 const Schedule = require('../models/Schedule.js');
 
-console.log('🔍 DEBUG: scheduleController.js loaded successfully');
-
 // Get all schedules
-exports.getSchedules = async (req, res) => {
-  console.log('🔍 DEBUG: getSchedules function called');
+const getSchedules = async (req, res) => {
   try {
     console.log('🔍 Fetching all schedules...');
     
@@ -36,7 +33,7 @@ exports.getSchedules = async (req, res) => {
 };
 
 // Get single schedule
-exports.getScheduleById = async (req, res) => {
+const getScheduleById = async (req, res) => {
   try {
     const schedule = await Schedule.findById(req.params.id)
       .populate('studentId')
@@ -51,7 +48,7 @@ exports.getScheduleById = async (req, res) => {
 };
 
 // Create schedule
-exports.createSchedule = async (req, res) => {
+const createSchedule = async (req, res) => {
   try {
     const { createZoomMeeting } = require('./meetingController');
     
@@ -95,7 +92,7 @@ exports.createSchedule = async (req, res) => {
 };
 
 // Update schedule
-exports.updateSchedule = async (req, res) => {
+const updateSchedule = async (req, res) => {
   try {
     const schedule = await Schedule.findByIdAndUpdate(
       req.params.id,
@@ -112,7 +109,7 @@ exports.updateSchedule = async (req, res) => {
 };
 
 // Delete schedule
-exports.deleteSchedule = async (req, res) => {
+const deleteSchedule = async (req, res) => {
   try {
     const schedule = await Schedule.findByIdAndDelete(req.params.id);
     if (!schedule) {
@@ -125,7 +122,7 @@ exports.deleteSchedule = async (req, res) => {
 };
 
 // Get schedules by day
-exports.getSchedulesByDay = async (req, res) => {
+const getSchedulesByDay = async (req, res) => {
   try {
     const schedules = await Schedule.find({ day: req.params.day })
       .populate('studentId', 'name')
@@ -138,7 +135,7 @@ exports.getSchedulesByDay = async (req, res) => {
 };
 
 // Get schedules by teacher
-exports.getSchedulesByTeacher = async (req, res) => {
+const getSchedulesByTeacher = async (req, res) => {
   try {
     // Prevent caching to ensure fresh data when meetings are created
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
@@ -155,7 +152,7 @@ exports.getSchedulesByTeacher = async (req, res) => {
 };
 
 // Request reschedule
-exports.requestReschedule = async (req, res) => {
+const requestReschedule = async (req, res) => {
   try {
     const schedule = await Schedule.findById(req.params.id);
     if (!schedule) {
@@ -171,7 +168,7 @@ exports.requestReschedule = async (req, res) => {
 };
 
 // Approve/Reject reschedule
-exports.handleReschedule = async (req, res) => {
+const handleReschedule = async (req, res) => {
   try {
     const { approved } = req.body;
     const schedule = await Schedule.findById(req.params.id);
@@ -197,7 +194,7 @@ exports.handleReschedule = async (req, res) => {
 };
 
 // Get schedule statistics
-exports.getScheduleStats = async (req, res) => {
+const getScheduleStats = async (req, res) => {
   try {
     const total = await Schedule.countDocuments();
     const completed = await Schedule.countDocuments({ status: 'completed' });
@@ -231,7 +228,7 @@ exports.getScheduleStats = async (req, res) => {
 };
 
 // Get schedules by student
-exports.getSchedulesByStudent = async (req, res) => {
+const getSchedulesByStudent = async (req, res) => {
   try {
     // Prevent caching to ensure fresh data when meetings are created
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
@@ -263,7 +260,7 @@ exports.getSchedulesByStudent = async (req, res) => {
 };
 
 // Clean up fake meeting numbers (one-time cleanup)
-exports.cleanupFakeMeetings = async (req, res) => {
+const cleanupFakeMeetings = async (req, res) => {
   try {
     console.log('🧹 Starting cleanup of fake meeting numbers...');
     

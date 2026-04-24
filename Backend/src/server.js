@@ -40,9 +40,11 @@ const loadRoute = (routePath, urlPath) => {
   try {
     const route = require(path.join(__dirname, "routes", routePath));
     app.use(urlPath, route);
-    console.log("Loaded:", urlPath);
+    console.log("✅ Loaded:", urlPath);
   } catch (err) {
-    console.log("Skipped:", urlPath, "-", err.message);
+    console.error("❌ FAILED TO LOAD:", urlPath);
+    console.error("🔥 FULL ERROR:", err);
+    console.error("🔥 STACK:", err.stack);
   }
 };
 
