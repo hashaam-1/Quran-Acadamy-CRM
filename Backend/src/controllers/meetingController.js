@@ -465,6 +465,12 @@ const startClass = async (req, res) => {
    JOIN CLASS (PERFECT - ALL ROLES)
 ===================== */
 const joinClass = async (req, res) => {
+  console.log('🚀 JOIN CLASS API CALLED');
+  console.log('🔍 Request method:', req.method);
+  console.log('🔍 Request URL:', req.url);
+  console.log('🔍 Request params:', req.params);
+  console.log('🔍 Request headers:', req.headers);
+  
   try {
     const { meetingNumber, meetingId } = req.params;
     const { userId: bodyUserId, userName: bodyUserName, scheduleId, teacherName, course, time, studentName, studentId, userRole: bodyUserRole } = req.body || {};
@@ -473,6 +479,14 @@ const joinClass = async (req, res) => {
     console.log('🔍 DEBUG: Full req.body:', req.body);
     console.log('🔍 DEBUG: req.body type:', typeof req.body);
     console.log('🔍 DEBUG: req.body keys:', req.body ? Object.keys(req.body) : 'undefined');
+    
+    // ✅ Check environment variables early
+    console.log('🔍 Environment variables check:', {
+      hasZoomSdkKey: !!process.env.ZOOM_SDK_KEY,
+      hasZoomSdkSecret: !!process.env.ZOOM_SDK_SECRET,
+      hasMongoConnection: !!process.env.MONGODB_URI,
+      nodeEnv: process.env.NODE_ENV
+    });
 
     // ✅ PERFECT: Better validation with role context
     if (!meetingNumber && !meetingId) {
@@ -703,11 +717,29 @@ const joinClass = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log("JOIN ERROR:", err.message);
+    console.error("❌ JOIN ERROR:", {
+      message: err.message,
+      stack: err.stack,
+      meetingNumber: req.params?.meetingNumber,
+      meetingId: req.params?.meetingId,
+      body: req.body,
+      timestamp: new Date().toISOString()
+    });
+
+    // Check for specific error types
+    if (err.message.includes('Missing Zoom SDK credentials')) {
+      console.error("❌ ZOOM SDK ISSUE - Check Railway environment variables");
+      console.error("❌ Required: ZOOM_SDK_KEY, ZOOM_SDK_SECRET");
+    }
+    
+    if (err.message.includes('database') || err.message.includes('Mongo')) {
+      console.error("❌ DATABASE ISSUE - Check MongoDB connection");
+    }
 
     res.status(500).json({
       success: false,
-      message: "Join failed",
+      message: `Join failed: ${err.message}`,
+      debug: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
   }
 };
