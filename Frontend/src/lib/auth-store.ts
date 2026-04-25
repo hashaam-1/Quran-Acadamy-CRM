@@ -226,28 +226,30 @@ export const useAuthStore = create<AuthStore>()(
       partialize: (state) => ({ 
         token: state.token 
       }),
-      onRehydrateStorage: () => (state) => {
-        const setState = useAuthStore.setState; // ✅ Fix: Get setState from store
-        console.log('🔄 Auth store rehydrating from token:', state?.token ? 'token present' : 'no token');
-        
-        if (state && state.token) {
-          // 🔒 SECURITY: Validate token from backend, don't trust stored data
-          fetch(`${API_BASE_URL}/auth/verify-token`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${state.token}`,
-              'Content-Type': 'application/json'
-            }
-          })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Token validation failed');
-            }
-            return response.json();
-          })
-          .then(data => {
+      onRehydrateStorage: () => async (state) => {
+        console.log('🔄 Rehydrating auth...');
+
+        try {
+          if (state?.token) {
+            // ✅ Add timeout protection
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            const res = await fetch(`${API_BASE_URL}/auth/verify-token`, {
+              headers: {
+                Authorization: `Bearer ${state.token}`,
+                'Content-Type': 'application/json'
+              },
+              signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!res.ok) throw new Error("Invalid token");
+
+            const data = await res.json();
+
             if (data.success && data.user) {
-              // ✅ Token valid - restore user from backend data
               const user = {
                 id: data.user._id || data.user.id,
                 name: data.user.name,
@@ -258,38 +260,30 @@ export const useAuthStore = create<AuthStore>()(
                 ...(data.user.studentId && { studentId: data.user.studentId }),
                 ...(data.user.teacherId && { teacherId: data.user.teacherId }),
               };
-              
-              setState({ 
-                currentUser: user, 
-                isAuthenticated: true, 
+
+              useAuthStore.setState({
+                currentUser: user,
+                isAuthenticated: true,
                 isLoading: false,
-                token: state.token 
+                token: state.token,
               });
               
               console.log('✅ Token validated and user restored:', user.role, user.email);
-            } else {
-              throw new Error('Invalid token response');
+              return;
             }
-          })
-          .catch(error => {
-            console.log('❌ Token validation failed - clearing auth:', error.message);
-            // ✅ CRITICAL: Always set loading to false to prevent infinite loading
-            setState({ 
-              currentUser: null, 
-              isAuthenticated: false, 
-              isLoading: false,
-              token: undefined 
-            });
-          });
-        } else {
-          // No token found
-          setState({ 
-            currentUser: null, 
-            isAuthenticated: false, 
-            isLoading: false 
-          });
-          console.log('❌ No token found - user not authenticated');
+          }
+        } catch (err) {
+          console.log("❌ Token invalid or API failed:", err.message);
         }
+
+        // ✅ ALWAYS fallback - prevents infinite loading
+        useAuthStore.setState({
+          currentUser: null,
+          isAuthenticated: false,
+          isLoading: false,
+          token: undefined,
+        });
+        console.log('❌ No valid token - user not authenticated');
       },
     }
   )

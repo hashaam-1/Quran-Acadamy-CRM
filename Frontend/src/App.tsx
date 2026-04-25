@@ -23,11 +23,24 @@ import StudentProfile from "./pages/StudentProfile";
 import StudentZoom from "./pages/StudentZoom";
 import ZoomMeetingClean from "./components/zoom/ZoomMeetingClean";
 import NotFound from "./pages/NotFound";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
 function AppRoutes() {
   const { isAuthenticated, isLoading } = useAuthStore();
+  
+  // ✅ Add timeout fallback to prevent infinite loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        console.log('🚨 Loading timeout - forcing loading to false');
+        useAuthStore.setState({ isLoading: false });
+      }
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [isLoading]);
   
   // Show loading spinner while auth state is being rehydrated
   if (isLoading) {
