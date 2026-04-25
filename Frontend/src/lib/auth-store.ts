@@ -221,12 +221,13 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: 'auth-token', // localStorage key - only store token
       version: 2, // Version for token-only storage
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
       // 🔒 CRITICAL: Store only token, not full user object
       partialize: (state) => ({ 
         token: state.token 
       }),
       onRehydrateStorage: () => (state) => {
+        const setState = useAuthStore.setState; // ✅ Fix: Get setState from store
         console.log('🔄 Auth store rehydrating from token:', state?.token ? 'token present' : 'no token');
         
         if (state && state.token) {
@@ -258,7 +259,7 @@ export const useAuthStore = create<AuthStore>()(
                 ...(data.user.teacherId && { teacherId: data.user.teacherId }),
               };
               
-              set({ 
+              setState({ 
                 currentUser: user, 
                 isAuthenticated: true, 
                 isLoading: false,
@@ -272,7 +273,7 @@ export const useAuthStore = create<AuthStore>()(
           })
           .catch(error => {
             console.log('❌ Token validation failed - clearing auth:', error.message);
-            set({ 
+            setState({ 
               currentUser: null, 
               isAuthenticated: false, 
               isLoading: false,
@@ -281,7 +282,7 @@ export const useAuthStore = create<AuthStore>()(
           });
         } else {
           // No token found
-          set({ 
+          setState({ 
             currentUser: null, 
             isAuthenticated: false, 
             isLoading: false 
