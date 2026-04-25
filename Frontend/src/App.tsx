@@ -30,19 +30,7 @@ const queryClient = new QueryClient();
 function AppRoutes() {
   const { isAuthenticated, isLoading } = useAuthStore();
   
-  // ✅ Add timeout fallback to prevent infinite loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (isLoading) {
-        console.log('🚨 Loading timeout - forcing loading to false');
-        useAuthStore.setState({ isLoading: false });
-      }
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [isLoading]);
-  
-  // Show loading spinner while auth state is being rehydrated
+  // Show loading spinner only for actual loading states (not auth verification)
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">

@@ -49,7 +49,7 @@ export const useAuthStore = create<AuthStore>()(
     (set, get) => ({
       currentUser: null,
       isAuthenticated: false,
-      isLoading: true,
+      isLoading: false, // ✅ Instant UI - don't block on token verification
       users: initialUsers,
       token: undefined,
 
@@ -229,21 +229,34 @@ export const useAuthStore = create<AuthStore>()(
       onRehydrateStorage: () => async (state) => {
         console.log('🔄 Rehydrating auth...');
 
-        try {
-          if (state?.token) {
-            // ✅ Add timeout protection
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
+        if (!state?.token) {
+          // ✅ No token - set unauthenticated state immediately
+          return {
+            currentUser: null,
+            isAuthenticated: false,
+            isLoading: false,
+            token: undefined,
+          };
+        }
 
+        // ✅ Don't block UI - verify token in background
+        // Set initial state immediately for instant UI
+        const initialState = {
+          currentUser: null,
+          isAuthenticated: false,
+          isLoading: false,
+          token: state.token,
+        };
+
+        // ✅ Verify token in background without blocking UI
+        (async () => {
+          try {
             const res = await fetch(`${API_BASE_URL}/auth/verify-token`, {
               headers: {
                 Authorization: `Bearer ${state.token}`,
                 'Content-Type': 'application/json'
               },
-              signal: controller.signal
             });
-
-            clearTimeout(timeoutId);
 
             if (!res.ok) throw new Error("Invalid token");
 
@@ -261,26 +274,30 @@ export const useAuthStore = create<AuthStore>()(
                 ...(data.user.teacherId && { teacherId: data.user.teacherId }),
               };
 
-              // ✅ Return the state to be set - no circular reference
-              return {
+              // ✅ Update state in background after successful validation
+              useAuthStore.setState({
                 currentUser: user,
                 isAuthenticated: true,
-                isLoading: false,
                 token: state.token,
-              };
+              });
+              
+              console.log('✅ Token validated and user restored:', user.role, user.email);
+            } else {
+              throw new Error('Invalid token response');
             }
+          } catch (err) {
+            console.log("❌ Token validation failed:", err.message);
+            // ✅ Clear invalid token in background
+            useAuthStore.setState({
+              currentUser: null,
+              isAuthenticated: false,
+              token: undefined,
+            });
           }
-        } catch (err) {
-          console.log("❌ Token validation failed:", err.message);
-        }
+        })();
 
-        // ✅ ALWAYS fallback - prevents infinite loading
-        return {
-          currentUser: null,
-          isAuthenticated: false,
-          isLoading: false,
-          token: undefined,
-        };
+        // ✅ Return initial state for instant UI
+        return initialState;
       },
     }
   )
