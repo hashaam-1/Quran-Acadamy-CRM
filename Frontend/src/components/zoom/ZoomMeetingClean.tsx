@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Video, Phone } from 'lucide-react';
+import { Loader2, Video, Phone, Crown, Users } from 'lucide-react';
 import { useAuthStore } from '@/lib/auth-store';
 import { toast } from 'sonner';
 
@@ -30,6 +30,7 @@ export default function ZoomMeetingClean() {
   const [meetingConfig, setMeetingConfig] = useState<MeetingConfig | null>(null);
   const [isJoined, setIsJoined] = useState(false);
   const [meeting, setMeeting] = useState<any>(null);
+  const [participants, setParticipants] = useState<any[]>([]);
   const zoomContainerRef = useRef<HTMLDivElement>(null);
   const { currentUser, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
@@ -138,12 +139,46 @@ export default function ZoomMeetingClean() {
     }
   }, [sdkLoaded]);
 
+  // Fetch meeting participants
+  const fetchParticipants = async () => {
+    if (!meetingNumber || !isAuthenticated) return;
+    
+    try {
+      const token = sessionStorage.getItem('auth-token');
+      const response = await fetch(`${API_BASE_URL}/meetings/details/${meetingNumber}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.meeting?.participants) {
+          setParticipants(data.meeting.participants);
+          console.log('👥 Meeting participants:', data.meeting.participants);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch participants:', err);
+    }
+  };
+
   // Generate signature when component loads AND auth is ready
   useEffect(() => {
     if (meetingNumber && sdkLoaded && currentUser && isAuthenticated) {
       generateSignature();
     }
   }, [meetingNumber, sdkLoaded, currentUser, isAuthenticated]);
+
+  // Fetch participants when meeting is joined
+  useEffect(() => {
+    if (isJoined && meetingNumber) {
+      fetchParticipants();
+      // Refresh participants every 30 seconds
+      const interval = setInterval(fetchParticipants, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isJoined, meetingNumber]);
 
   const generateSignature = async () => {
     try {
@@ -388,6 +423,143 @@ export default function ZoomMeetingClean() {
           )}
 
           <div className="space-y-6">
+            {/* Participants List */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Meeting Participants
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {/* All Participants */}
+                  <div className="space-y-2">
+                    {/* Current User (always shown first) */}
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                          {currentUser?.name?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900">{currentUser?.name || 'Guest'} (You)</div>
+                          <div className="text-sm text-gray-500">{currentUser?.email}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {role === 1 ? (
+                          <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600">
+                            <Crown className="w-3 h-3 mr-1" />
+                            Host
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">
+                            Participant
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Other Participants */}
+                    {participants.length > 0 && (
+                      <>
+                        <div className="text-sm font-medium text-gray-700 pt-2">
+                          Other Participants ({participants.length})
+                        </div>
+                        {participants
+                          .filter(p => p.userId !== (currentUser?.id || currentUser?.userId))
+                          .map((participant, index) => (
+                            <div key={participant.userId || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                  {participant.name?.charAt(0).toUpperCase() || 'P'}
+                                </div>
+                                <div>
+                                  <div className="font-medium text-gray-900">{participant.name}</div>
+                                  <div className="text-sm text-gray-500">
+                                    {participant.userId === currentUser?.id ? 'You' : 'Participant'}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {participant.role === 1 ? (
+                                  <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600">
+                                    <Crown className="w-3 h-3 mr-1" />
+                                    Host
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline">
+                                    Participant
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                      </>
+                    )}
+                    
+                    {participants.length === 0 && (
+                      <div className="text-center p-4 text-gray-500 text-sm">
+                        No other participants have joined yet
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Meeting Info */}
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <div className="text-sm text-gray-600">
+                      <div className="flex justify-between">
+                        <span>Meeting ID:</span>
+                        <span className="font-mono">{meetingNumber}</span>
+                      </div>
+                      <div className="flex justify-between mt-1">
+                        <span>Your Role:</span>
+                        <span className="font-medium">
+                          {role === 1 ? 'Host (Teacher)' : 'Participant'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between mt-1">
+                        <span>Status:</span>
+                        <span className={`font-medium ${isJoined ? 'text-green-600' : 'text-gray-500'}`}>
+                          {isJoined ? 'In Meeting' : 'Not Joined'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Host Instructions */}
+                  {role === 1 && (
+                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <Crown className="w-4 h-4 text-yellow-600 mt-0.5" />
+                        <div>
+                          <div className="font-medium text-yellow-800">You are the Host</div>
+                          <div className="text-sm text-yellow-700 mt-1">
+                            As the teacher, you have host privileges and can control the meeting.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Participant Instructions */}
+                  {role === 0 && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <Users className="w-4 h-4 text-blue-600 mt-0.5" />
+                        <div>
+                          <div className="font-medium text-blue-800">You are a Participant</div>
+                          <div className="text-sm text-blue-700 mt-1">
+                            You can join and participate in the meeting. The teacher/host will control the meeting.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
