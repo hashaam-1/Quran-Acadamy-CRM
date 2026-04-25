@@ -1,17 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-// 🔥 Clear stale auth on deploy/version change
-const AUTH_VERSION = "v2"; // change on deploy
-const storedVersion = localStorage.getItem("auth_version");
-
-if (storedVersion !== AUTH_VERSION) {
-  console.log('🔄 Auth version changed, clearing stale data...');
-  localStorage.clear();
-  sessionStorage.clear();
-  localStorage.setItem("auth_version", AUTH_VERSION);
-}
-
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export type UserRole = 'admin' | 'sales_team' | 'team_leader' | 'teacher' | 'student';
@@ -63,172 +52,172 @@ export const useAuthStore = create<AuthStore>()(
       isLoading: true,
       users: initialUsers,
       token: undefined,
-  
-  login: (email, password) => {
-    // Debug logging
-    console.log('Login attempt:', { email, password });
-    console.log('Current users:', get().users);
-    console.log('Current passwords:', passwords);
-    
-    // Find user with case-insensitive email matching
-    const user = get().users.find(u => u.email.toLowerCase() === email.toLowerCase());
-    if (!user) {
-      console.log('User not found for email:', email);
-      return { success: false, error: 'User not found' };
-    }
-    
-    // Check password using the same case-insensitive email key
-    const storedPassword = passwords[user.email.toLowerCase()];
-    console.log('Password check:', { storedPassword, provided: password, match: storedPassword === password });
-    
-    if (storedPassword !== password) {
-      return { success: false, error: 'Invalid password' };
-    }
-    
-    set({ currentUser: user, isAuthenticated: true });
-    console.log('Login successful for:', user);
-    return { success: true };
-  },
-  
-  addUser: (user, password) => {
-    console.log('Adding user:', { user, password });
-    passwords[user.email.toLowerCase()] = password;
-    set(state => ({
-      users: [...state.users, user],
-    }));
-    console.log('User added. Total users:', get().users);
-    console.log('Updated passwords:', passwords);
-  },
-  
-  logout: async () => {
-    const currentUser = get().currentUser;
-    
-    // Auto-checkout teacher on logout
-    if (currentUser && currentUser.role === 'teacher') {
-      try {
-        const response = await fetch(`${API_BASE_URL}/teachers/checkout`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ teacherId: currentUser.id }),
-        });
+
+      login: (email, password) => {
+        // Debug logging
+        console.log('Login attempt:', { email, password });
+        console.log('Current users:', get().users);
+        console.log('Current passwords:', passwords);
         
-        if (response.ok) {
-          console.log('Teacher checked out successfully');
+        // Find user with case-insensitive email matching
+        const user = get().users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        if (!user) {
+          console.log('User not found for email:', email);
+          return { success: false, error: 'User not found' };
         }
-      } catch (error) {
-        console.error('Error checking out teacher:', error);
-      }
-    }
-    
-    // Auto-checkout student on logout
-    if (currentUser && currentUser.role === 'student') {
-      try {
-        const response = await fetch(`${API_BASE_URL}/students/checkout`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ studentId: currentUser.id }),
-        });
         
-        if (response.ok) {
-          console.log('Student checked out successfully');
+        // Check password using the same case-insensitive email key
+        const storedPassword = passwords[user.email.toLowerCase()];
+        console.log('Password check:', { storedPassword, provided: password, match: storedPassword === password });
+        
+        if (storedPassword !== password) {
+          return { success: false, error: 'Invalid password' };
         }
-      } catch (error) {
-        console.error('Error checking out student:', error);
-      }
-    }
-    
-    set({ currentUser: null, isAuthenticated: false });
-  },
-  
-  updateUser: (id, data) => {
-    set(state => ({
-      users: state.users.map(u => u.id === id ? { ...u, ...data } : u),
-      currentUser: state.currentUser?.id === id ? { ...state.currentUser, ...data } : state.currentUser,
-    }));
-  },
-
-  loginWithBackend: async (email, password) => {
-    try {
-      // ✅ FIXED: Normalize email to lowercase and trim before sending
-      const normalizedEmail = email.toLowerCase().trim();
+        
+        set({ currentUser: user, isAuthenticated: true });
+        console.log('Login successful for:', user);
+        return { success: true };
+      },
       
-      console.log('🔐 Attempting unified login for:', normalizedEmail);
+      addUser: (user, password) => {
+        console.log('Adding user:', { user, password });
+        passwords[user.email.toLowerCase()] = password;
+        set(state => ({
+          users: [...state.users, user],
+        }));
+        console.log('User added. Total users:', get().users);
+        console.log('Updated passwords:', passwords);
+      },
       
-      // ✅ FIXED: Clear any existing auth state to prevent role overwrite
-      const { currentUser } = get();
-      if (currentUser) {
-        console.log('🔄 Clearing existing auth state to prevent role overwrite');
-        set({ currentUser: null, isAuthenticated: false });
-      }
+      logout: async () => {
+        const currentUser = get().currentUser;
+        
+        // Auto-checkout teacher on logout
+        if (currentUser && currentUser.role === 'teacher') {
+          try {
+            const response = await fetch(`${API_BASE_URL}/teachers/checkout`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ teacherId: currentUser.id }),
+            });
+            
+            if (response.ok) {
+              console.log('Teacher checked out successfully');
+            }
+          } catch (error) {
+            console.error('Error checking out teacher:', error);
+          }
+        }
+        
+        // Auto-checkout student on logout
+        if (currentUser && currentUser.role === 'student') {
+          try {
+            const response = await fetch(`${API_BASE_URL}/students/checkout`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ studentId: currentUser.id }),
+            });
+            
+            if (response.ok) {
+              console.log('Student checked out successfully');
+            }
+          } catch (error) {
+            console.error('Error checking out student:', error);
+          }
+        }
+        
+        set({ currentUser: null, isAuthenticated: false, token: undefined });
+      },
       
-      // ✅ FIXED: Single unified login endpoint with normalized email
-      const response = await fetch(`${API_BASE_URL}/auth/unified-login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: normalizedEmail, password })
-      });
+      updateUser: (id, data) => {
+        set(state => ({
+          users: state.users.map(u => u.id === id ? { ...u, ...data } : u),
+          currentUser: state.currentUser?.id === id ? { ...state.currentUser, ...data } : state.currentUser,
+        }));
+      },
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        return { success: false, error: errorData.message || 'Login failed' };
-      }
-
-      const data = await response.json();
-      
-      if (!data.success) {
-        return { success: false, error: data.message || 'Login failed' };
-      }
-
-      // ✅ FIXED: Store only the returned role explicitly
-      const user = {
-        id: data.user._id || data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        phone: data.user.phone || '',
-        role: data.user.role, // ✅ Explicit role from backend
-        createdAt: data.user.createdAt,
-        ...(data.user.studentId && { studentId: data.user.studentId }),
-        ...(data.user.teacherId && { teacherId: data.user.teacherId }),
-      };
-
-      set({ currentUser: user, isAuthenticated: true });
-      console.log('✅ Unified login successful:', { role: user.role, email: user.email });
-      
-      // Role-specific auto check-in
-      try {
-        if (user.role === 'student') {
-          await fetch(`${API_BASE_URL}/attendance/mark`, {
+      loginWithBackend: async (email, password) => {
+        try {
+          // ✅ FIXED: Normalize email to lowercase and trim before sending
+          const normalizedEmail = email.toLowerCase().trim();
+          
+          console.log('🔐 Attempting unified login for:', normalizedEmail);
+          
+          // ✅ FIXED: Clear any existing auth state to prevent role overwrite
+          const { currentUser } = get();
+          if (currentUser) {
+            console.log('🔄 Clearing existing auth state to prevent role overwrite');
+            set({ currentUser: null, isAuthenticated: false });
+          }
+          
+          // ✅ FIXED: Single unified login endpoint with normalized email
+          const response = await fetch(`${API_BASE_URL}/auth/unified-login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              studentId: user.id,
-              status: 'present'
-            }),
+            body: JSON.stringify({ email: normalizedEmail, password })
           });
-          console.log('Student auto check-in successful');
-        } else if (user.role === 'teacher') {
-          await fetch(`${API_BASE_URL}/teachers/checkin`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ teacherId: user.id }),
-          });
-          console.log('Teacher auto check-in successful');
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            return { success: false, error: errorData.message || 'Login failed' };
+          }
+
+          const data = await response.json();
+          
+          if (!data.success) {
+            return { success: false, error: data.message || 'Login failed' };
+          }
+
+          // ✅ FIXED: Store only the returned role explicitly
+          const user = {
+            id: data.user._id || data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            phone: data.user.phone || '',
+            role: data.user.role, // ✅ Explicit role from backend
+            createdAt: data.user.createdAt,
+            ...(data.user.studentId && { studentId: data.user.studentId }),
+            ...(data.user.teacherId && { teacherId: data.user.teacherId }),
+          };
+
+          set({ currentUser: user, isAuthenticated: true, token: data.token });
+          console.log('✅ Unified login successful:', { role: user.role, email: user.email, token: data.token ? 'present' : 'missing' });
+          
+          // Role-specific auto check-in
+          try {
+            if (user.role === 'student') {
+              await fetch(`${API_BASE_URL}/attendance/mark`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  studentId: user.id,
+                  status: 'present'
+                }),
+              });
+              console.log('Student auto check-in successful');
+            } else if (user.role === 'teacher') {
+              await fetch(`${API_BASE_URL}/teachers/checkin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ teacherId: user.id }),
+              });
+              console.log('Teacher auto check-in successful');
+            }
+          } catch (error) {
+            console.error('Error auto checking in:', error);
+          }
+          
+          return { success: true, user };
+        } catch (error) {
+          console.error('Unified login error:', error);
+          return { success: false, error: 'Login failed' };
         }
-      } catch (error) {
-        console.error('Error auto checking in:', error);
-      }
-      
-      return { success: true, user };
-    } catch (error) {
-      console.error('Unified login error:', error);
-      return { success: false, error: 'Login failed' };
-    }
-  },
-},
+      },
+    }),
     {
       name: 'auth-token', // localStorage key - only store token
       version: 2, // Version for token-only storage
