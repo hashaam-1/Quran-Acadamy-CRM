@@ -154,20 +154,32 @@ export default function ZoomMeetingClean() {
         throw new Error('No meeting number provided in URL');
       }
 
-      // Use preserved user session instead of current user to prevent logout
-      const activeUser = preservedUser || currentUser;
-      console.log('Generating signature for meeting:', meetingNumber, 'role:', role, 'user:', activeUser?.name, 'userRole:', activeUser?.role);
+      // 🔒 SECURE: Use only current authenticated user to prevent session contamination
+      // Do NOT use preserved user as it can cause role mixing between browsers
+      const activeUser = currentUser;
       
-      // Use role from URL with new mapping: teacher=1 (host), admin/student=0 (participant)
+      console.log('🔒 Secure user session check:', {
+        currentUser: activeUser?.name,
+        currentUserRole: activeUser?.role,
+        currentUserEmail: activeUser?.email,
+        preservedUser: preservedUser?.name,
+        meetingNumber: meetingNumber,
+        role: role
+      });
       
       if (!activeUser) {
-        throw new Error('No user session found');
+        throw new Error('No authenticated user session found. Please login again.');
+      }
+      
+      // 🔒 SECURITY: Validate user has proper authentication
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found. Please login again.');
       }
       
       // Join the meeting to get signature and password in one call
       const joinUrl = `https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${meetingNumber}`;
       
-      const token = localStorage.getItem('token');
       const joinResponse = await fetch(joinUrl, {
         method: 'POST',
         headers: {
@@ -175,9 +187,10 @@ export default function ZoomMeetingClean() {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
+          // Send minimal info - backend will get user role from authentication token
           userId: activeUser?.id,
           userName: activeUser?.name,
-          userRole: activeUser?.role
+          // Note: userRole will be determined by backend from authentication, not from frontend
         })
       });
       
