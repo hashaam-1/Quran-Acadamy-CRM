@@ -98,9 +98,12 @@ export default function Syllabus() {
     
     // If we have a fileUrl, construct the full URL
     let fullUrl = fileUrl;
+    
+    // If the fileUrl is relative, construct the full URL
     if (fileUrl && !fileUrl.startsWith('http')) {
-      // Construct full URL with the backend base URL
-      fullUrl = `https://quran-acadamy-crm-production.up.railway.app${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+      // Remove /api from VITE_API_URL if present since uploads are served directly
+      const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '');
+      fullUrl = `${baseUrl}${fileUrl}`;
     }
     
     console.log('Attempting to download URL:', fullUrl);
@@ -129,15 +132,19 @@ export default function Syllabus() {
     
     // If we have a fileUrl, construct the full URL
     let fullUrl = fileUrl;
+    
+    // If the fileUrl is relative, construct the full URL
     if (fileUrl && !fileUrl.startsWith('http')) {
-      // Construct full URL with the backend base URL
-      fullUrl = `https://quran-acadamy-crm-production.up.railway.app${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+      // Remove /api from VITE_API_URL if present since uploads are served directly
+      const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '');
+      fullUrl = `${baseUrl}${fileUrl}`;
     }
     
-    console.log('Attempting to open URL:', fullUrl);
+    console.log('Opening file:', fullUrl);
     
     if (fullUrl) {
-      window.open(fullUrl, '_blank');
+      // Open in same tab instead of new tab
+      window.location.href = fullUrl;
     } else {
       console.error('No valid file URL found in attachment:', attachment);
       alert('Unable to open file - file path not found');
