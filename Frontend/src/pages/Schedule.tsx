@@ -133,6 +133,7 @@ export default function Schedule() {
     // Add the date to the schedule data
     const scheduleWithDate = {
       ...data,
+      className: `${data.course} Class`, // ✅ Add required className field
       date: classDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
     };
     
