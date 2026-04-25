@@ -36,6 +36,7 @@ interface AuthStore {
   isAuthenticated: boolean;
   isLoading: boolean;
   users: User[];
+  token?: string; // 🔒 Store only token, not full user object
   login: (email: string, password: string) => { success: boolean; error?: string };
   logout: () => void;
   updateUser: (id: string, data: Partial<User>) => void;
@@ -57,10 +58,11 @@ const generateId = () => Math.random().toString(36).substr(2, 9);
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
-  currentUser: null,
-  isAuthenticated: false,
-  isLoading: true,
-  users: initialUsers,
+      currentUser: null,
+      isAuthenticated: false,
+      isLoading: true,
+      users: initialUsers,
+      token: undefined,
   
   login: (email, password) => {
     // Debug logging
@@ -226,44 +228,77 @@ export const useAuthStore = create<AuthStore>()(
       return { success: false, error: 'Login failed' };
     }
   },
-}),
+},
     {
-      name: 'auth-storage', // localStorage key
-      version: 1, // Add version to handle schema changes
+      name: 'auth-token', // localStorage key - only store token
+      version: 2, // Version for token-only storage
+      storage: createJSONStorage(() => localStorage),
+      // 🔒 CRITICAL: Store only token, not full user object
+      partialize: (state) => ({ 
+        token: state.token 
+      }),
       onRehydrateStorage: () => (state) => {
-        console.log('🔄 Auth store rehydrating:', state);
+        console.log('🔄 Auth store rehydrating from token:', state?.token ? 'token present' : 'no token');
         
-        // CRITICAL: Validate and clean up auth state to prevent role switching
-        if (state && state.currentUser) {
-          // Validate required fields
-          if (!state.currentUser.email || !state.currentUser.role) {
-            console.log('❌ Invalid auth state detected - clearing corrupted data');
-            state.currentUser = null;
-            state.isAuthenticated = false;
-            state.isLoading = false;
-            return state;
-          }
-          
-          // Ensure role is valid
-          const validRoles = ['admin', 'teacher', 'student', 'sales_team', 'team_leader'];
-          if (!validRoles.includes(state.currentUser.role)) {
-            console.log('❌ Invalid role detected - clearing auth state');
-            state.currentUser = null;
-            state.isAuthenticated = false;
-            state.isLoading = false;
-            return state;
-          }
-          
-          // Set loading to false when rehydration is complete
-          state.isLoading = false;
-          console.log('✅ Auth state validated and restored for user:', state.currentUser.role, state.currentUser.email);
+        if (state && state.token) {
+          // 🔒 SECURITY: Validate token from backend, don't trust stored data
+          fetch(`${API_BASE_URL}/auth/verify-token`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${state.token}`,
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Token validation failed');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success && data.user) {
+              // ✅ Token valid - restore user from backend data
+              const user = {
+                id: data.user._id || data.user.id,
+                name: data.user.name,
+                email: data.user.email,
+                phone: data.user.phone || '',
+                role: data.user.role,
+                createdAt: data.user.createdAt,
+                ...(data.user.studentId && { studentId: data.user.studentId }),
+                ...(data.user.teacherId && { teacherId: data.user.teacherId }),
+              };
+              
+              set({ 
+                currentUser: user, 
+                isAuthenticated: true, 
+                isLoading: false,
+                token: state.token 
+              });
+              
+              console.log('✅ Token validated and user restored:', user.role, user.email);
+            } else {
+              throw new Error('Invalid token response');
+            }
+          })
+          .catch(error => {
+            console.log('❌ Token validation failed - clearing auth:', error.message);
+            set({ 
+              currentUser: null, 
+              isAuthenticated: false, 
+              isLoading: false,
+              token: undefined 
+            });
+          });
         } else {
-          console.log('❌ No auth state found on refresh');
-          state.currentUser = null;
-          state.isAuthenticated = false;
-          state.isLoading = false;
+          // No token found
+          set({ 
+            currentUser: null, 
+            isAuthenticated: false, 
+            isLoading: false 
+          });
+          console.log('❌ No token found - user not authenticated');
         }
-        return state;
       },
     }
   )
