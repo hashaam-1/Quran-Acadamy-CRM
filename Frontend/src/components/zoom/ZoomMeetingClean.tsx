@@ -23,6 +23,13 @@ interface MeetingConfig {
   password: string;
 }
 
+interface MeetingParticipant {
+  userId: string;
+  name: string;
+  role: number; // 0 = participant, 1 = host
+  joinedAt?: string;
+}
+
 export default function ZoomMeetingClean() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,7 +37,7 @@ export default function ZoomMeetingClean() {
   const [meetingConfig, setMeetingConfig] = useState<MeetingConfig | null>(null);
   const [isJoined, setIsJoined] = useState(false);
   const [meeting, setMeeting] = useState<any>(null);
-  const [participants, setParticipants] = useState<any[]>([]);
+  const [participants, setParticipants] = useState<MeetingParticipant[]>([]);
   const zoomContainerRef = useRef<HTMLDivElement>(null);
   const { currentUser, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
@@ -467,7 +474,7 @@ export default function ZoomMeetingClean() {
                           Other Participants ({participants.length})
                         </div>
                         {participants
-                          .filter(p => p.userId !== (currentUser?.id || currentUser?.userId))
+                          .filter(p => p.userId !== (currentUser?.id || (currentUser as any).userId))
                           .map((participant, index) => (
                             <div key={participant.userId || index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
                               <div className="flex items-center gap-3">
