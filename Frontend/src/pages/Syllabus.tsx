@@ -101,9 +101,19 @@ export default function Syllabus() {
     
     // If the fileUrl is relative, construct the full URL
     if (fileUrl && !fileUrl.startsWith('http')) {
-      // Remove /api from VITE_API_URL if present since uploads are served directly
-      const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '');
-      fullUrl = `${baseUrl}${fileUrl}`;
+      // For production, use the correct base URL
+      // In production, files are served directly from the main domain
+      const isProduction = window.location.hostname.includes('railway.app') || 
+                           window.location.hostname.includes('quran-acadamy-crm-production');
+      
+      if (isProduction) {
+        fullUrl = `https://quran-acadamy-crm-production.up.railway.app${fileUrl}`;
+      } else {
+        // For development, use VITE_API_URL
+        const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const baseUrl = apiBaseUrl.replace('/api', '');
+        fullUrl = `${baseUrl}${fileUrl}`;
+      }
     }
     
     console.log('Attempting to download URL:', fullUrl);
@@ -129,18 +139,33 @@ export default function Syllabus() {
     
     // Use the correct field names from backend
     const fileUrl = attachment.fileUrl || attachment.url || attachment.path;
+    console.log('Raw fileUrl from database:', fileUrl);
     
     // If we have a fileUrl, construct the full URL
     let fullUrl = fileUrl;
     
     // If the fileUrl is relative, construct the full URL
     if (fileUrl && !fileUrl.startsWith('http')) {
-      // Remove /api from VITE_API_URL if present since uploads are served directly
-      const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '');
-      fullUrl = `${baseUrl}${fileUrl}`;
+      // For production, use the correct base URL
+      // In production, files are served directly from the main domain
+      const isProduction = window.location.hostname.includes('railway.app') || 
+                           window.location.hostname.includes('quran-acadamy-crm-production');
+      
+      if (isProduction) {
+        fullUrl = `https://quran-acadamy-crm-production.up.railway.app${fileUrl}`;
+      } else {
+        // For development, use VITE_API_URL
+        const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const baseUrl = apiBaseUrl.replace('/api', '');
+        fullUrl = `${baseUrl}${fileUrl}`;
+      }
+      
+      console.log('Is Production:', isProduction);
+      console.log('Raw fileUrl:', fileUrl);
+      console.log('Constructed full URL:', fullUrl);
     }
     
-    console.log('Opening file:', fullUrl);
+    console.log('Final URL to open:', fullUrl);
     
     if (fullUrl) {
       // Open in same tab instead of new tab
