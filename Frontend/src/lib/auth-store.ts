@@ -273,6 +273,7 @@ export const useAuthStore = create<AuthStore>()(
           })
           .catch(error => {
             console.log('❌ Token validation failed - clearing auth:', error.message);
+            // ✅ CRITICAL: Always set loading to false to prevent infinite loading
             setState({ 
               currentUser: null, 
               isAuthenticated: false, 
