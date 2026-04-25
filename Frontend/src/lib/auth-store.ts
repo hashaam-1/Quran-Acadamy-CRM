@@ -261,29 +261,26 @@ export const useAuthStore = create<AuthStore>()(
                 ...(data.user.teacherId && { teacherId: data.user.teacherId }),
               };
 
-              useAuthStore.setState({
+              // ✅ Return the state to be set - no circular reference
+              return {
                 currentUser: user,
                 isAuthenticated: true,
                 isLoading: false,
                 token: state.token,
-              });
-              
-              console.log('✅ Token validated and user restored:', user.role, user.email);
-              return;
+              };
             }
           }
         } catch (err) {
-          console.log("❌ Token invalid or API failed:", err.message);
+          console.log("❌ Token validation failed:", err.message);
         }
 
         // ✅ ALWAYS fallback - prevents infinite loading
-        useAuthStore.setState({
+        return {
           currentUser: null,
           isAuthenticated: false,
           isLoading: false,
           token: undefined,
-        });
-        console.log('❌ No valid token - user not authenticated');
+        };
       },
     }
   )
