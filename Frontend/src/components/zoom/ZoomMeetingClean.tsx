@@ -31,7 +31,7 @@ export default function ZoomMeetingClean() {
   const [isJoined, setIsJoined] = useState(false);
   const [meeting, setMeeting] = useState<any>(null);
   const zoomContainerRef = useRef<HTMLDivElement>(null);
-  const { currentUser } = useAuthStore();
+  const { currentUser, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -138,17 +138,24 @@ export default function ZoomMeetingClean() {
     }
   }, [sdkLoaded]);
 
-  // Generate signature when component loads
+  // Generate signature when component loads AND auth is ready
   useEffect(() => {
-    if (meetingNumber && sdkLoaded) {
+    if (meetingNumber && sdkLoaded && currentUser && isAuthenticated) {
       generateSignature();
     }
-  }, [meetingNumber, sdkLoaded]);
+  }, [meetingNumber, sdkLoaded, currentUser, isAuthenticated]);
 
   const generateSignature = async () => {
     try {
       setIsLoading(true);
       setError('');
+
+      // ✅ CRITICAL: Ensure authentication is ready before proceeding
+      if (!currentUser || !isAuthenticated) {
+        console.log('⛔ Waiting for authentication to complete...');
+        setIsLoading(false);
+        return;
+      }
 
       if (!meetingNumber) {
         throw new Error('No meeting number provided in URL');
@@ -172,7 +179,7 @@ export default function ZoomMeetingClean() {
       }
       
       // 🔒 SECURITY: Validate user has proper authentication
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('auth-token');
       if (!token) {
         throw new Error('No authentication token found. Please login again.');
       }
