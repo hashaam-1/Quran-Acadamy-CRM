@@ -239,12 +239,11 @@ export const useAuthStore = create<AuthStore>()(
           };
         }
 
-        // ✅ Don't block UI - verify token in background
-        // Set initial state immediately for instant UI
+        // ✅ Set loading state during token verification to prevent redirect
         const initialState = {
           currentUser: null,
           isAuthenticated: false,
-          isLoading: false,
+          isLoading: true, // ✅ Keep loading during token verification to prevent redirect
           token: state.token,
         };
 
@@ -279,6 +278,7 @@ export const useAuthStore = create<AuthStore>()(
                 currentUser: user,
                 isAuthenticated: true,
                 token: state.token,
+                isLoading: false, // ✅ Stop loading after successful validation
               });
               
               console.log('✅ Token validated and user restored:', user.role, user.email);
@@ -292,6 +292,7 @@ export const useAuthStore = create<AuthStore>()(
               currentUser: null,
               isAuthenticated: false,
               token: undefined,
+              isLoading: false, // ✅ Stop loading after failed validation
             });
           }
         })();
