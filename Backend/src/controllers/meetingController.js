@@ -475,7 +475,7 @@ const joinClass = async (req, res) => {
     const { meetingNumber, meetingId } = req.params;
     const { userId: bodyUserId, userName: bodyUserName, scheduleId, teacherName, course, time, studentName, studentId, userRole: bodyUserRole } = req.body || {};
 
-    console.log('🔍 Join class request:', { meetingNumber, meetingId, scheduleId, userRole });
+    console.log('🔍 Join class request:', { meetingNumber, meetingId, scheduleId, userRole: bodyUserRole });
     console.log('🔍 DEBUG: Full req.body:', req.body);
     console.log('🔍 DEBUG: req.body type:', typeof req.body);
     console.log('🔍 DEBUG: req.body keys:', req.body ? Object.keys(req.body) : 'undefined');
@@ -534,7 +534,7 @@ const joinClass = async (req, res) => {
     console.log('🔍 Matching meetings for:', meetingNumber, matchingMeetings.length, 'found');
 
     console.log('📋 Meeting found:', meeting ? 'Yes' : 'No');
-    console.log('👤 User role for meeting:', userRole);
+    console.log('👤 User role for meeting (from body):', bodyUserRole);
 
     // If meeting doesn't exist, return error instead of creating meeting
     if (!meeting) {
