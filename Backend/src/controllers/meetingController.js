@@ -467,7 +467,7 @@ const startClass = async (req, res) => {
 const joinClass = async (req, res) => {
   try {
     const { meetingNumber, meetingId } = req.params;
-    const { userId: bodyUserId, userName: bodyUserName, scheduleId, teacherName, course, time, studentName, studentId, userRole } = req.body || {};
+    const { userId: bodyUserId, userName: bodyUserName, scheduleId, teacherName, course, time, studentName, studentId, userRole: bodyUserRole } = req.body || {};
 
     console.log('🔍 Join class request:', { meetingNumber, meetingId, scheduleId, userRole });
     console.log('🔍 DEBUG: Full req.body:', req.body);
@@ -541,47 +541,75 @@ const joinClass = async (req, res) => {
     }
 
     
-    // Use provided user info or fallback to req.user
-    const userId = bodyUserId || req.user?.id || "guest";
-    const userName = bodyUserName || req.user?.name || "Guest";
-    // userRole is already destructured from req.body above
+    // 🔒 SECURE: Use authenticated user from token, not from request body
+    // This prevents session contamination between different browsers/users
+    const authenticatedUser = req.user;
+    const userId = authenticatedUser?.id || bodyUserId || "guest";
+    const userName = authenticatedUser?.name || bodyUserName || "Guest";
+    
+    // ✅ CRITICAL: Get user role from authenticated user, not from request body
+    // This prevents role spoofing and session contamination
+    let userRole = authenticatedUser?.role || 'student'; // Default to student for safety
+    
+    // Only use request body role if authenticated user role is not available (fallback)
+    if (!authenticatedUser?.role && bodyUserRole) {
+      userRole = bodyUserRole;
+      console.log('⚠️ Using fallback userRole from request body:', userRole);
+    }
+    
+    console.log('🔒 User authentication check:', {
+      authenticatedUserId: authenticatedUser?.id,
+      authenticatedUserRole: authenticatedUser?.role,
+      bodyUserId: bodyUserId,
+      bodyUserRole: bodyUserRole,
+      finalUserId: userId,
+      finalUserRole: userRole,
+      userName: userName
+    });
 
     const already = meeting.participants.find(
       (p) => String(p.userId) === String(userId)
     );
 
-    // Set role based on user type - only teachers can be hosts
-    // PERFECT HOST CONFLICT RESOLUTION
-    let participantRole = 0; // Default to participant
+    // 🔒 SECURE ROLE ASSIGNMENT: Based on authenticated user role only
+    let participantRole = 0; // Default to participant for security
     let roleDescription = 'Participant';
     
+    console.log(`👤 Processing role assignment for ${userName} (${userRole})`);
+    
     if (userRole === 'teacher') {
-      // Check if there's already a host in the meeting
+      // Teachers can become hosts if no host exists
       const existingHost = meeting.participants.find(p => p.role === 1);
       
       if (!existingHost) {
-        // No host exists - this teacher becomes the host
+        // First teacher becomes host
         participantRole = 1;
         roleDescription = 'Host (Teacher)';
-        console.log(`👑 ${userName} promoted to host (first teacher)`);
+        console.log(`👑 ${userName} PROMOTED TO HOST - First teacher in meeting`);
       } else {
-        // Host already exists - this teacher remains a participant
+        // Additional teachers remain participants
         participantRole = 0;
         roleDescription = 'Participant (Teacher)';
-        console.log(`👤 ${userName} remains participant (host exists: ${existingHost.userName})`);
+        console.log(`👤 ${userName} remains participant - Host exists: ${existingHost.userName}`);
       }
     } else if (userRole === 'admin') {
-      participantRole = 0; // Admins are always participants
-      roleDescription = 'Participant (Admin)';
+      // Admins are ALWAYS participants (observers only)
+      participantRole = 0;
+      roleDescription = 'Participant (Admin - Observer)';
+      console.log(`👁️ ${userName} joined as Admin Observer - Never host`);
     } else if (userRole === 'student') {
-      participantRole = 0; // Students are always participants
+      // Students are ALWAYS participants
+      participantRole = 0;
       roleDescription = 'Participant (Student)';
+      console.log(`🎓 ${userName} joined as Student - Never host`);
     } else {
-      participantRole = 0; // Default to participant for other roles
-      roleDescription = 'Participant (Other)';
+      // Unknown roles - safest to make participant
+      participantRole = 0;
+      roleDescription = 'Participant (Unknown Role)';
+      console.log(`⚠️ ${userName} joined as Participant - Unknown role: ${userRole}`);
     }
     
-    console.log(`🔍 Role assignment: ${userName} -> ${roleDescription} (${participantRole})`);
+    console.log(`✅ Final role assignment: ${userName} → ${roleDescription} (role=${participantRole})`);
 
     if (!already) {
       meeting.participants.push({

@@ -21,18 +21,8 @@ router.get("/test", (req, res) => {
   });
 });
 
-/* Mock User */
-router.use((req, res, next) => {
-  if (!req.user) {
-    req.user = {
-      id: "test-user-id",
-      name: "Test User",
-      email: "test@example.com",
-      role: "teacher"
-    };
-  }
-  next();
-});
+// 🔒 SECURE: Remove mock user middleware to prevent session contamination
+// Real authentication middleware should be used instead
 
 /* Routes */
 router.post("/start-class", startClass);
