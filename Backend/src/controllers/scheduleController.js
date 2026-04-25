@@ -74,11 +74,14 @@ const createSchedule = async (req, res) => {
     // ✅ Save meeting to Meeting collection as well
     const Meeting = require('../models/Meeting');
     const meeting = new Meeting({
+      className: req.body.className || `${req.body.course || 'Quran'} Class`, // ✅ REQUIRED: Add className
       meetingNumber: zoomMeeting.id.toString(), // ✅ REAL Zoom meeting ID as string
       zoomMeetingId: zoomMeeting.id.toString(),
       joinUrl: zoomMeeting.join_url,
       startUrl: zoomMeeting.start_url,
       password: zoomMeeting.password || "123456",
+      zoomPassword: zoomMeeting.password || "123456", // ✅ Store Zoom password
+      plainPassword: zoomMeeting.password || "123456", // ✅ Store plain password
       topic: `${req.body.course || 'Quran'} Class - ${req.body.studentName || 'Student'}`,
       teacherId: req.body.teacherId,
       studentId: req.body.studentId,
