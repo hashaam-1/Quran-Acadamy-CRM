@@ -37,16 +37,29 @@ interface FileWithPreview {
 
 export default function Syllabus() {
   const { currentUser } = useAuthStore();
-  const [selectedTab, setSelectedTab] = useState("qaida");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [editingSyllabus, setEditingSyllabus] = useState<any>(null);
-  const [currentSyllabus, setCurrentSyllabus] = useState<any>(null);
-  
-  const { data: syllabi = [], isLoading } = useSyllabi();
+  const { syllabi, isLoading, error } = useSyllabi();
   const createSyllabus = useCreateSyllabus();
   const updateSyllabus = useUpdateSyllabus();
   const deleteSyllabus = useDeleteSyllabus();
+  
+  const [selectedTab, setSelectedTab] = useState("qaida");
+  const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingSyllabus, setEditingSyllabus] = useState<any>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [currentSyllabus, setCurrentSyllabus] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCourse, setFilterCourse] = useState('all');
+  const [filterLevel, setFilterLevel] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [syllabusToDelete, setSyllabusToDelete] = useState<string | null>(null);
+  
+  // PDF viewer state
+  const [showPdfViewer, setShowPdfViewer] = useState(false);
+  const [selectedPdfUrl, setSelectedPdfUrl] = useState<string | null>(null);
   
   // Check if user can add/edit syllabus
   const canManageSyllabus = currentUser?.role === 'admin' || currentUser?.role === 'team_leader' || currentUser?.role === 'teacher';
@@ -63,8 +76,6 @@ export default function Syllabus() {
     assessmentCriteria: '',
     status: 'active'
   });
-  
-  const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
   
   // File size validation (5MB limit)
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
@@ -124,9 +135,10 @@ export default function Syllabus() {
     
     // Cloudinary URLs are already complete, no construction needed
     if (fileUrl) {
-      console.log('Opening Cloudinary file:', fileUrl);
-      // Open in same tab instead of new tab
-      window.location.href = fileUrl;
+      console.log('Opening Cloudinary file in iframe:', fileUrl);
+      // Open in iframe modal instead of new tab
+      setSelectedPdfUrl(fileUrl);
+      setShowPdfViewer(true);
     } else {
       console.error('No valid file URL found in attachment:', attachment);
       alert('Unable to open file - file path not found');
@@ -950,6 +962,32 @@ export default function Syllabus() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* PDF Viewer Modal */}
+      <Dialog open={showPdfViewer} onOpenChange={setShowPdfViewer}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>Document Viewer</DialogTitle>
+            <DialogDescription>
+              View the syllabus attachment in the viewer below
+            </DialogDescription>
+          </DialogHeader>
+          <div className="w-full h-[70vh]">
+            {selectedPdfUrl && (
+              <iframe
+                src={selectedPdfUrl}
+                className="w-full h-full border rounded"
+                title="PDF Document Viewer"
+              />
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowPdfViewer(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 }
