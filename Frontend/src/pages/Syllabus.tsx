@@ -93,34 +93,15 @@ export default function Syllabus() {
     console.log('Download attachment data:', attachment);
     console.log('Available keys:', Object.keys(attachment));
     
-    // Use the correct field names from backend
+    // Use the correct field names from backend - Cloudinary URLs are already complete
     const fileUrl = attachment.fileUrl || attachment.url || attachment.path;
+    console.log('Cloudinary download URL:', fileUrl);
     
-    // If we have a fileUrl, construct the full URL
-    let fullUrl = fileUrl;
-    
-    // If the fileUrl is relative, construct the full URL
-    if (fileUrl && !fileUrl.startsWith('http')) {
-      // For production, use the correct base URL
-      // In production, files are served directly from the main domain
-      const isProduction = window.location.hostname.includes('railway.app') || 
-                           window.location.hostname.includes('quran-acadamy-crm-production');
-      
-      if (isProduction) {
-        fullUrl = `https://quran-acadamy-crm-production.up.railway.app${fileUrl}`;
-      } else {
-        // For development, use VITE_API_URL
-        const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        const baseUrl = apiBaseUrl.replace('/api', '');
-        fullUrl = `${baseUrl}${fileUrl}`;
-      }
-    }
-    
-    console.log('Attempting to download URL:', fullUrl);
-    
-    if (fullUrl) {
+    // Cloudinary URLs are already complete, no construction needed
+    if (fileUrl) {
+      console.log('Downloading from Cloudinary:', fileUrl);
       const link = document.createElement('a');
-      link.href = fullUrl;
+      link.href = fileUrl;
       link.download = attachment.fileName || attachment.filename || attachment.originalname || 'syllabus-file';
       link.target = '_blank';
       document.body.appendChild(link);
@@ -137,39 +118,15 @@ export default function Syllabus() {
     console.log('Attachment data:', attachment);
     console.log('Available keys:', Object.keys(attachment));
     
-    // Use the correct field names from backend
+    // Use the correct field names from backend - Cloudinary URLs are already complete
     const fileUrl = attachment.fileUrl || attachment.url || attachment.path;
-    console.log('Raw fileUrl from database:', fileUrl);
+    console.log('Cloudinary fileUrl:', fileUrl);
     
-    // If we have a fileUrl, construct the full URL
-    let fullUrl = fileUrl;
-    
-    // If the fileUrl is relative, construct the full URL
-    if (fileUrl && !fileUrl.startsWith('http')) {
-      // For production, use the correct base URL
-      // In production, files are served directly from the main domain
-      const isProduction = window.location.hostname.includes('railway.app') || 
-                           window.location.hostname.includes('quran-acadamy-crm-production');
-      
-      if (isProduction) {
-        fullUrl = `https://quran-acadamy-crm-production.up.railway.app${fileUrl}`;
-      } else {
-        // For development, use VITE_API_URL
-        const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-        const baseUrl = apiBaseUrl.replace('/api', '');
-        fullUrl = `${baseUrl}${fileUrl}`;
-      }
-      
-      console.log('Is Production:', isProduction);
-      console.log('Raw fileUrl:', fileUrl);
-      console.log('Constructed full URL:', fullUrl);
-    }
-    
-    console.log('Final URL to open:', fullUrl);
-    
-    if (fullUrl) {
+    // Cloudinary URLs are already complete, no construction needed
+    if (fileUrl) {
+      console.log('Opening Cloudinary file:', fileUrl);
       // Open in same tab instead of new tab
-      window.location.href = fullUrl;
+      window.location.href = fileUrl;
     } else {
       console.error('No valid file URL found in attachment:', attachment);
       alert('Unable to open file - file path not found');
