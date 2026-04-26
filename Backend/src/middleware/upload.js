@@ -7,7 +7,8 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "quran-academy/syllabus",
-    resource_type: "auto", // allows pdf, doc, images
+    resource_type: "raw", // 🔥 FIX: Use 'raw' for PDFs, docs, files
+    access_mode: "public", // 🔥 FIX: Ensure public access
     allowed_formats: ["pdf", "doc", "docx", "xls", "xlsx"],
   },
 });
