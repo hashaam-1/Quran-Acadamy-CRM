@@ -43,13 +43,15 @@ export const syllabusApi = {
     if (filters?.createdBy) queryParams.append('createdBy', filters.createdBy);
     
     const response = await api.get(`/syllabus?${queryParams.toString()}`);
-    return response.data;
+    // Backend returns { success: true, data: [...] } - extract the data array
+    return response.data?.data || [];
   },
 
   // Get single syllabus by ID
   getById: async (id: string): Promise<Syllabus> => {
     const response = await api.get(`/syllabus/${id}`);
-    return response.data;
+    // Backend returns { success: true, data: {...} } - extract the data object
+    return response.data?.data;
   },
 
   // Create new syllabus
@@ -57,7 +59,8 @@ export const syllabusApi = {
     const response = await api.post('/syllabus', data, {
       headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {}
     });
-    return response.data;
+    // Backend returns { success: true, data: {...} } - extract the data object
+    return response.data?.data;
   },
 
   // Update syllabus
@@ -65,7 +68,8 @@ export const syllabusApi = {
     const response = await api.put(`/syllabus/${id}`, data, {
       headers: data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {}
     });
-    return response.data;
+    // Backend returns { success: true, data: {...} } - extract the data object
+    return response.data?.data;
   },
 
   // Delete syllabus

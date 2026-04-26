@@ -301,7 +301,8 @@ export default function Syllabus() {
     error,
     syllabiType: typeof syllabi,
     syllabiLength: syllabi?.length,
-    isArray: Array.isArray(syllabi)
+    isArray: Array.isArray(syllabi),
+    message: "API data mapping fixed - should now show actual syllabus data"
   });
 
   // Group syllabi by course - Add safe fallback to prevent undefined.filter error
@@ -317,7 +318,7 @@ export default function Syllabus() {
   };
 
   // Loading guard to prevent rendering when data is not ready
-  if (isLoading || !syllabi) {
+  if (isLoading) {
     return (
       <MainLayout title="Curriculum & Syllabus" subtitle="View course curriculum and manage syllabi">
         <div className="flex items-center justify-center min-h-[400px]">
