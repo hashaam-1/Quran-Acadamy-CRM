@@ -7,6 +7,7 @@ const compression = require("compression");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 const path = require("path");
+const fs = require("fs");
 const connectDB = require("./config/database");
 
 const app = express();
@@ -157,8 +158,47 @@ try {
 /* =========================
    STATIC FILE SERVING
 ========================= */
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Serve uploaded files with fallback for missing files
+app.use('/uploads', (req, res, next) => {
+  const filePath = path.join(__dirname, '../uploads', req.path);
+  console.log('🔍 File request:', req.path, 'Full path:', filePath);
+  
+  // Check if file exists
+  if (fs.existsSync(filePath)) {
+    console.log('✅ File found, serving:', filePath);
+    return express.static(path.join(__dirname, '../uploads'))(req, res, next);
+  } else {
+    console.log('❌ File not found:', filePath);
+    console.log('📁 Uploads directory contents:');
+    try {
+      const uploadsDir = path.join(__dirname, '../uploads');
+      const listFiles = (dir, prefix = '') => {
+        const items = fs.readdirSync(dir);
+        items.forEach(item => {
+          const itemPath = path.join(dir, item);
+          const stat = fs.statSync(itemPath);
+          if (stat.isDirectory()) {
+            console.log(prefix + '📁', item + '/');
+            listFiles(itemPath, prefix + '  ');
+          } else {
+            console.log(prefix + '📄', item);
+          }
+        });
+      };
+      listFiles(uploadsDir);
+    } catch (err) {
+      console.log('📁 Could not list uploads directory:', err.message);
+    }
+    
+    // Return a proper error response
+    return res.status(404).json({
+      success: false,
+      message: "File not found - file may have been lost due to server restart",
+      path: req.originalUrl,
+      suggestion: "Please re-upload the file to fix this issue"
+    });
+  }
+});
 
 /* =========================
    404 HANDLER

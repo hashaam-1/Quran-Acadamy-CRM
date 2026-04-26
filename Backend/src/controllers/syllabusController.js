@@ -52,8 +52,23 @@ exports.createSyllabus = async (req, res) => {
   try {
     // Handle file uploads
     const attachments = [];
+    console.log('📤 Files received in request:', req.files ? req.files.length : 0);
     if (req.files && req.files.length > 0) {
       req.files.forEach(file => {
+        console.log('📄 Processing file:', {
+          originalname: file.originalname,
+          filename: file.filename,
+          path: file.path,
+          size: file.size,
+          mimetype: file.mimetype
+        });
+        
+        // Verify file exists on disk
+        const fs = require('fs');
+        const filePath = file.path;
+        const fileExists = fs.existsSync(filePath);
+        console.log('🔍 File exists on disk:', fileExists, 'at path:', filePath);
+        
         attachments.push({
           fileName: file.originalname,
           fileUrl: `/uploads/syllabi/${file.filename}`,
