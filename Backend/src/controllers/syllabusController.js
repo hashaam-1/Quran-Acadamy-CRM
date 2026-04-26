@@ -50,28 +50,23 @@ exports.getSyllabusById = async (req, res) => {
 // Create new syllabus
 exports.createSyllabus = async (req, res) => {
   try {
-    // Handle file uploads
+    // Handle file uploads with Cloudinary
     const attachments = [];
     console.log('📤 Files received in request:', req.files ? req.files.length : 0);
     if (req.files && req.files.length > 0) {
       req.files.forEach(file => {
-        console.log('📄 Processing file:', {
+        console.log('📄 Processing Cloudinary file:', {
           originalname: file.originalname,
           filename: file.filename,
-          path: file.path,
+          path: file.path, // This is now the Cloudinary URL
           size: file.size,
           mimetype: file.mimetype
         });
         
-        // Verify file exists on disk
-        const fs = require('fs');
-        const filePath = file.path;
-        const fileExists = fs.existsSync(filePath);
-        console.log('🔍 File exists on disk:', fileExists, 'at path:', filePath);
-        
+        // Use Cloudinary URL directly
         attachments.push({
           fileName: file.originalname,
-          fileUrl: `/uploads/syllabi/${file.filename}`,
+          fileUrl: file.path, // Cloudinary URL
           fileType: file.mimetype
         });
       });
@@ -235,6 +230,31 @@ exports.updateSyllabus = async (req, res) => {
     } catch (error) {
       console.error('Error parsing assessmentCriteria JSON in update:', error);
       parsedAssessmentCriteria = assessmentCriteria;
+    }
+    
+    // Handle file uploads with Cloudinary for updates
+    if (req.files && req.files.length > 0) {
+      const attachments = [];
+      console.log('📤 Files received in update request:', req.files.length);
+      req.files.forEach(file => {
+        console.log('📄 Processing Cloudinary file (update):', {
+          originalname: file.originalname,
+          filename: file.filename,
+          path: file.path, // This is now the Cloudinary URL
+          size: file.size,
+          mimetype: file.mimetype
+        });
+        
+        // Use Cloudinary URL directly
+        attachments.push({
+          fileName: file.originalname,
+          fileUrl: file.path, // Cloudinary URL
+          fileType: file.mimetype
+        });
+      });
+      
+      // Add new attachments to existing ones or replace them
+      syllabus.attachments = [...(syllabus.attachments || []), ...attachments];
     }
     
     // Update fields
