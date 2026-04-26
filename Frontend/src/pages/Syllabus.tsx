@@ -294,17 +294,38 @@ export default function Syllabus() {
     }
   };
   
-  // Group syllabi by course
-  const qaidaSyllabi = syllabi.filter(s => s.course === 'Qaida' && s.status === 'active');
-  const nazraSyllabi = syllabi.filter(s => s.course === 'Nazra' && s.status === 'active');
-  const hifzSyllabi = syllabi.filter(s => s.course === 'Hifz' && s.status === 'active');
-  const tajweedSyllabi = syllabi.filter(s => s.course === 'Tajweed' && s.status === 'active');
+  // Debug logging to understand syllabus data structure
+  console.log("SYLLABUS DATA DEBUG:", {
+    syllabi,
+    isLoading,
+    error,
+    syllabiType: typeof syllabi,
+    syllabiLength: syllabi?.length,
+    isArray: Array.isArray(syllabi)
+  });
+
+  // Group syllabi by course - Add safe fallback to prevent undefined.filter error
+  const qaidaSyllabi = (syllabi || []).filter(s => s.course === 'Qaida' && s.status === 'active');
+  const nazraSyllabi = (syllabi || []).filter(s => s.course === 'Nazra' && s.status === 'active');
+  const hifzSyllabi = (syllabi || []).filter(s => s.course === 'Hifz' && s.status === 'active');
+  const tajweedSyllabi = (syllabi || []).filter(s => s.course === 'Tajweed' && s.status === 'active');
   
   const statusConfig = {
     completed: { icon: CheckCircle2, color: "bg-success/10 text-success" },
     current: { icon: PlayCircle, color: "bg-accent/10 text-accent" },
     locked: { icon: Lock, color: "bg-muted text-muted-foreground" },
   };
+
+  // Loading guard to prevent rendering when data is not ready
+  if (isLoading || !syllabi) {
+    return (
+      <MainLayout title="Curriculum & Syllabus" subtitle="View course curriculum and manage syllabi">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout title="Curriculum & Syllabus" subtitle="View course curriculum and manage syllabi">
