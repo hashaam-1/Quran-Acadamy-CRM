@@ -101,16 +101,22 @@ export default function Syllabus() {
   // File download functionality
   const handleFileDownload = (attachment: any) => {
     // Debug: Log attachment structure
-    console.log('Download attachment data:', attachment);
-    console.log('Available keys:', Object.keys(attachment));
+    console.log('🔍 DOWNLOAD ATTACHMENT DATA DEBUG:', attachment);
+    console.log('🔍 AVAILABLE KEYS:', Object.keys(attachment));
     
     // Use the correct field names from backend - Cloudinary URLs are already complete
-    const fileUrl = attachment.fileUrl || attachment.url || attachment.path;
-    console.log('Cloudinary download URL:', fileUrl);
+    let fileUrl = attachment.fileUrl || attachment.url || attachment.path;
+    console.log('🔍 ORIGINAL DOWNLOAD URL:', fileUrl);
+    
+    // Fix Cloudinary URL for PDFs and documents - use /raw/upload/ instead of /image/upload/
+    if (fileUrl && attachment.fileType === 'application/pdf') {
+      fileUrl = fileUrl.replace('/image/upload/', '/raw/upload/');
+      console.log('🔧 FIXED DOWNLOAD URL:', fileUrl);
+    }
     
     // Cloudinary URLs are already complete, no construction needed
     if (fileUrl) {
-      console.log('Downloading from Cloudinary:', fileUrl);
+      console.log('🚀 DOWNLOADING FROM CLOUDINARY:', fileUrl);
       const link = document.createElement('a');
       link.href = fileUrl;
       link.download = attachment.fileName || attachment.filename || attachment.originalname || 'syllabus-file';
@@ -119,7 +125,7 @@ export default function Syllabus() {
       link.click();
       document.body.removeChild(link);
     } else {
-      console.error('No valid file URL found in attachment:', attachment);
+      console.error('❌ NO VALID FILE URL FOUND in attachment:', attachment);
       alert('Unable to download file - file path not found');
     }
   };
@@ -130,11 +136,17 @@ export default function Syllabus() {
     console.log('🔍 AVAILABLE KEYS:', Object.keys(attachment));
     
     // Use the correct field names from backend - Cloudinary URLs are already complete
-    const fileUrl = attachment.fileUrl || attachment.url || attachment.path;
-    console.log('🔍 CLOUDINARY FILE URL:', fileUrl);
+    let fileUrl = attachment.fileUrl || attachment.url || attachment.path;
+    console.log('🔍 ORIGINAL CLOUDINARY FILE URL:', fileUrl);
     console.log('🔍 URL TYPE:', typeof fileUrl);
     console.log('🔍 URL CONTAINS /image/upload/:', fileUrl?.includes('/image/upload/'));
     console.log('🔍 URL CONTAINS /raw/upload/:', fileUrl?.includes('/raw/upload/'));
+    
+    // Fix Cloudinary URL for PDFs and documents - use /raw/upload/ instead of /image/upload/
+    if (fileUrl && attachment.fileType === 'application/pdf') {
+      fileUrl = fileUrl.replace('/image/upload/', '/raw/upload/');
+      console.log('🔧 FIXED PDF URL:', fileUrl);
+    }
     
     // Cloudinary URLs are already complete, no construction needed
     if (fileUrl) {
