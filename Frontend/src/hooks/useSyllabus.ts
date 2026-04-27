@@ -34,12 +34,20 @@ interface SyllabusFilters {
 
 // Get all syllabi
 export const useSyllabi = (filters?: SyllabusFilters) => {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['syllabus', filters],
     queryFn: async () => {
       return await syllabusApi.getAll(filters);
     },
   });
+  
+  // Return the expected structure with syllabi property
+  return {
+    syllabi: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
+  };
 };
 
 // Get single syllabus by ID
