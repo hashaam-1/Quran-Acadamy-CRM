@@ -45,8 +45,8 @@ export const syllabusApi = {
     const response = await api.get(`/syllabus${queryParams.toString() ? '?' + queryParams.toString() : ''}`);
     // Debug: Log full response to understand structure
     console.log("FULL SYLLABUS RESPONSE:", response.data);
-    // Backend returns the array directly - no wrapping
-    return response.data || [];
+    // Backend returns direct array - use res.data (not res.data.data)
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   // Get single syllabus by ID
