@@ -126,21 +126,30 @@ export default function Syllabus() {
 
   const handleFileOpen = (attachment: any) => {
     // Debug: Log attachment structure
-    console.log('Attachment data:', attachment);
-    console.log('Available keys:', Object.keys(attachment));
+    console.log('🔍 ATTACHMENT DATA DEBUG:', attachment);
+    console.log('🔍 AVAILABLE KEYS:', Object.keys(attachment));
     
     // Use the correct field names from backend - Cloudinary URLs are already complete
     const fileUrl = attachment.fileUrl || attachment.url || attachment.path;
-    console.log('Cloudinary fileUrl:', fileUrl);
+    console.log('🔍 CLOUDINARY FILE URL:', fileUrl);
+    console.log('🔍 URL TYPE:', typeof fileUrl);
+    console.log('🔍 URL CONTAINS /image/upload/:', fileUrl?.includes('/image/upload/'));
+    console.log('🔍 URL CONTAINS /raw/upload/:', fileUrl?.includes('/raw/upload/'));
     
     // Cloudinary URLs are already complete, no construction needed
     if (fileUrl) {
-      console.log('Opening Cloudinary file in iframe:', fileUrl);
-      // Open in iframe modal instead of new tab
-      setSelectedPdfUrl(fileUrl);
-      setShowPdfViewer(true);
+      console.log('🚀 OPENING CLOUDINARY FILE IN IFRAME:', fileUrl);
+      // Add error handling for iframe loading
+      try {
+        setSelectedPdfUrl(fileUrl);
+        setShowPdfViewer(true);
+        console.log('✅ PDF VIEWER OPENED SUCCESSFULLY');
+      } catch (error) {
+        console.error('❌ ERROR OPENING PDF VIEWER:', error);
+        alert('Error opening file viewer - please try again');
+      }
     } else {
-      console.error('No valid file URL found in attachment:', attachment);
+      console.error('❌ NO VALID FILE URL FOUND in attachment:', attachment);
       alert('Unable to open file - file path not found');
     }
   };
@@ -304,6 +313,9 @@ export default function Syllabus() {
     isArray: Array.isArray(syllabi),
     message: "API data mapping fixed - should now show actual syllabus data"
   });
+
+  // Add global error handler to catch 401 errors
+  console.error("GLOBAL 401 DEBUG: Checking for authentication issues...");
 
   // Group syllabi by course - Add safe fallback to prevent undefined.filter error
   const qaidaSyllabi = (syllabi || []).filter(s => s.course === 'Qaida' && s.status === 'active');
@@ -1000,6 +1012,12 @@ export default function Syllabus() {
                 src={selectedPdfUrl}
                 className="w-full h-full border rounded"
                 title="PDF Document Viewer"
+                onLoad={() => console.log('✅ IFRAME LOADED SUCCESSFULLY')}
+                onError={(e) => {
+                  console.error('❌ IFRAME LOADING ERROR:', e);
+                  console.error('❌ FAILED URL:', selectedPdfUrl);
+                  alert('Error loading file - the file may not be accessible or may have been moved');
+                }}
               />
             )}
           </div>
