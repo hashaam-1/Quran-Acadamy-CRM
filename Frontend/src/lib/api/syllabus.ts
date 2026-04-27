@@ -42,7 +42,9 @@ export const syllabusApi = {
     if (filters?.status) queryParams.append('status', filters.status);
     if (filters?.createdBy) queryParams.append('createdBy', filters.createdBy);
     
-    const response = await api.get(`/syllabus?${queryParams.toString()}`);
+    const response = await api.get(`/syllabus${queryParams.toString() ? '?' + queryParams.toString() : ''}`);
+    // Debug: Log full response to understand structure
+    console.log("FULL SYLLABUS RESPONSE:", response.data);
     // Backend returns the array directly - no wrapping
     return response.data || [];
   },
