@@ -27,19 +27,49 @@ const getSchedules = async (req, res) => {
       today: today.toISOString().split('T')[0]
     });
     
-    // ✅ FIXED: Filter schedules by actual date range instead of day logic
-    const currentWeekSchedules = await Schedule.find({
-      date: {
-        $gte: weekStart,
-        $lte: weekEnd
-      }
-    })
+    // ✅ DEBUG: Check all schedules to see date fields
+    const allSchedules = await Schedule.find()
       .populate('studentId', 'name age')
       .populate('teacherId', 'name email')
-      .sort({ date: 1, time: 1 });
+      .sort({ day: 1, time: 1 });
+    
+    console.log('🔍 DEBUG: All schedules date fields:');
+    allSchedules.forEach(s => {
+      console.log(`📅 Schedule ID: ${s._id}, Date: ${s.date}, Day: ${s.day}, Type: ${typeof s.date}`);
+    });
     
     // Get total schedules for comparison
-    const totalSchedules = await Schedule.countDocuments();
+    const totalSchedules = allSchedules.length;
+    
+    // ✅ FIXED: Filter schedules with fallback date calculation
+    const getDateFromDay = (dayName) => {
+      const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+      
+      const today = new Date();
+      const currentDayIndex = today.getDay();
+      const targetDayIndex = days.indexOf(dayName);
+
+      let diff = targetDayIndex - currentDayIndex;
+      if (diff <= 0) diff += 7; // If day passed or today, schedule for next week
+
+      const result = new Date(today);
+      result.setDate(today.getDate() + diff);
+      result.setHours(0, 0, 0, 0);
+
+      return result;
+    };
+    
+    const currentWeekSchedules = allSchedules.filter(schedule => {
+      let scheduleDate;
+      
+      if (schedule.date && schedule.date instanceof Date && !isNaN(schedule.date)) {
+        scheduleDate = schedule.date;
+      } else {
+        scheduleDate = getDateFromDay(schedule.day); // fallback for missing/invalid dates
+      }
+      
+      return scheduleDate >= weekStart && scheduleDate <= weekEnd;
+    });
     
     console.log('✅ Found schedules:', {
       total: totalSchedules,
@@ -48,11 +78,14 @@ const getSchedules = async (req, res) => {
       weekEnd: weekEnd.toISOString().split('T')[0]
     });
     
-    // Debug: Log schedule dates to verify filtering
-    console.log('📅 Schedule dates in current week:', 
+    // Debug: Log filtered schedules with their calculated dates
+    console.log('📅 Current week schedules:', 
       currentWeekSchedules.map(s => ({
         id: s._id,
-        date: s.date?.toISOString().split('T')[0],
+        originalDate: s.date,
+        calculatedDate: (s.date && s.date instanceof Date && !isNaN(s.date)) 
+          ? s.date.toISOString().split('T')[0]
+          : getDateFromDay(s.day).toISOString().split('T')[0],
         day: s.day,
         studentName: s.studentName
       }))
