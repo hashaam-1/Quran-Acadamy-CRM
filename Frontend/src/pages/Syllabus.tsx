@@ -134,15 +134,15 @@ export default function Syllabus() {
     console.log('🔍 URL CONTAINS /image/upload/:', fileUrl?.includes('/image/upload/'));
     console.log('🔍 URL CONTAINS /raw/upload/:', fileUrl?.includes('/raw/upload/'));
     
-    // For PDFs, ensure we're using the correct URL structure
+    // For PDFs, convert old URLs from /image/upload/ to /raw/upload/
     if (fileUrl && attachment.fileType === 'application/pdf') {
-      // If it's an old file with /image/upload/, it might cause 401
-      // New files will have /raw/upload/ which should work correctly
+      // Convert old /image/upload/ URLs to /raw/upload/ for proper access
       if (fileUrl.includes('/image/upload/')) {
-        console.log('⚠️ DETECTED OLD PDF URL (may cause 401):', fileUrl);
-        console.log('💡 RECOMMENDATION: Re-upload this PDF to fix Cloudinary access');
+        console.log('🔧 CONVERTING OLD PDF URL:', fileUrl);
+        fileUrl = fileUrl.replace('/image/upload/', '/raw/upload/');
+        console.log('✅ CONVERTED TO CORRECT URL:', fileUrl);
       } else if (fileUrl.includes('/raw/upload/')) {
-        console.log('✅ DETECTED CORRECT PDF URL:', fileUrl);
+        console.log('✅ ALREADY CORRECT PDF URL:', fileUrl);
       }
     }
     
