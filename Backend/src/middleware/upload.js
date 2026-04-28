@@ -11,6 +11,17 @@ const storage = new CloudinaryStorage({
     access_mode: "public", // 🔥 FIX: Ensure public access
     allowed_formats: ["pdf", "doc", "docx", "xls", "xlsx"],
   },
+  // Add logging to verify upload parameters
+  transformation: (req, file) => {
+    console.log('🔍 CLOUDINARY UPLOAD DEBUG:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      resource_type: "raw",
+      access_mode: "public",
+      folder: "quran-academy/syllabus"
+    });
+    return {};
+  }
 });
 
 // File filter for PDFs and documents
