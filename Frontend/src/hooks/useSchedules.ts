@@ -65,10 +65,7 @@ export const useSchedules = () => {
         console.log('📅 Week Info:', data.weekInfo);
       }
       
-      return {
-        schedules: formattedSchedules,
-        weekInfo: data?.weekInfo || null
-      };
+      return formattedSchedules;
     },
     enabled: !!currentUser,
   });
@@ -102,6 +99,34 @@ export const useSchedulesStats = () => {
   return useQuery({
     queryKey: ['schedules', 'stats'],
     queryFn: schedulesApi.getStats,
+  });
+};
+
+export const useWeekInfo = () => {
+  const { currentUser } = useAuthStore();
+  
+  return useQuery({
+    queryKey: ['schedules', 'weekInfo', currentUser?.role, currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser) return null;
+      
+      // Role-based schedule fetching
+      let data;
+      
+      if (currentUser.role === 'admin' || currentUser.role === 'sales_team' || currentUser.role === 'team_leader') {
+        data = await schedulesApi.getAll();
+      } else if (currentUser.role === 'teacher') {
+        data = await schedulesApi.getByTeacher(currentUser.id);
+      } else if (currentUser.role === 'student') {
+        data = await schedulesApi.getByStudent(currentUser.id);
+      } else {
+        data = await schedulesApi.getAll();
+      }
+      
+      // Return week information from API response
+      return data?.weekInfo || null;
+    },
+    enabled: !!currentUser,
   });
 };
 

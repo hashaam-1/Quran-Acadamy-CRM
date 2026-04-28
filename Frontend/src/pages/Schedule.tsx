@@ -37,7 +37,7 @@ import StartClassButton from "@/components/zoom/StartClassButton";
 import JoinClassButton from "@/components/zoom/JoinClassButton";
 import StudentZoomManager from "@/components/zoom/StudentZoomManager";
 import { toast } from "sonner";
-import { useSchedules, useCreateSchedule, useUpdateSchedule, useDeleteSchedule } from "@/hooks/useSchedules";
+import { useSchedules, useWeekInfo, useCreateSchedule, useUpdateSchedule, useDeleteSchedule } from "@/hooks/useSchedules";
 import { useTeachers } from "@/hooks/useTeachers";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
@@ -59,7 +59,8 @@ const courseColors = {
 };
 
 export default function Schedule() {
-  const { data: scheduleData = { schedules: [], weekInfo: null }, isLoading: schedulesLoading } = useSchedules();
+  const { data: schedules = [], isLoading: schedulesLoading } = useSchedules();
+  const { data: weekInfo } = useWeekInfo();
   const { data: teachers = [], isLoading: teachersLoading } = useTeachers();
   const { currentUser } = useAuthStore();
   const createSchedule = useCreateSchedule();
@@ -68,10 +69,6 @@ export default function Schedule() {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [teacherFilter, setTeacherFilter] = useState("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
-
-  // Extract schedules from the new data structure
-  const schedules = scheduleData?.schedules || [];
-  const weekInfo = scheduleData?.weekInfo;
 
   useEffect(() => {
     console.log('Schedule Page - Schedules:', schedules.length, 'schedules');
