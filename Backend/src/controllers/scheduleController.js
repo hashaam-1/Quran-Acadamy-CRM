@@ -10,7 +10,7 @@ const getSchedules = async (req, res) => {
     res.set('Pragma', 'no-cache');
     res.set('Expires', '0');
     
-    // Get current week date range
+    // Get current week date range (Monday to Sunday)
     const today = new Date();
     const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
     const weekStart = new Date(today);
@@ -27,29 +27,36 @@ const getSchedules = async (req, res) => {
       today: today.toISOString().split('T')[0]
     });
     
-    // Get all schedules first
-    const allSchedules = await Schedule.find()
+    // ✅ FIXED: Filter schedules by actual date range instead of day logic
+    const currentWeekSchedules = await Schedule.find({
+      date: {
+        $gte: weekStart,
+        $lte: weekEnd
+      }
+    })
       .populate('studentId', 'name age')
       .populate('teacherId', 'name email')
-      .sort({ day: 1, time: 1 });
+      .sort({ date: 1, time: 1 });
     
-    // Filter schedules for current week based on day
-    const currentWeekSchedules = allSchedules.filter(schedule => {
-      const scheduleDay = schedule.day;
-      const dayOfWeek = getDayOfWeek(scheduleDay);
-      
-      // Check if this day falls within the current week
-      const scheduleDate = new Date(today);
-      scheduleDate.setDate(today.getDate() - currentDay + dayOfWeek);
-      
-      return scheduleDate >= weekStart && scheduleDate <= weekEnd;
-    });
+    // Get total schedules for comparison
+    const totalSchedules = await Schedule.countDocuments();
     
     console.log('✅ Found schedules:', {
-      total: allSchedules.length,
+      total: totalSchedules,
       currentWeek: currentWeekSchedules.length,
-      filtered: currentWeekSchedules.length
+      weekStart: weekStart.toISOString().split('T')[0],
+      weekEnd: weekEnd.toISOString().split('T')[0]
     });
+    
+    // Debug: Log schedule dates to verify filtering
+    console.log('📅 Schedule dates in current week:', 
+      currentWeekSchedules.map(s => ({
+        id: s._id,
+        date: s.date?.toISOString().split('T')[0],
+        day: s.day,
+        studentName: s.studentName
+      }))
+    );
     
     // ✅ FIXED: Return consistent response format with weekly filtering
     res.json({
@@ -59,7 +66,7 @@ const getSchedules = async (req, res) => {
       weekInfo: {
         weekStart: weekStart.toISOString().split('T')[0],
         weekEnd: weekEnd.toISOString().split('T')[0],
-        totalSchedules: allSchedules.length,
+        totalSchedules: totalSchedules,
         currentWeekSchedules: currentWeekSchedules.length
       }
     });
@@ -182,6 +189,35 @@ const createSchedule = async (req, res) => {
     await meeting.save();
     console.log('✅ Meeting saved to Meeting collection:', meeting.meetingNumber);
     
+    // ✅ FIXED: Calculate proper date for the schedule based on day
+    const getScheduleDate = (day) => {
+      const today = new Date();
+      const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
+      const dayMap = {
+        'Monday': 1,
+        'Tuesday': 2,
+        'Wednesday': 3,
+        'Thursday': 4,
+        'Friday': 5,
+        'Saturday': 6,
+        'Sunday': 0
+      };
+      
+      const targetDay = dayMap[day] || 1;
+      let dateOffset = targetDay - currentDay;
+      
+      // If the day is earlier in the week, schedule for next week
+      if (dateOffset <= 0) {
+        dateOffset += 7;
+      }
+      
+      const scheduleDate = new Date(today);
+      scheduleDate.setDate(today.getDate() + dateOffset);
+      scheduleDate.setHours(0, 0, 0, 0);
+      
+      return scheduleDate;
+    };
+
     // Ensure required fields have fallbacks to prevent undefined data
     const scheduleData = {
       ...req.body,
@@ -189,7 +225,8 @@ const createSchedule = async (req, res) => {
       meetingNumber: zoomMeeting.id.toString(), // ✅ REAL Zoom meeting ID
       joinUrl: zoomMeeting.join_url,
       startUrl: zoomMeeting.start_url,
-      zoomMeetingId: zoomMeeting.id
+      zoomMeetingId: zoomMeeting.id,
+      date: getScheduleDate(req.body.day) // ✅ FIXED: Add proper date calculation
     };
     
     const schedule = new Schedule(scheduleData);

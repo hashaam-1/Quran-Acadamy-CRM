@@ -63,6 +63,11 @@ const scheduleSchema = new mongoose.Schema({
     required: true,
     enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
   },
+  date: {
+    type: Date,
+    required: true,
+    default: Date.now
+  },
   rescheduleRequest: rescheduleRequestSchema,
   // Unique meeting number for this specific class (CRITICAL for preventing host conflicts)
   meetingNumber: {
