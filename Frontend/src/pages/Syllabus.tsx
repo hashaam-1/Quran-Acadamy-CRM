@@ -57,10 +57,6 @@ export default function Syllabus() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [syllabusToDelete, setSyllabusToDelete] = useState<string | null>(null);
   
-  // PDF viewer state
-  const [showPdfViewer, setShowPdfViewer] = useState(false);
-  const [selectedPdfUrl, setSelectedPdfUrl] = useState<string | null>(null);
-  
   // Check if user can add/edit syllabus
   const canManageSyllabus = currentUser?.role === 'admin' || currentUser?.role === 'team_leader' || currentUser?.role === 'teacher';
   
@@ -132,28 +128,20 @@ export default function Syllabus() {
     console.log('🔍 AVAILABLE KEYS:', Object.keys(attachment));
     
     // Use the correct field names from backend - Cloudinary URLs are already complete
-    let fileUrl = attachment.fileUrl || attachment.url || attachment.path;
-    console.log('🔍 ORIGINAL CLOUDINARY FILE URL:', fileUrl);
+    const fileUrl = attachment.fileUrl || attachment.url || attachment.path;
+    console.log('🔍 CLOUDINARY FILE URL:', fileUrl);
     console.log('🔍 URL TYPE:', typeof fileUrl);
     
-    // Fix Cloudinary URL for PDFs - use transformation parameters for inline viewing
-    if (fileUrl && attachment.fileType === 'application/pdf') {
-      // Add inline viewing transformation to prevent download behavior in iframe
-      fileUrl = fileUrl.replace('/upload/', '/upload/fl_attachment:false/');
-      console.log('🔧 FIXED PDF URL WITH INLINE VIEWING:', fileUrl);
-    }
-    
-    // Cloudinary URLs are already complete, no construction needed
+    // Open PDFs in new tab to avoid Cloudinary iframe restrictions
     if (fileUrl) {
-      console.log('🚀 OPENING CLOUDINARY FILE IN IFRAME:', fileUrl);
-      // Add error handling for iframe loading
+      console.log('� OPENING PDF IN NEW TAB:', fileUrl);
       try {
-        setSelectedPdfUrl(fileUrl);
-        setShowPdfViewer(true);
-        console.log('✅ PDF VIEWER OPENED SUCCESSFULLY');
+        // Open in new tab - Cloudinary handles PDF viewing properly
+        window.open(fileUrl, '_blank', 'noopener,noreferrer');
+        console.log('✅ PDF OPENED IN NEW TAB SUCCESSFULLY');
       } catch (error) {
-        console.error('❌ ERROR OPENING PDF VIEWER:', error);
-        alert('Error opening file viewer - please try again');
+        console.error('❌ ERROR OPENING PDF:', error);
+        alert('Error opening file - please try again or use download instead');
       }
     } else {
       console.error('❌ NO VALID FILE URL FOUND in attachment:', attachment);
@@ -1004,37 +992,7 @@ export default function Syllabus() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* PDF Viewer Modal */}
-      <Dialog open={showPdfViewer} onOpenChange={setShowPdfViewer}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>Document Viewer</DialogTitle>
-            <DialogDescription>
-              View the syllabus attachment in the viewer below
-            </DialogDescription>
-          </DialogHeader>
-          <div className="w-full h-[70vh]">
-            {selectedPdfUrl && (
-              <iframe
-                src={selectedPdfUrl}
-                className="w-full h-full border rounded"
-                title="PDF Document Viewer"
-                onLoad={() => console.log('✅ IFRAME LOADED SUCCESSFULLY')}
-                onError={(e) => {
-                  console.error('❌ IFRAME LOADING ERROR:', e);
-                  console.error('❌ FAILED URL:', selectedPdfUrl);
-                  alert('Error loading file - the file may not be accessible or may have been moved');
-                }}
-              />
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setShowPdfViewer(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* PDF Viewer Modal - Removed - Now using new tab approach for better Cloudinary compatibility */}
     </MainLayout>
   );
 }
