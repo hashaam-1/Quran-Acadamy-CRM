@@ -24,6 +24,10 @@ export interface Syllabus {
   status: 'draft' | 'active' | 'archived';
   createdAt: string;
   updatedAt: string;
+  // Role-based filtering properties
+  assignedTeachers?: string[];
+  assignedStudents?: string[];
+  teamId?: string;
 }
 
 interface SyllabusFilters {

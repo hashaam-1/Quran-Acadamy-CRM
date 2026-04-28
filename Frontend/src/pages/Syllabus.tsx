@@ -151,7 +151,7 @@ export default function Syllabus() {
         // Teachers see syllabi they created or are assigned to
         filtered = filtered.filter(syllabus => 
           syllabus.createdBy === currentUser?.id || 
-          syllabus.assignedTeachers?.includes(currentUser?.id)
+          (syllabus.assignedTeachers && syllabus.assignedTeachers.includes(currentUser?.id || ''))
         );
         break;
         
@@ -159,7 +159,7 @@ export default function Syllabus() {
         // Students see syllabi for their enrolled courses
         filtered = filtered.filter(syllabus => 
           syllabus.course === currentUser?.enrolledCourse ||
-          syllabus.assignedStudents?.includes(currentUser?.id)
+          (syllabus.assignedStudents && syllabus.assignedStudents.includes(currentUser?.id || ''))
         );
         break;
         

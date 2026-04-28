@@ -18,6 +18,9 @@ export interface User {
   assignedStudents?: string[]; // for teacher
   teacherId?: string; // for teacher role
   studentId?: string; // for student role
+  // Role-based syllabus filtering properties
+  enrolledCourse?: 'Qaida' | 'Nazra' | 'Hifz' | 'Tajweed'; // for student
+  teamId?: string; // for team_leader
 }
 
 interface AuthStore {
