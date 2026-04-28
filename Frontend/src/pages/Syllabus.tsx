@@ -62,8 +62,147 @@ export default function Syllabus() {
     return attachment?.fileUrl || attachment?.url || attachment?.path || '';
   };
 
-  // Check if user can add/edit syllabus
-  const canManageSyllabus = currentUser?.role === 'admin' || currentUser?.role === 'team_leader' || currentUser?.role === 'teacher';
+  // Role-based permissions and logic
+  const getRoleBasedPermissions = () => {
+    const role = currentUser?.role;
+    
+    switch (role) {
+      case 'admin':
+        return {
+          canView: true,
+          canCreate: true,
+          canEdit: true,
+          canDelete: true,
+          canManageAll: true,
+          viewTitle: 'All Syllabi',
+          description: 'Manage all syllabi across the system'
+        };
+        
+      case 'sales_team':
+        return {
+          canView: true,
+          canCreate: false,
+          canEdit: false,
+          canDelete: false,
+          canManageAll: false,
+          viewTitle: 'Syllabus Catalog',
+          description: 'View available syllabi for course information'
+        };
+        
+      case 'team_leader':
+        return {
+          canView: true,
+          canCreate: true,
+          canEdit: true,
+          canDelete: false,
+          canManageAll: true,
+          viewTitle: 'Team Syllabi',
+          description: 'Manage syllabi for your team'
+        };
+        
+      case 'teacher':
+        return {
+          canView: true,
+          canCreate: true,
+          canEdit: true,
+          canDelete: false,
+          canManageAll: false,
+          viewTitle: 'My Syllabi',
+          description: 'View and manage syllabi for your courses'
+        };
+        
+      case 'student':
+        return {
+          canView: true,
+          canCreate: false,
+          canEdit: false,
+          canDelete: false,
+          canManageAll: false,
+          viewTitle: 'Course Syllabi',
+          description: 'View syllabi for your enrolled courses'
+        };
+        
+      default:
+        return {
+          canView: false,
+          canCreate: false,
+          canEdit: false,
+          canDelete: false,
+          canManageAll: false,
+          viewTitle: 'Syllabi',
+          description: 'Access restricted'
+        };
+    }
+  };
+
+  const permissions = getRoleBasedPermissions();
+  const canManageSyllabus = permissions.canCreate || permissions.canEdit || permissions.canDelete;
+
+  // Role-based syllabus filtering
+  const getFilteredSyllabi = () => {
+    if (!syllabi || syllabi.length === 0) return [];
+    
+    const role = currentUser?.role;
+    let filtered = [...syllabi];
+    
+    // Apply role-based filtering
+    switch (role) {
+      case 'teacher':
+        // Teachers see syllabi they created or are assigned to
+        filtered = filtered.filter(syllabus => 
+          syllabus.createdBy === currentUser?.id || 
+          syllabus.assignedTeachers?.includes(currentUser?.id)
+        );
+        break;
+        
+      case 'student':
+        // Students see syllabi for their enrolled courses
+        filtered = filtered.filter(syllabus => 
+          syllabus.course === currentUser?.enrolledCourse ||
+          syllabus.assignedStudents?.includes(currentUser?.id)
+        );
+        break;
+        
+      case 'team_leader':
+        // Team leaders see syllabus for their team
+        filtered = filtered.filter(syllabus => 
+          syllabus.createdBy === currentUser?.id ||
+          syllabus.teamId === currentUser?.teamId
+        );
+        break;
+        
+      case 'sales_team':
+        // Sales team see only active syllabi for course information
+        filtered = filtered.filter(syllabus => syllabus.status === 'active');
+        break;
+        
+      case 'admin':
+      default:
+        // Admins see all syllabi
+        break;
+    }
+    
+    // Apply additional filters
+    if (searchTerm) {
+      filtered = filtered.filter(syllabus =>
+        syllabus.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        syllabus.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        syllabus.course.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (filterCourse !== 'all') {
+      filtered = filtered.filter(syllabus => syllabus.course === filterCourse);
+    }
+    
+    if (filterLevel !== 'all') {
+      filtered = filtered.filter(syllabus => syllabus.level === filterLevel);
+    }
+    
+    return filtered;
+  };
+
+  const filteredSyllabi = getFilteredSyllabi();
   
   const [formData, setFormData] = useState<SyllabusFormData>({
     title: '',
@@ -329,14 +468,21 @@ export default function Syllabus() {
   }
 
   return (
-    <MainLayout title="Curriculum & Syllabus" subtitle="View course curriculum and manage syllabi">
-      <div className="flex justify-end mb-6">
-        {canManageSyllabus && (
-          <Button className="gap-2" onClick={() => { setEditingSyllabus(null); setFormData({ title: '', course: 'Qaida', level: 'Beginner', description: '', duration: '', objectives: '', prerequisites: '', materials: '', assessmentCriteria: '', status: 'active' }); setIsDialogOpen(true); }}>
-            <Plus className="h-4 w-4" />
-            Add Syllabus
-          </Button>
-        )}
+    <MainLayout title={permissions.viewTitle} subtitle={permissions.description}>
+      {/* Role-specific header */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">{permissions.viewTitle}</h1>
+            <p className="text-muted-foreground">{permissions.description}</p>
+          </div>
+          {permissions.canCreate && (
+            <Button className="gap-2" onClick={() => { setEditingSyllabus(null); setFormData({ title: '', course: 'Qaida', level: 'Beginner', description: '', duration: '', objectives: '', prerequisites: '', materials: '', assessmentCriteria: '', status: 'active' }); setIsDialogOpen(true); }}>
+              <Plus className="h-4 w-4" />
+              Add Syllabus
+            </Button>
+          )}
+        </div>
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">

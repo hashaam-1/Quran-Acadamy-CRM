@@ -41,7 +41,7 @@ const navigation: NavItem[] = [
   { name: "Progress", href: "/progress", icon: TrendingUp, roles: ['admin', 'sales_team', 'team_leader', 'teacher', 'student'] },
   { name: "Invoices", href: "/invoices", icon: Receipt, roles: ['admin', 'sales_team', 'student'] },
   { name: "Monitoring", href: "/monitoring", icon: Monitor, roles: ['admin', 'sales_team', 'team_leader'] },
-  { name: "Syllabus", href: "/syllabus", icon: BookOpen, roles: ['admin', 'sales_team', 'teacher', 'student'] },
+  { name: "Syllabus", href: "/syllabus", icon: BookOpen, roles: ['admin', 'sales_team', 'team_leader', 'teacher', 'student'] },
   { name: "Messages", href: "/messages", icon: MessageSquare, roles: ['admin', 'sales_team', 'team_leader', 'teacher'] },
   { name: "Settings", href: "/settings", icon: Settings, roles: ['admin'] },
 ];

@@ -50,6 +50,23 @@ export const useSyllabi = (filters?: SyllabusFilters) => {
   };
 };
 
+// Role-specific syllabus hooks
+export const useSyllabiByRole = (filters?: SyllabusFilters) => {
+  const query = useQuery({
+    queryKey: ['syllabus', 'by-role', JSON.stringify(filters || {})],
+    queryFn: async () => {
+      return await syllabusApi.getAll(filters);
+    },
+  });
+  
+  return {
+    syllabi: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
+  };
+};
+
 // Get single syllabus by ID
 export const useSyllabus = (id: string) => {
   return useQuery({
