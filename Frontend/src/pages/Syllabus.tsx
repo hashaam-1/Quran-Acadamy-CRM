@@ -151,15 +151,15 @@ export default function Syllabus() {
         // Teachers see syllabi they created or are assigned to
         filtered = filtered.filter(syllabus => 
           syllabus.createdBy === currentUser?.id || 
-          (syllabus.assignedTeachers && syllabus.assignedTeachers.includes(currentUser?.id || ''))
+          ((syllabus as any).assignedTeachers && (syllabus as any).assignedTeachers.includes(currentUser?.id || ''))
         );
         break;
         
       case 'student':
         // Students see syllabi for their enrolled courses
         filtered = filtered.filter(syllabus => 
-          syllabus.course === currentUser?.enrolledCourse ||
-          (syllabus.assignedStudents && syllabus.assignedStudents.includes(currentUser?.id || ''))
+          syllabus.course === (currentUser as any).enrolledCourse ||
+          ((syllabus as any).assignedStudents && (syllabus as any).assignedStudents.includes(currentUser?.id || ''))
         );
         break;
         
@@ -167,7 +167,7 @@ export default function Syllabus() {
         // Team leaders see syllabus for their team
         filtered = filtered.filter(syllabus => 
           syllabus.createdBy === currentUser?.id ||
-          syllabus.teamId === currentUser?.teamId
+          (syllabus as any).teamId === (currentUser as any).teamId
         );
         break;
         
