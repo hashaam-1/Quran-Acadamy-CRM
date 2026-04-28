@@ -105,18 +105,56 @@ export default function Monitoring() {
       totalSchedules: schedulesArray.length
     });
     
+    // ✅ FIXED: Use fallback date calculation for schedules with old dates
+    const getDateFromDay = (dayName) => {
+      const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+      
+      const today = new Date();
+      const currentDayIndex = today.getDay();
+      const targetDayIndex = days.indexOf(dayName);
+
+      let diff = targetDayIndex - currentDayIndex;
+      if (diff <= 0) diff += 7; // If day passed or today, schedule for next week
+
+      const result = new Date(today);
+      result.setDate(today.getDate() + diff);
+      result.setHours(0, 0, 0, 0);
+
+      return result.toISOString().split('T')[0];
+    };
+
     const todaySchedules = schedulesArray.filter(schedule => {
-      // Check if schedule is for today based on day field AND date
+      // Check if schedule is for today based on day field
       const scheduleDay = schedule.day.toLowerCase();
       const matchesDay = scheduleDay === todayDay;
       
-      // Also check if the schedule date is today (if date field exists)
+      // ✅ FIXED: Use fallback date calculation if schedule date is old/invalid
       let matchesDate = true;
+      let calculatedDate = today;
+      
       if (schedule.date) {
         const scheduleDate = typeof schedule.date === 'string' 
-          ? schedule.date 
+          ? schedule.date.split('T')[0] 
           : new Date(schedule.date).toISOString().split('T')[0];
-        matchesDate = scheduleDate === today;
+        
+        // Check if the schedule date is old (creation date) or valid (occurrence date)
+        const scheduleDateObj = new Date(schedule.date);
+        const todayObj = new Date(today);
+        const daysDiff = Math.floor((todayObj.getTime() - scheduleDateObj.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysDiff > 7) {
+          // Schedule date is old (creation date), use fallback calculation
+          calculatedDate = getDateFromDay(schedule.day);
+          matchesDate = calculatedDate === today;
+        } else {
+          // Schedule date is recent, use it directly
+          matchesDate = scheduleDate === today;
+          calculatedDate = scheduleDate;
+        }
+      } else {
+        // No date field, use fallback calculation
+        calculatedDate = getDateFromDay(schedule.day);
+        matchesDate = calculatedDate === today;
       }
       
       console.log('🔍 MONITORING DEBUG - Schedule check:', {
@@ -124,7 +162,8 @@ export default function Monitoring() {
         studentName: schedule.studentName,
         day: schedule.day,
         matchesDay,
-        date: schedule.date,
+        originalDate: schedule.date,
+        calculatedDate: calculatedDate,
         matchesDate,
         willInclude: matchesDay && matchesDate
       });
