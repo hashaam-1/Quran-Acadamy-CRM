@@ -293,19 +293,8 @@ export default function Syllabus() {
   };
   
   // Debug logging to understand syllabus data structure
-  console.log("SYLLABUS DATA DEBUG:", {
-    syllabi,
-    isLoading,
-    error,
-    syllabiType: typeof syllabi,
-    syllabiLength: syllabi?.length,
-    isArray: Array.isArray(syllabi),
-    message: "API data mapping fixed - should now show actual syllabus data"
-  });
-
-  // Add global error handler to catch 401 errors
-  console.error("GLOBAL 401 DEBUG: Checking for authentication issues...");
-
+  
+  
   // Group syllabi by course - Add safe fallback to prevent undefined.filter error
   const qaidaSyllabi = (syllabi || []).filter(s => s.course === 'Qaida' && s.status === 'active');
   const nazraSyllabi = (syllabi || []).filter(s => s.course === 'Nazra' && s.status === 'active');
