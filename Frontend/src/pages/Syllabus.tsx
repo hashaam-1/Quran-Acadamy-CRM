@@ -228,10 +228,20 @@ export default function Syllabus() {
         formDataToSend.append('assessmentCriteria', JSON.stringify(syllabusData.assessmentCriteria || []));
         
         // Add files
+        console.log('📤 FRONTEND DEBUG - Selected files:', selectedFiles.length);
+        console.log('📤 FRONTEND DEBUG - Selected files details:', selectedFiles.map(f => ({
+          name: f.name,
+          size: f.file?.size,
+          type: f.file?.type
+        })));
+        
         selectedFiles.forEach((fileItem) => {
+          console.log('📤 FRONTEND DEBUG - Appending file:', fileItem.name, fileItem.file);
           formDataToSend.append('attachments', fileItem.file);
         });
         
+        console.log('📤 FRONTEND DEBUG - FormData entries count:', formDataToSend.getAll('attachments').length);
+        console.log('📤 FRONTEND DEBUG - FormData keys:', Array.from(formDataToSend.keys()));
         console.log('Submitting with FormData (fields directly)...');
         if (editingSyllabus) {
           await updateSyllabus.mutateAsync({ id: editingSyllabus.id, data: formDataToSend });
