@@ -76,14 +76,20 @@ export default function Monitoring() {
   const navigate = useNavigate();
   const { currentUser } = useAuthStore();
 
-  // Fetch today's scheduled classes
+  // Fetch all schedules for monitoring (not filtered by week)
   const { data: response, isLoading, refetch } = useQuery({
-    queryKey: ['schedules'],
-    queryFn: schedulesApi.getAll,
+    queryKey: ['schedules', 'monitoring'],
+    queryFn: schedulesApi.getAllWithoutFilter, // Use the endpoint that returns all schedules
   });
 
   // ✅ FIXED: Extract data field from API response
   const schedules = Array.isArray(response) ? response : (response?.data || []);
+
+  // Debug logging for monitoring
+  console.log('🔍 MONITORING DEBUG - Raw response:', response);
+  console.log('🔍 MONITORING DEBUG - Extracted schedules:', schedules);
+  console.log('🔍 MONITORING DEBUG - Schedules count:', schedules.length);
+  console.log('🔍 MONITORING DEBUG - Is loading:', isLoading);
 
   // Process schedules to get today's classes and calculate status
   const processSchedules = (schedules: ClassSchedule[]) => {
@@ -91,19 +97,42 @@ export default function Monitoring() {
     const schedulesArray = Array.isArray(schedules) ? schedules : [];
     
     const today = format(new Date(), 'yyyy-MM-dd');
+    const todayDay = format(new Date(), 'EEEE').toLowerCase();
+    
+    console.log('🔍 MONITORING DEBUG - Today info:', {
+      today,
+      todayDay,
+      totalSchedules: schedulesArray.length
+    });
+    
     const todaySchedules = schedulesArray.filter(schedule => {
       // Check if schedule is for today based on day field AND date
-      const scheduleDay = format(new Date(), 'EEEE').toLowerCase();
-      const matchesDay = schedule.day.toLowerCase() === scheduleDay;
+      const scheduleDay = schedule.day.toLowerCase();
+      const matchesDay = scheduleDay === todayDay;
       
       // Also check if the schedule date is today (if date field exists)
       let matchesDate = true;
       if (schedule.date) {
-        matchesDate = schedule.date === today;
+        const scheduleDate = typeof schedule.date === 'string' 
+          ? schedule.date 
+          : new Date(schedule.date).toISOString().split('T')[0];
+        matchesDate = scheduleDate === today;
       }
+      
+      console.log('🔍 MONITORING DEBUG - Schedule check:', {
+        id: schedule.id || (schedule as any)._id,
+        studentName: schedule.studentName,
+        day: schedule.day,
+        matchesDay,
+        date: schedule.date,
+        matchesDate,
+        willInclude: matchesDay && matchesDate
+      });
       
       return matchesDay && matchesDate;
     });
+    
+    console.log('🔍 MONITORING DEBUG - Today schedules after filtering:', todaySchedules.length);
 
     const liveClasses: LiveClass[] = (todaySchedules || []).map(schedule => {
       const now = new Date();
