@@ -85,7 +85,7 @@ export default function Syllabus() {
     const files = Array.from(e.target.files || []);
     const validFiles: FileWithPreview[] = [];
     
-    files.forEach(file => {
+    files.forEach((file: File) => {
       if (file.size > MAX_FILE_SIZE) {
         alert(`File "${file.name}" is too large. Maximum size is 5MB.`);
         return;
