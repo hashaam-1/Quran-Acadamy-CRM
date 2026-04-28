@@ -1,4 +1,5 @@
 const Syllabus = require('../models/Syllabus');
+const { uploadToCloudinary } = require('../middleware/upload');
 
 // Get all syllabi
 exports.getSyllabi = async (req, res) => {
@@ -50,26 +51,38 @@ exports.getSyllabusById = async (req, res) => {
 // Create new syllabus
 exports.createSyllabus = async (req, res) => {
   try {
-    // Handle file uploads with Cloudinary
+    // Handle file uploads with direct Cloudinary upload
     const attachments = [];
     console.log('📤 Files received in request:', req.files ? req.files.length : 0);
     if (req.files && req.files.length > 0) {
-      req.files.forEach(file => {
-        console.log('📄 Processing Cloudinary file:', {
+      for (const file of req.files) {
+        console.log('📄 Processing file for direct Cloudinary upload:', {
           originalname: file.originalname,
-          filename: file.filename,
-          path: file.path, // This is now the Cloudinary URL
           size: file.size,
           mimetype: file.mimetype
         });
         
-        // Use Cloudinary URL directly
-        attachments.push({
-          fileName: file.originalname,
-          fileUrl: file.path, // Cloudinary URL
-          fileType: file.mimetype
-        });
-      });
+        try {
+          // Upload directly to Cloudinary with resource_type: "raw"
+          const uploadResult = await uploadToCloudinary(file);
+          
+          console.log('✅ File uploaded successfully:', {
+            fileName: file.originalname,
+            secure_url: uploadResult.secure_url,
+            resource_type: uploadResult.resource_type
+          });
+          
+          // Use the correct Cloudinary URL from direct upload
+          attachments.push({
+            fileName: file.originalname,
+            fileUrl: uploadResult.secure_url, // Direct Cloudinary URL with /raw/upload/
+            fileType: file.mimetype
+          });
+        } catch (uploadError) {
+          console.error('❌ Failed to upload file:', file.originalname, uploadError);
+          // Continue with other files, but log the error
+        }
+      }
     }
     
     const {
@@ -232,26 +245,38 @@ exports.updateSyllabus = async (req, res) => {
       parsedAssessmentCriteria = assessmentCriteria;
     }
     
-    // Handle file uploads with Cloudinary for updates
+    // Handle file uploads with direct Cloudinary for updates
     if (req.files && req.files.length > 0) {
       const attachments = [];
       console.log('📤 Files received in update request:', req.files.length);
-      req.files.forEach(file => {
-        console.log('📄 Processing Cloudinary file (update):', {
+      for (const file of req.files) {
+        console.log('📄 Processing file for direct Cloudinary upload (update):', {
           originalname: file.originalname,
-          filename: file.filename,
-          path: file.path, // This is now the Cloudinary URL
           size: file.size,
           mimetype: file.mimetype
         });
         
-        // Use Cloudinary URL directly
-        attachments.push({
-          fileName: file.originalname,
-          fileUrl: file.path, // Cloudinary URL
-          fileType: file.mimetype
-        });
-      });
+        try {
+          // Upload directly to Cloudinary with resource_type: "raw"
+          const uploadResult = await uploadToCloudinary(file);
+          
+          console.log('✅ File uploaded successfully in update:', {
+            fileName: file.originalname,
+            secure_url: uploadResult.secure_url,
+            resource_type: uploadResult.resource_type
+          });
+          
+          // Use the correct Cloudinary URL from direct upload
+          attachments.push({
+            fileName: file.originalname,
+            fileUrl: uploadResult.secure_url, // Direct Cloudinary URL with /raw/upload/
+            fileType: file.mimetype
+          });
+        } catch (uploadError) {
+          console.error('❌ Failed to upload file in update:', file.originalname, uploadError);
+          // Continue with other files, but log the error
+        }
+      }
       
       // Add new attachments to existing ones or replace them
       syllabus.attachments = [...(syllabus.attachments || []), ...attachments];

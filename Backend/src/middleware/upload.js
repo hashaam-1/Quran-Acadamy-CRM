@@ -1,28 +1,6 @@
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinary");
-
-// Configure Cloudinary storage
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "quran-academy/syllabus",
-    resource_type: "raw", // 🔥 FIX: Use 'raw' for PDFs, docs, files
-    access_mode: "public", // 🔥 FIX: Ensure public access
-    allowed_formats: ["pdf", "doc", "docx", "xls", "xlsx"],
-  },
-  // Add logging to verify upload parameters
-  transformation: (req, file) => {
-    console.log('🔍 CLOUDINARY UPLOAD DEBUG:', {
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      resource_type: "raw",
-      access_mode: "public",
-      folder: "quran-academy/syllabus"
-    });
-    return {};
-  }
-});
+const path = require("path");
 
 // File filter for PDFs and documents
 const fileFilter = (req, file, cb) => {
@@ -41,7 +19,10 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Create multer upload instance with Cloudinary storage
+// Custom storage engine with direct Cloudinary upload
+const storage = multer.memoryStorage();
+
+// Custom upload middleware
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
@@ -50,4 +31,42 @@ const upload = multer({
   }
 });
 
-module.exports = upload;
+// Custom upload function to handle direct Cloudinary upload
+const uploadToCloudinary = async (file) => {
+  return new Promise((resolve, reject) => {
+    console.log('🔍 CLOUDINARY DIRECT UPLOAD DEBUG:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      resource_type: "raw",
+      folder: "quran-academy/syllabus"
+    });
+
+    // Upload to Cloudinary with explicit resource_type: "raw"
+    cloudinary.uploader.upload_stream(
+      {
+        resource_type: "raw", // 🔥 CRITICAL: This forces raw upload for PDFs
+        folder: "quran-academy/syllabus",
+        access_mode: "public",
+        public_id: `${Date.now()}-${path.parse(file.originalname).name}`,
+        format: path.extname(file.originalname).substring(1)
+      },
+      (error, result) => {
+        if (error) {
+          console.error('❌ CLOUDINARY UPLOAD ERROR:', error);
+          reject(error);
+        } else {
+          console.log('✅ CLOUDINARY UPLOAD SUCCESS:', {
+            public_id: result.public_id,
+            secure_url: result.secure_url,
+            resource_type: result.resource_type,
+            format: result.format
+          });
+          resolve(result);
+        }
+      }
+    ).end(file.buffer);
+  });
+};
+
+module.exports = { upload, uploadToCloudinary };
