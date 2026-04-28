@@ -105,16 +105,11 @@ export default function Syllabus() {
     console.log('🔍 AVAILABLE KEYS:', Object.keys(attachment));
     
     // Use the correct field names from backend - Cloudinary URLs are already complete
-    let fileUrl = attachment.fileUrl || attachment.url || attachment.path;
-    console.log('🔍 ORIGINAL DOWNLOAD URL:', fileUrl);
+    const fileUrl = attachment.fileUrl || attachment.url || attachment.path;
+    console.log('🔍 DOWNLOAD URL (ORIGINAL):', fileUrl);
     
-    // Fix Cloudinary URL for PDFs and documents - use /raw/upload/ instead of /image/upload/
-    if (fileUrl && attachment.fileType === 'application/pdf') {
-      fileUrl = fileUrl.replace('/image/upload/', '/raw/upload/');
-      console.log('🔧 FIXED DOWNLOAD URL:', fileUrl);
-    }
-    
-    // Cloudinary URLs are already complete, no construction needed
+    // For downloads, use original URL to allow proper download behavior
+    // Cloudinary handles downloads correctly with the original /image/upload/ path
     if (fileUrl) {
       console.log('🚀 DOWNLOADING FROM CLOUDINARY:', fileUrl);
       const link = document.createElement('a');
@@ -124,6 +119,7 @@ export default function Syllabus() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      console.log('✅ DOWNLOAD INITIATED SUCCESSFULLY');
     } else {
       console.error('❌ NO VALID FILE URL FOUND in attachment:', attachment);
       alert('Unable to download file - file path not found');
@@ -139,13 +135,12 @@ export default function Syllabus() {
     let fileUrl = attachment.fileUrl || attachment.url || attachment.path;
     console.log('🔍 ORIGINAL CLOUDINARY FILE URL:', fileUrl);
     console.log('🔍 URL TYPE:', typeof fileUrl);
-    console.log('🔍 URL CONTAINS /image/upload/:', fileUrl?.includes('/image/upload/'));
-    console.log('🔍 URL CONTAINS /raw/upload/:', fileUrl?.includes('/raw/upload/'));
     
-    // Fix Cloudinary URL for PDFs and documents - use /raw/upload/ instead of /image/upload/
+    // Fix Cloudinary URL for PDFs - use transformation parameters for inline viewing
     if (fileUrl && attachment.fileType === 'application/pdf') {
-      fileUrl = fileUrl.replace('/image/upload/', '/raw/upload/');
-      console.log('🔧 FIXED PDF URL:', fileUrl);
+      // Add inline viewing transformation to prevent download behavior in iframe
+      fileUrl = fileUrl.replace('/upload/', '/upload/fl_attachment:false/');
+      console.log('🔧 FIXED PDF URL WITH INLINE VIEWING:', fileUrl);
     }
     
     // Cloudinary URLs are already complete, no construction needed
