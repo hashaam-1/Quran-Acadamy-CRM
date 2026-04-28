@@ -10,6 +10,17 @@ const {
 } = require('../controllers/syllabusController');
 
 const router = express.Router();
+
+console.log('🔍 SYLLABUS ROUTES: Loading syllabus routes...');
+console.log('🔍 SYLLABUS ROUTES: Upload middleware loaded:', typeof upload);
+console.log('🔍 SYLLABUS ROUTES: Controller functions loaded:', {
+  getSyllabi: typeof getSyllabi,
+  getSyllabusById: typeof getSyllabusById,
+  createSyllabus: typeof createSyllabus,
+  updateSyllabus: typeof updateSyllabus,
+  deleteSyllabus: typeof deleteSyllabus,
+  getSyllabusStats: typeof getSyllabusStats
+});
 const fs = require('fs');
 const path = require('path');
 

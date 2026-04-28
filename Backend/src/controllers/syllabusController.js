@@ -3,6 +3,10 @@ const { uploadToCloudinary } = require('../middleware/upload');
 
 // Get all syllabi
 exports.getSyllabi = async (req, res) => {
+  console.log('🔍 GET SYLLABI: Function called');
+  console.log('🔍 GET SYLLABI: Query params:', req.query);
+  console.log('🔍 GET SYLLABI: Request headers:', req.headers);
+  
   try {
     const { course, level, status } = req.query;
     
