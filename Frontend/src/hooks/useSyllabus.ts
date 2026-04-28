@@ -35,7 +35,7 @@ interface SyllabusFilters {
 // Get all syllabi
 export const useSyllabi = (filters?: SyllabusFilters) => {
   const query = useQuery({
-    queryKey: ['syllabus', filters],
+    queryKey: ['syllabus', JSON.stringify(filters || {})],
     queryFn: async () => {
       return await syllabusApi.getAll(filters);
     },

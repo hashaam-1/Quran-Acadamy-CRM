@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,11 @@ export default function Syllabus() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [syllabusToDelete, setSyllabusToDelete] = useState<string | null>(null);
   
+  // Centralized helper for attachment URLs
+  const getFileUrl = (attachment: any) => {
+    return attachment?.fileUrl || attachment?.url || attachment?.path || '';
+  };
+
   // Check if user can add/edit syllabus
   const canManageSyllabus = currentUser?.role === 'admin' || currentUser?.role === 'team_leader' || currentUser?.role === 'teacher';
   
@@ -96,18 +101,12 @@ export default function Syllabus() {
 
   // File download functionality
   const handleFileDownload = (attachment: any) => {
-    // Debug: Log attachment structure
-    console.log('🔍 DOWNLOAD ATTACHMENT DATA DEBUG:', attachment);
-    console.log('🔍 AVAILABLE KEYS:', Object.keys(attachment));
+    // Use centralized helper for URL resolution
+    const fileUrl = getFileUrl(attachment);
+    console.log('🔍 DOWNLOAD URL:', fileUrl);
     
-    // Use the correct field names from backend - Cloudinary URLs are already complete
-    const fileUrl = attachment.fileUrl || attachment.url || attachment.path;
-    console.log('🔍 DOWNLOAD URL (ORIGINAL):', fileUrl);
-    
-    // For downloads, use original URL to allow proper download behavior
-    // Cloudinary handles downloads correctly with the original /image/upload/ path
     if (fileUrl) {
-      console.log('🚀 DOWNLOADING FROM CLOUDINARY:', fileUrl);
+      console.log('🚀 DOWNLOADING FILE:', fileUrl);
       const link = document.createElement('a');
       link.href = fileUrl;
       link.download = attachment.fileName || attachment.filename || attachment.originalname || 'syllabus-file';
@@ -123,38 +122,19 @@ export default function Syllabus() {
   };
 
   const handleFileOpen = (attachment: any) => {
-    // Debug: Log attachment structure
-    console.log('🔍 ATTACHMENT DATA DEBUG:', attachment);
-    console.log('🔍 AVAILABLE KEYS:', Object.keys(attachment));
+    // Use centralized helper for URL resolution
+    const fileUrl = getFileUrl(attachment);
+    console.log('🔍 FILE URL:', fileUrl);
+    console.log('🔍 FILE TYPE:', attachment?.fileType);
     
-    // Use the correct field names from backend - Cloudinary URLs are already complete
-    let fileUrl = attachment.fileUrl || attachment.url || attachment.path;
-    console.log('🔍 ORIGINAL CLOUDINARY FILE URL:', fileUrl);
-    console.log('🔍 URL TYPE:', typeof fileUrl);
-    console.log('🔍 URL CONTAINS /image/upload/:', fileUrl?.includes('/image/upload/'));
-    console.log('🔍 URL CONTAINS /raw/upload/:', fileUrl?.includes('/raw/upload/'));
-    
-    // For PDFs, convert old URLs from /image/upload/ to /raw/upload/
-    if (fileUrl && attachment.fileType === 'application/pdf') {
-      // Convert old /image/upload/ URLs to /raw/upload/ for proper access
-      if (fileUrl.includes('/image/upload/')) {
-        console.log('🔧 CONVERTING OLD PDF URL:', fileUrl);
-        fileUrl = fileUrl.replace('/image/upload/', '/raw/upload/');
-        console.log('✅ CONVERTED TO CORRECT URL:', fileUrl);
-      } else if (fileUrl.includes('/raw/upload/')) {
-        console.log('✅ ALREADY CORRECT PDF URL:', fileUrl);
-      }
-    }
-    
-    // Open PDFs in new tab to avoid Cloudinary iframe restrictions
+    // Open files in new tab - backend should provide correct URLs
     if (fileUrl) {
-      console.log('🚀 OPENING PDF IN NEW TAB:', fileUrl);
+      console.log('🚀 OPENING FILE IN NEW TAB:', fileUrl);
       try {
-        // Open in new tab - Cloudinary handles PDF viewing properly
         window.open(fileUrl, '_blank', 'noopener,noreferrer');
-        console.log('✅ PDF OPENED IN NEW TAB SUCCESSFULLY');
+        console.log('✅ FILE OPENED IN NEW TAB SUCCESSFULLY');
       } catch (error) {
-        console.error('❌ ERROR OPENING PDF:', error);
+        console.error('❌ ERROR OPENING FILE:', error);
         alert('Error opening file - please try again or use download instead');
       }
     } else {
@@ -383,8 +363,8 @@ export default function Syllabus() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {qaidaSyllabi.map((syllabus) => (
-                <>
-                  <Card className="lg:col-span-1" key={`${syllabus._id || syllabus.id}-overview`}>
+                <React.Fragment key={syllabus._id || syllabus.id}>
+                  <Card className="lg:col-span-1">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <BookOpen className="h-5 w-5 text-primary" />
@@ -473,7 +453,7 @@ export default function Syllabus() {
                     </CardContent>
                   </Card>
 
-                                  </>
+                                  </React.Fragment>
               ))}
             </div>
           )}
@@ -494,8 +474,8 @@ export default function Syllabus() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {nazraSyllabi.map((syllabus) => (
-                <>
-                  <Card className="lg:col-span-1" key={`${syllabus._id || syllabus.id}-overview`}>
+                <React.Fragment key={syllabus._id || syllabus.id}>
+                  <Card className="lg:col-span-1">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <BookOpen className="h-5 w-5 text-success" />
@@ -584,7 +564,7 @@ export default function Syllabus() {
                     </CardContent>
                   </Card>
 
-                                  </>
+                                  </React.Fragment>
               ))}
             </div>
           )}
@@ -605,8 +585,8 @@ export default function Syllabus() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {hifzSyllabi.map((syllabus) => (
-                <>
-                  <Card className="lg:col-span-1" key={`${syllabus._id || syllabus.id}-overview`}>
+                <React.Fragment key={syllabus._id || syllabus.id}>
+                  <Card className="lg:col-span-1">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <BookOpen className="h-5 w-5 text-accent" />
@@ -695,7 +675,7 @@ export default function Syllabus() {
                     </CardContent>
                   </Card>
 
-                                  </>
+                                  </React.Fragment>
               ))}
             </div>
           )}
@@ -716,8 +696,8 @@ export default function Syllabus() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {tajweedSyllabi.map((syllabus) => (
-                <>
-                  <Card className="lg:col-span-1" key={`${syllabus._id || syllabus.id}-overview`}>
+                <React.Fragment key={syllabus._id || syllabus.id}>
+                  <Card className="lg:col-span-1">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <BookOpen className="h-5 w-5 text-primary" />
@@ -806,7 +786,7 @@ export default function Syllabus() {
                     </CardContent>
                   </Card>
 
-                                  </>
+                                  </React.Fragment>
               ))}
             </div>
           )}
