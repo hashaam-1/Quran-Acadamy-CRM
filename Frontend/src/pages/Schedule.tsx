@@ -59,7 +59,7 @@ const courseColors = {
 };
 
 export default function Schedule() {
-  const { data: schedules = [], isLoading: schedulesLoading } = useSchedules();
+  const { data: scheduleData = { schedules: [], weekInfo: null }, isLoading: schedulesLoading } = useSchedules();
   const { data: teachers = [], isLoading: teachersLoading } = useTeachers();
   const { currentUser } = useAuthStore();
   const createSchedule = useCreateSchedule();
@@ -68,6 +68,10 @@ export default function Schedule() {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [teacherFilter, setTeacherFilter] = useState("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
+
+  // Extract schedules from the new data structure
+  const schedules = scheduleData?.schedules || [];
+  const weekInfo = scheduleData?.weekInfo;
 
   useEffect(() => {
     console.log('Schedule Page - Schedules:', schedules.length, 'schedules');
@@ -173,6 +177,25 @@ export default function Schedule() {
 
   return (
     <MainLayout title="Class Schedule" subtitle="Weekly timetable view">
+      {/* Week Information Display */}
+      {weekInfo && (
+        <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">
+                Current Week: {weekInfo.weekStart} to {weekInfo.weekEnd}
+              </span>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-blue-700">
+              <span>Showing {weekInfo.currentWeekSchedules} of {weekInfo.totalSchedules} classes</span>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                This Week
+              </Badge>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card variant="stat" className="animate-slide-up stagger-1">

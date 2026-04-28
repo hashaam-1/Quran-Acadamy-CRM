@@ -60,7 +60,15 @@ export const useSchedules = () => {
       console.log('📋 Schedule data sample:', formattedSchedules[0]);
       console.log('🔍 ID mapping check:', formattedSchedules.map(s => ({ id: s.id, meetingNumber: s.meetingNumber })));
       
-      return formattedSchedules;
+      // Log week information if available
+      if (data?.weekInfo) {
+        console.log('📅 Week Info:', data.weekInfo);
+      }
+      
+      return {
+        schedules: formattedSchedules,
+        weekInfo: data?.weekInfo || null
+      };
     },
     enabled: !!currentUser,
   });

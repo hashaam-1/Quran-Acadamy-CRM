@@ -7,6 +7,11 @@ export const schedulesApi = {
     return data;
   },
 
+  getAllWithoutFilter: async () => {
+    const { data } = await api.get('/schedules/all');
+    return data;
+  },
+
   getById: async (id: string) => {
     const { data } = await api.get(`/schedules/${id}`);
     return data;
