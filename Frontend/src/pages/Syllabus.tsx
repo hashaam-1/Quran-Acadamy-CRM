@@ -128,13 +128,27 @@ export default function Syllabus() {
     console.log('🔍 AVAILABLE KEYS:', Object.keys(attachment));
     
     // Use the correct field names from backend - Cloudinary URLs are already complete
-    const fileUrl = attachment.fileUrl || attachment.url || attachment.path;
-    console.log('🔍 CLOUDINARY FILE URL:', fileUrl);
+    let fileUrl = attachment.fileUrl || attachment.url || attachment.path;
+    console.log('🔍 ORIGINAL CLOUDINARY FILE URL:', fileUrl);
     console.log('🔍 URL TYPE:', typeof fileUrl);
+    console.log('🔍 URL CONTAINS /image/upload/:', fileUrl?.includes('/image/upload/'));
+    console.log('🔍 URL CONTAINS /raw/upload/:', fileUrl?.includes('/raw/upload/'));
+    
+    // For PDFs, ensure we're using the correct URL structure
+    if (fileUrl && attachment.fileType === 'application/pdf') {
+      // If it's an old file with /image/upload/, it might cause 401
+      // New files will have /raw/upload/ which should work correctly
+      if (fileUrl.includes('/image/upload/')) {
+        console.log('⚠️ DETECTED OLD PDF URL (may cause 401):', fileUrl);
+        console.log('💡 RECOMMENDATION: Re-upload this PDF to fix Cloudinary access');
+      } else if (fileUrl.includes('/raw/upload/')) {
+        console.log('✅ DETECTED CORRECT PDF URL:', fileUrl);
+      }
+    }
     
     // Open PDFs in new tab to avoid Cloudinary iframe restrictions
     if (fileUrl) {
-      console.log('� OPENING PDF IN NEW TAB:', fileUrl);
+      console.log('🚀 OPENING PDF IN NEW TAB:', fileUrl);
       try {
         // Open in new tab - Cloudinary handles PDF viewing properly
         window.open(fileUrl, '_blank', 'noopener,noreferrer');
