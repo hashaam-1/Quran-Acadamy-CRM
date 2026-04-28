@@ -38,14 +38,14 @@ const uploadToCloudinary = async (file) => {
       originalname: file.originalname,
       mimetype: file.mimetype,
       size: file.size,
-      resource_type: "raw",
+      resource_type: "auto",
       folder: "quran-academy/syllabus"
     });
 
-    // Upload to Cloudinary with explicit resource_type: "raw"
+    // Upload to Cloudinary with resource_type: "auto" for proper file viewing
     cloudinary.uploader.upload_stream(
       {
-        resource_type: "raw", // 🔥 CRITICAL: This forces raw upload for PDFs
+        resource_type: "auto", // ✅ FIXED: Auto-detect file type for proper viewing
         folder: "quran-academy/syllabus",
         access_mode: "public",
         public_id: `${Date.now()}-${path.parse(file.originalname).name}`,
