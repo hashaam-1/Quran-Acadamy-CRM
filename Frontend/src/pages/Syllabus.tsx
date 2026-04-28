@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -363,7 +363,7 @@ export default function Syllabus() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {qaidaSyllabi.map((syllabus) => (
-                <React.Fragment key={syllabus._id || syllabus.id}>
+                <>
                   <Card className="lg:col-span-1">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -453,7 +453,7 @@ export default function Syllabus() {
                     </CardContent>
                   </Card>
 
-                                  </React.Fragment>
+                                  </>
               ))}
             </div>
           )}
@@ -474,7 +474,7 @@ export default function Syllabus() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {nazraSyllabi.map((syllabus) => (
-                <React.Fragment key={syllabus._id || syllabus.id}>
+                <>
                   <Card className="lg:col-span-1">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -564,7 +564,7 @@ export default function Syllabus() {
                     </CardContent>
                   </Card>
 
-                                  </React.Fragment>
+                                  </>
               ))}
             </div>
           )}
@@ -585,7 +585,7 @@ export default function Syllabus() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {hifzSyllabi.map((syllabus) => (
-                <React.Fragment key={syllabus._id || syllabus.id}>
+                <>
                   <Card className="lg:col-span-1">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -675,7 +675,7 @@ export default function Syllabus() {
                     </CardContent>
                   </Card>
 
-                                  </React.Fragment>
+                                  </>
               ))}
             </div>
           )}
@@ -696,7 +696,7 @@ export default function Syllabus() {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {tajweedSyllabi.map((syllabus) => (
-                <React.Fragment key={syllabus._id || syllabus.id}>
+                <>
                   <Card className="lg:col-span-1">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -786,7 +786,7 @@ export default function Syllabus() {
                     </CardContent>
                   </Card>
 
-                                  </React.Fragment>
+                                  </>
               ))}
             </div>
           )}
