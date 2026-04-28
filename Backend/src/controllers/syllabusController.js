@@ -57,7 +57,14 @@ exports.createSyllabus = async (req, res) => {
   try {
     // Handle file uploads with direct Cloudinary upload
     const attachments = [];
-    console.log('📤 Files received in request:', req.files ? req.files.length : 0);
+    console.log('📤 CREATE SYLLABUS DEBUG:');
+    console.log('📤 Request body keys:', Object.keys(req.body));
+    console.log('📤 Files received:', req.files ? req.files.length : 0);
+    console.log('📤 Files object:', req.files);
+    console.log('📤 Request headers:', {
+      'content-type': req.get('content-type'),
+      'content-length': req.get('content-length')
+    });
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         console.log('📄 Processing file for direct Cloudinary upload:', {
