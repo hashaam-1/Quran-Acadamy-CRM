@@ -38,18 +38,17 @@ const uploadToCloudinary = async (file) => {
       originalname: file.originalname,
       mimetype: file.mimetype,
       size: file.size,
-      resource_type: "auto",
+      resource_type: "image",
       folder: "quran-academy/syllabus"
     });
 
-    // Upload to Cloudinary with resource_type: "auto" for proper file viewing
+    // Upload to Cloudinary with resource_type: "image" for PDF viewing in browser
     cloudinary.uploader.upload_stream(
       {
-        resource_type: "auto", // ✅ FIXED: Auto-detect file type for proper viewing
+        resource_type: "image", // ✅ FIXED: Use image type for PDF viewing in browser
         folder: "quran-academy/syllabus",
         access_mode: "public",
         public_id: `${Date.now()}-${path.parse(file.originalname).name}`,
-        format: path.extname(file.originalname).substring(1)
       },
       (error, result) => {
         if (error) {
