@@ -1,9 +1,95 @@
 const Schedule = require('../models/Schedule.js');
 
-// Get all schedules
+// Get all schedules with weekly filtering
 const getSchedules = async (req, res) => {
   try {
-    console.log('🔍 Fetching all schedules...');
+    console.log('🔍 Fetching schedules with weekly filtering...');
+    
+    // Prevent caching to ensure fresh data
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    
+    // Get current week date range
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - currentDay + (currentDay === 0 ? -6 : 1)); // Start from Monday
+    weekStart.setHours(0, 0, 0, 0);
+    
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6); // End on Sunday
+    weekEnd.setHours(23, 59, 59, 999);
+    
+    console.log('📅 Current week range:', {
+      start: weekStart.toISOString().split('T')[0],
+      end: weekEnd.toISOString().split('T')[0],
+      today: today.toISOString().split('T')[0]
+    });
+    
+    // Get all schedules first
+    const allSchedules = await Schedule.find()
+      .populate('studentId', 'name age')
+      .populate('teacherId', 'name email')
+      .sort({ day: 1, time: 1 });
+    
+    // Filter schedules for current week based on day
+    const currentWeekSchedules = allSchedules.filter(schedule => {
+      const scheduleDay = schedule.day;
+      const dayOfWeek = getDayOfWeek(scheduleDay);
+      
+      // Check if this day falls within the current week
+      const scheduleDate = new Date(today);
+      scheduleDate.setDate(today.getDate() - currentDay + dayOfWeek);
+      
+      return scheduleDate >= weekStart && scheduleDate <= weekEnd;
+    });
+    
+    console.log('✅ Found schedules:', {
+      total: allSchedules.length,
+      currentWeek: currentWeekSchedules.length,
+      filtered: currentWeekSchedules.length
+    });
+    
+    // ✅ FIXED: Return consistent response format with weekly filtering
+    res.json({
+      success: true,
+      data: currentWeekSchedules,
+      count: currentWeekSchedules.length,
+      weekInfo: {
+        weekStart: weekStart.toISOString().split('T')[0],
+        weekEnd: weekEnd.toISOString().split('T')[0],
+        totalSchedules: allSchedules.length,
+        currentWeekSchedules: currentWeekSchedules.length
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error fetching schedules:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
+// Helper function to convert day name to day number (Monday=1, Sunday=7)
+const getDayOfWeek = (dayName) => {
+  const days = {
+    'Monday': 1,
+    'Tuesday': 2,
+    'Wednesday': 3,
+    'Thursday': 4,
+    'Friday': 5,
+    'Saturday': 6,
+    'Sunday': 0 // Use 0 for Sunday to match JavaScript getDay()
+  };
+  return days[dayName] || 1;
+};
+
+// Get all schedules without weekly filtering (for admin purposes)
+const getAllSchedules = async (req, res) => {
+  try {
+    console.log('🔍 Fetching ALL schedules (no weekly filter)...');
     
     // Prevent caching to ensure fresh data
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
@@ -15,16 +101,15 @@ const getSchedules = async (req, res) => {
       .populate('teacherId', 'name email')
       .sort({ day: 1, time: 1 });
     
-    console.log('✅ Found schedules:', schedules.length);
+    console.log('✅ Found all schedules:', schedules.length);
     
-    // ✅ FIXED: Return consistent response format
     res.json({
       success: true,
       data: schedules,
       count: schedules.length
     });
   } catch (error) {
-    console.error('❌ Error fetching schedules:', error);
+    console.error('❌ Error fetching all schedules:', error);
     res.status(500).json({ 
       success: false, 
       message: error.message 
@@ -334,7 +419,8 @@ const cleanupFakeMeetings = async (req, res) => {
 };
 
 module.exports = {
-  getSchedules, // ✅ FIXED: Add missing getSchedules export
+  getSchedules,
+  getAllSchedules,
   getScheduleById,
   createSchedule,
   updateSchedule,

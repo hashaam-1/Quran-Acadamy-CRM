@@ -2,6 +2,7 @@ const express = require('express');
 
 const {
   getSchedules,
+  getAllSchedules,
   getScheduleById,
   createSchedule,
   updateSchedule,
@@ -18,6 +19,7 @@ const {
 const router = express.Router();
 
 router.get('/', getSchedules);
+router.get('/all', getAllSchedules);
 router.get('/stats', getScheduleStats);
 router.get('/day/:day', getSchedulesByDay);
 router.get('/teacher/:teacherId', getSchedulesByTeacher);
