@@ -218,54 +218,7 @@ export default function Monitoring() {
     return { liveClasses, summary, teacherPerformance: Array.from(teacherMap.values()) };
   };
 
-  // Calculate last week's class counts by modules
-  const getLastWeekModuleStats = (schedules: ClassSchedule[]) => {
-    const today = new Date();
-    const lastWeekStart = new Date(today);
-    lastWeekStart.setDate(today.getDate() - today.getDay() - 6); // Go to previous week Monday
-    const lastWeekEnd = new Date(lastWeekStart);
-    lastWeekEnd.setDate(lastWeekStart.getDate() + 6); // Previous week Sunday
-
-    const lastWeekSchedules = schedules.filter(schedule => {
-      if (schedule.date) {
-        const scheduleDate = new Date(schedule.date);
-        return scheduleDate >= lastWeekStart && scheduleDate <= lastWeekEnd;
-      }
-      return false; // Only count schedules with specific dates
-    });
-
-    // Group by course (modules)
-    const moduleStats = lastWeekSchedules.reduce((acc, schedule) => {
-      const course = schedule.course;
-      if (!acc[course]) {
-        acc[course] = {
-          total: 0,
-          completed: 0,
-          ongoing: 0,
-          upcoming: 0,
-          ended: 0,
-          late: 0
-        };
-      }
-      
-      acc[course].total++;
-      
-      if (schedule.status === 'completed') {
-        acc[course].completed++;
-      } else if (schedule.status === 'in_progress') {
-        acc[course].ongoing++;
-      } else if (schedule.status === 'scheduled') {
-        acc[course].upcoming++;
-      }
-      
-      return acc;
-    }, {} as Record<string, { total: number; completed: number; ongoing: number; upcoming: number; ended: number; late: number }>);
-
-    return moduleStats;
-  };
-
   const { liveClasses, summary, teacherPerformance } = processSchedules(schedules);
-  const lastWeekModuleStats = getLastWeekModuleStats(schedules);
 
   // Handle observe button click - join or create zoom meeting
   const handleObserve = async (liveClass: LiveClass) => {
@@ -372,48 +325,6 @@ export default function Monitoring() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Last Week Module Stats */}
-      <Card className="animate-slide-up">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
-            Last Week Classes by Module
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {Object.keys(lastWeekModuleStats).length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No classes from last week
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Object.entries(lastWeekModuleStats).map(([module, stats]) => (
-                <div key={module} className="p-4 rounded-lg border bg-card">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">{module}</h3>
-                    <Badge variant="outline">{stats.total} classes</Badge>
-                  </div>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Completed:</span>
-                      <span className="font-medium text-success">{stats.completed}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Ongoing:</span>
-                      <span className="font-medium text-info">{stats.ongoing}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Scheduled:</span>
-                      <span className="font-medium text-primary">{stats.upcoming}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Live Classes */}

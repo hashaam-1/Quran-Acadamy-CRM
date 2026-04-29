@@ -106,9 +106,9 @@ export default function Schedule() {
         const scheduleDate = new Date(s.date);
         matchesWeek = scheduleDate >= startOfWeek && scheduleDate <= endOfWeek;
       } else {
-        // For backward compatibility - show schedules without dates for any week
-        // This allows viewing historical data
-        matchesWeek = true;
+        // For backward compatibility - only show schedules without dates if they're for the selected week
+        // This prevents showing the same classes in every week
+        matchesWeek = false; // Don't show old schedules without specific dates
       }
       
       // All roles can see all classes - no role-based filtering
