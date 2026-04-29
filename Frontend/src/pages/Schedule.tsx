@@ -99,24 +99,16 @@ export default function Schedule() {
       const matchesDay = s.day === day;
       const matchesTeacher = teacherFilter === "all" || s.teacherId === teacherFilter;
       
-      // Week-based filtering - check if schedule falls within current week
+      // Week-based filtering - check if schedule falls within the selected week
       let matchesWeek = true;
       if (s.date) {
-        // If schedule has a specific date, check if it's within current week
+        // If schedule has a specific date, check if it's within the selected week
         const scheduleDate = new Date(s.date);
         matchesWeek = scheduleDate >= startOfWeek && scheduleDate <= endOfWeek;
       } else {
-        // For backward compatibility - only show schedules without dates if they're for current week
-        // This is temporary until all schedules have dates
-        const today = new Date();
-        const currentWeekStart = new Date(today);
-        currentWeekStart.setDate(today.getDate() - today.getDay() + 1);
-        const currentWeekEnd = new Date(currentWeekStart);
-        currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
-        
-        // Only show old schedules if currentWeek is the current week
-        const isCurrentWeek = currentWeek.toDateString() === currentWeekStart.toDateString();
-        matchesWeek = isCurrentWeek;
+        // For backward compatibility - show schedules without dates for any week
+        // This allows viewing historical data
+        matchesWeek = true;
       }
       
       // All roles can see all classes - no role-based filtering
