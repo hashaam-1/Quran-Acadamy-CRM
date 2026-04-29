@@ -33,7 +33,7 @@ interface LiveClass {
   startTime: string;
   duration: number;
   elapsed: number;
-  status: "live" | "upcoming" | "completed" | "late";
+  status: "live" | "upcoming" | "ended" | "late";
   meetingNumber?: string;
   scheduleId: string;
 }
@@ -62,7 +62,7 @@ interface TeacherPerformance {
 const statusConfig = {
   live: { label: "Live", variant: "success" as const, color: "bg-success animate-pulse" },
   upcoming: { label: "Upcoming", variant: "info" as const, color: "bg-info" },
-  completed: { label: "Completed", variant: "secondary" as const, color: "bg-secondary" },
+  ended: { label: "Ended", variant: "secondary" as const, color: "bg-secondary" },
   late: { label: "Late", variant: "warning" as const, color: "bg-warning" },
 };
 
@@ -86,9 +86,17 @@ export default function Monitoring() {
   const processSchedules = (schedules: ClassSchedule[]) => {
     const today = format(new Date(), 'yyyy-MM-dd');
     const todaySchedules = schedules.filter(schedule => {
-      // Check if schedule is for today based on day field
+      // Check if schedule is for today based on day field AND date
       const scheduleDay = format(new Date(), 'EEEE').toLowerCase();
-      return schedule.day.toLowerCase() === scheduleDay;
+      const matchesDay = schedule.day.toLowerCase() === scheduleDay;
+      
+      // Also check if the schedule date is today (if date field exists)
+      let matchesDate = true;
+      if (schedule.date) {
+        matchesDate = schedule.date === today;
+      }
+      
+      return matchesDay && matchesDate;
     });
 
     const liveClasses: LiveClass[] = todaySchedules.map(schedule => {
@@ -96,25 +104,33 @@ export default function Monitoring() {
       const startTime = parse(schedule.time, 'HH:mm', new Date());
       const endTime = addMinutes(startTime, parseInt(schedule.duration) || 30);
       
-      let status: "live" | "upcoming" | "completed" | "late" = "upcoming";
+      let status: "live" | "upcoming" | "ended" | "late" = "upcoming";
       let elapsed = 0;
 
-      if (schedule.status === "in_progress" && schedule.meetingNumber) {
-        status = "live";
-        elapsed = Math.floor((now.getTime() - startTime.getTime()) / 60000);
-      } else if (schedule.status === "completed") {
-        status = "completed";
-        elapsed = parseInt(schedule.duration) || 30;
-      } else if (isAfter(now, endTime) && schedule.status !== "completed") {
-        status = "late";
-        elapsed = parseInt(schedule.duration) || 30;
-      } else if (isBefore(now, startTime)) {
+      // Real-time status based on actual class time vs current time
+      if (isBefore(now, startTime)) {
+        // Class hasn't started yet
         status = "upcoming";
         elapsed = 0;
-      } else if (isBefore(now, endTime) && schedule.status === "scheduled") {
-        status = "late"; // Should have started but hasn't
-        elapsed = 0;
+      } else if (isAfter(now, endTime)) {
+        // Class has ended (regardless of schedule.status)
+        status = "ended";
+        elapsed = parseInt(schedule.duration) || 30;
+      } else if (isBefore(now, endTime) && isAfter(now, startTime)) {
+        // Class is currently in session time
+        if (schedule.status === "in_progress" && schedule.meetingNumber) {
+          status = "live";
+          elapsed = Math.floor((now.getTime() - startTime.getTime()) / 60000);
+        } else if (schedule.status === "completed") {
+          status = "ended";
+          elapsed = parseInt(schedule.duration) || 30;
+        } else {
+          // Should be live but hasn't started meeting
+          status = "late";
+          elapsed = 0;
+        }
       } else {
+        // Edge case - should be live
         status = "live";
         elapsed = Math.floor((now.getTime() - startTime.getTime()) / 60000);
       }
@@ -136,7 +152,7 @@ export default function Monitoring() {
     // Calculate summary
     const summary: ClassSummary = {
       total: todaySchedules.length,
-      completed: liveClasses.filter(c => c.status === 'completed').length,
+      completed: liveClasses.filter(c => c.status === 'ended').length,
       ongoing: liveClasses.filter(c => c.status === 'live').length,
       upcoming: liveClasses.filter(c => c.status === 'upcoming').length,
       missed: liveClasses.filter(c => c.status === 'late').length,
@@ -167,7 +183,7 @@ export default function Monitoring() {
       const teacher = teacherMap.get(teacherId)!;
       teacher.totalClasses++;
       
-      if (schedule.status === 'completed') {
+      if (schedule.status === 'completed' || schedule.status === 'ended') {
         teacher.classesCompleted++;
       }
     });
@@ -341,7 +357,7 @@ export default function Monitoring() {
                     session.status === "late" && "bg-warning/5 border-warning/20",
                     session.status === "live" && "bg-success/5 border-success/20",
                     session.status === "upcoming" && "bg-info/5 border-info/20",
-                    session.status === "completed" && "bg-secondary/5 border-secondary/20"
+                    session.status === "ended" && "bg-secondary/5 border-secondary/20"
                   )}
                 >
                   <div className="flex items-start justify-between mb-3">
