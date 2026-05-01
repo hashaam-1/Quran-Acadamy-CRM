@@ -226,7 +226,7 @@ export default function Schedule() {
   return (
     <MainLayout title="Class Schedule" subtitle="Weekly timetable view">
       {/* Week Navigation Controls */}
-      <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+      {/* <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
@@ -278,7 +278,7 @@ export default function Schedule() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card variant="stat" className="animate-slide-up stagger-1">
