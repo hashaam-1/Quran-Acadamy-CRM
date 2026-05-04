@@ -10,22 +10,41 @@ const getSchedules = async (req, res) => {
     res.set('Pragma', 'no-cache');
     res.set('Expires', '0');
     
-    // Get current week date range (Monday to Sunday)
-    const today = new Date();
-    const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
-    const weekStart = new Date(today);
-    weekStart.setDate(today.getDate() - currentDay + (currentDay === 0 ? -6 : 1)); // Start from Monday
-    weekStart.setHours(0, 0, 0, 0);
+    // ✅ FIXED: Accept week parameters from frontend or use current week
+    let weekStart, weekEnd;
     
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6); // End on Sunday
-    weekEnd.setHours(23, 59, 59, 999);
-    
-    console.log('📅 Current week range:', {
-      start: weekStart.toISOString().split('T')[0],
-      end: weekEnd.toISOString().split('T')[0],
-      today: today.toISOString().split('T')[0]
-    });
+    if (req.query.weekStart && req.query.weekEnd) {
+      // Use provided week range from frontend
+      weekStart = new Date(req.query.weekStart);
+      weekEnd = new Date(req.query.weekEnd);
+      weekStart.setHours(0, 0, 0, 0);
+      weekEnd.setHours(23, 59, 59, 999);
+      
+      console.log('📅 FRONTEND WEEK CHANGE DETECTED!');
+      console.log('🔄 Week range from frontend:', {
+        start: weekStart.toISOString().split('T')[0],
+        end: weekEnd.toISOString().split('T')[0],
+        source: 'frontend_control'
+      });
+    } else {
+      // Use current week as default
+      const today = new Date();
+      const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
+      weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - currentDay + (currentDay === 0 ? -6 : 1)); // Start from Monday
+      weekStart.setHours(0, 0, 0, 0);
+      
+      weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6); // End on Sunday
+      weekEnd.setHours(23, 59, 59, 999);
+      
+      console.log('📅 Using current week (default):', {
+        start: weekStart.toISOString().split('T')[0],
+        end: weekEnd.toISOString().split('T')[0],
+        today: today.toISOString().split('T')[0],
+        source: 'current_week_default'
+      });
+    }
     
     // ✅ DEBUG: Check all schedules to see date fields
     const allSchedules = await Schedule.find()
