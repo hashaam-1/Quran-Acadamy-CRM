@@ -59,67 +59,16 @@ const courseColors = {
 };
 
 export default function Schedule() {
-  const [currentWeek, setCurrentWeek] = useState(new Date());
   const [teacherFilter, setTeacherFilter] = useState("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
   
-  // Calculate week range from currentWeek
-  const getWeekRange = (date: Date) => {
-    const day = date.getDay(); // 0 (Sun) - 6 (Sat)
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-    
-    const weekStart = new Date(date);
-    weekStart.setDate(date.getDate() + diffToMonday);
-    weekStart.setHours(0, 0, 0, 0);
-    
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    weekEnd.setHours(23, 59, 59, 999);
-    
-    return {
-      weekStart: weekStart.toISOString().split('T')[0],
-      weekEnd: weekEnd.toISOString().split('T')[0]
-    };
-  };
-  
-  const { weekStart, weekEnd } = getWeekRange(currentWeek);
-  
-  // Log week changes
-  useEffect(() => {
-    console.log('📅 SCHEDULE COMPONENT - Week changed:', {
-      weekStart,
-      weekEnd,
-      currentWeek: currentWeek.toISOString().split('T')[0]
-    });
-  }, [weekStart, weekEnd, currentWeek]);
-  
-  const { data: schedules = [], isLoading: schedulesLoading } = useSchedules(weekStart, weekEnd);
+  const { data: schedules = [], isLoading: schedulesLoading } = useSchedules();
   const { data: weekInfo } = useWeekInfo();
   const { data: teachers = [], isLoading: teachersLoading } = useTeachers();
   const { currentUser } = useAuthStore();
   const createSchedule = useCreateSchedule();
   const updateScheduleMutation = useUpdateSchedule();
   const deleteScheduleMutation = useDeleteSchedule();
-  
-  // Week navigation functions
-  const navigateWeek = (direction: 'prev' | 'next') => {
-    const newWeek = new Date(currentWeek);
-    const daysToAdd = direction === 'next' ? 7 : -7;
-    newWeek.setDate(currentWeek.getDate() + daysToAdd);
-    
-    console.log(`📅 WEEK NAVIGATION - ${direction.toUpperCase()}:`, {
-      oldWeek: currentWeek.toISOString().split('T')[0],
-      newWeek: newWeek.toISOString().split('T')[0],
-      direction
-    });
-    
-    setCurrentWeek(newWeek);
-  };
-  
-  const goToCurrentWeek = () => {
-    console.log('📅 WEEK NAVIGATION - Go to current week');
-    setCurrentWeek(new Date());
-  };
 
   useEffect(() => {
     console.log('Schedule Page - Schedules:', schedules.length, 'schedules');
@@ -225,61 +174,7 @@ export default function Schedule() {
 
   return (
     <MainLayout title="Class Schedule" subtitle="Weekly timetable view">
-      {/* Week Navigation Controls */}
-      <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigateWeek('prev')}
-              className="flex items-center gap-2"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous Week
-            </Button>
-            
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-600" />
-              <span className="text-sm font-medium text-blue-900">
-                {weekStart} to {weekEnd}
-              </span>
-            </div>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigateWeek('next')}
-              className="flex items-center gap-2"
-            >
-              Next Week
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={goToCurrentWeek}
-              className="flex items-center gap-2"
-            >
-              <Calendar className="h-4 w-4" />
-              Current Week
-            </Button>
-            
-            <div className="flex items-center gap-2 text-sm text-blue-700">
-              <span>{schedules.length} classes</span>
-              {weekInfo && (
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                  Week {weekInfo.currentWeekSchedules}/{weekInfo.totalSchedules}
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Statistics Cards */}
+            {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card variant="stat" className="animate-slide-up stagger-1">
           <CardContent className="p-4 text-center">
