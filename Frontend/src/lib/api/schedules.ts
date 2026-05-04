@@ -2,8 +2,12 @@ import api from './config';
 import { ClassSchedule } from '../store';
 
 export const schedulesApi = {
-  getAll: async () => {
-    const { data } = await api.get('/schedules');
+  getAll: async (weekStart?: string, weekEnd?: string) => {
+    let url = '/schedules';
+    if (weekStart && weekEnd) {
+      url += `?weekStart=${weekStart}&weekEnd=${weekEnd}`;
+    }
+    const { data } = await api.get(url);
     return data;
   },
 

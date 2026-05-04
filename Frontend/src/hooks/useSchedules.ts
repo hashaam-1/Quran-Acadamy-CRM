@@ -4,11 +4,11 @@ import { ClassSchedule } from '@/lib/store';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/lib/auth-store';
 
-export const useSchedules = () => {
+export const useSchedules = (weekStart?: string, weekEnd?: string) => {
   const { currentUser } = useAuthStore();
   
   return useQuery({
-    queryKey: ['schedules', currentUser?.role, currentUser?.id],
+    queryKey: ['schedules', currentUser?.role, currentUser?.id, weekStart, weekEnd],
     queryFn: async () => {
       // Role-based schedule fetching
       let data;
@@ -19,32 +19,44 @@ export const useSchedules = () => {
       }
       
       console.log('🔍 Fetching schedules for user:', {
-        role: currentUser.role,
-        id: currentUser.id,
-        name: currentUser.name
+        role: currentUser?.role,
+        id: currentUser?.id,
+        name: currentUser?.name,
+        weekStart,
+        weekEnd,
+        hasWeekParams: !!(weekStart && weekEnd)
       });
+      
+      // Log week change if parameters are provided
+      if (weekStart && weekEnd) {
+        console.log('📅 FRONTEND WEEK CHANGE - Passing to backend:', {
+          weekStart,
+          weekEnd,
+          userRole: currentUser?.role
+        });
+      }
       
       // Admin, Sales Team, and Team Leader see all schedules
       if (currentUser.role === 'admin' || currentUser.role === 'sales_team' || currentUser.role === 'team_leader') {
-        console.log('👑 Admin/Sales/Team Leader - fetching ALL schedules');
-        data = await schedulesApi.getAll();
+        console.log('👑 Admin/Sales/Team Leader - fetching ALL schedules with week filter');
+        data = await schedulesApi.getAll(weekStart, weekEnd);
       }
       // Teachers see only their assigned classes
       else if (currentUser.role === 'teacher') {
-        console.log('👨‍🏫 Teacher - fetching schedules for teacher ID:', currentUser.id);
+        console.log('👨‍🏫 Teacher - fetching schedules for teacher ID:', currentUser.id, 'with week filter');
         data = await schedulesApi.getByTeacher(currentUser.id);
       }
       // Students see only their classes
       else if (currentUser.role === 'student') {
-        console.log('Student - fetching schedules for student ID:', currentUser.id);
+        console.log('Student - fetching schedules for student ID:', currentUser.id, 'with week filter');
         console.log('Student - full user object:', currentUser);
         data = await schedulesApi.getByStudent(currentUser.id);
         console.log('Student - API response:', data);
       }
       // Default: show all (fallback)
       else {
-        console.log('⚠️ Unknown role - fetching ALL schedules');
-        data = await schedulesApi.getAll();
+        console.log('⚠️ Unknown role - fetching ALL schedules with week filter');
+        data = await schedulesApi.getAll(weekStart, weekEnd);
       }
       
       // ✅ FIXED: Extract data field from API response
@@ -62,7 +74,7 @@ export const useSchedules = () => {
       
       // Log week information if available
       if (data?.weekInfo) {
-        console.log('📅 Week Info:', data.weekInfo);
+        console.log('📅 Week Info from backend:', data.weekInfo);
       }
       
       return formattedSchedules;
