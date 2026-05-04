@@ -92,7 +92,7 @@ export default function Schedule() {
   const [current, setCurrent] = useState<ClassSchedule | null>(null);
 
   const getWeekDates = () => {
-    const start = new Date(currentWeek);
+    const start = new Date();
     start.setDate(start.getDate() - start.getDay() + 1);
     return weekDays.map((day, index) => {
       const date = new Date(start);
@@ -126,7 +126,7 @@ export default function Schedule() {
   const handleAdd = (data: Omit<ClassSchedule, 'id'>) => {
     // Calculate the date for the selected day in the current week
     const dayIndex = weekDays.indexOf(data.day);
-    const startOfWeek = new Date(currentWeek);
+    const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Start from Monday
     const classDate = new Date(startOfWeek);
     classDate.setDate(startOfWeek.getDate() + dayIndex);
@@ -197,28 +197,6 @@ export default function Schedule() {
       </div>
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => {
-            const newWeek = new Date(currentWeek);
-            newWeek.setDate(newWeek.getDate() - 7);
-            setCurrentWeek(newWeek);
-          }}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div className="text-lg font-semibold">
-            {weekDates[0].month} {weekDates[0].date} - {weekDates[6].month} {weekDates[6].date}
-          </div>
-          <Button variant="outline" size="icon" onClick={() => {
-            const newWeek = new Date(currentWeek);
-            newWeek.setDate(newWeek.getDate() + 7);
-            setCurrentWeek(newWeek);
-          }}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setCurrentWeek(new Date())}>
-            Today
-          </Button>
-        </div>
         <div className="flex items-center gap-4">
           <Select value={teacherFilter} onValueChange={setTeacherFilter}>
             <SelectTrigger className="w-[180px]">
