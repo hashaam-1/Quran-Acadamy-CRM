@@ -5,67 +5,80 @@ const path = require("path");
 // File filter for PDFs and documents
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   ];
-  
+
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Only PDF, DOC, DOCX, XLS, and XLSX files are allowed'), false);
+    cb(
+      new Error(
+        "Only PDF, DOC, DOCX, XLS, and XLSX files are allowed"
+      ),
+      false
+    );
   }
 };
 
-// Custom storage engine with direct Cloudinary upload
+// Memory storage
 const storage = multer.memoryStorage();
 
-// Custom upload middleware
+// Upload middleware
 const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
+  storage,
+  fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
-  }
+    fileSize: 10 * 1024 * 1024, // 10MB
+  },
 });
 
-// Custom upload function to handle direct Cloudinary upload
+// Upload to Cloudinary
 const uploadToCloudinary = async (file) => {
   return new Promise((resolve, reject) => {
-    console.log('🔍 CLOUDINARY DIRECT UPLOAD DEBUG:', {
+    console.log("📄 Uploading file:", {
       originalname: file.originalname,
       mimetype: file.mimetype,
       size: file.size,
-      resource_type: "image",
-      folder: "quran-academy/syllabus"
     });
 
-    // Upload to Cloudinary with resource_type: "image" for PDF viewing in browser
-    cloudinary.uploader.upload_stream(
-      {
-        resource_type: "image", // ✅ FIXED: Use image type for PDF viewing in browser
-        folder: "quran-academy/syllabus",
-        access_mode: "public",
-        public_id: `${Date.now()}-${path.parse(file.originalname).name}`,
-      },
-      (error, result) => {
-        if (error) {
-          console.error('❌ CLOUDINARY UPLOAD ERROR:', error);
-          reject(error);
-        } else {
-          console.log('✅ CLOUDINARY UPLOAD SUCCESS:', {
+    cloudinary.uploader
+      .upload_stream(
+        {
+          resource_type: "auto", // Automatically detects PDF/DOCX/XLSX
+          folder: "quran-academy/syllabus",
+          public_id: `${Date.now()}-${path.parse(file.originalname).name}`,
+          use_filename: true,
+          unique_filename: true,
+          overwrite: false,
+        },
+        (error, result) => {
+          if (error) {
+            console.error("❌ Cloudinary Upload Error:", error);
+            return reject(error);
+          }
+
+          console.log("✅ Cloudinary Upload Success");
+          console.log(JSON.stringify(result, null, 2));
+
+          resolve({
             public_id: result.public_id,
             secure_url: result.secure_url,
+            url: result.url,
             resource_type: result.resource_type,
-            format: result.format
+            format: result.format,
+            original_filename: result.original_filename,
           });
-          resolve(result);
         }
-      }
-    ).end(file.buffer);
+      )
+      .end(file.buffer);
   });
 };
 
-module.exports = { upload, uploadToCloudinary };
+module.exports = {
+  upload,
+  uploadToCloudinary,
+};
