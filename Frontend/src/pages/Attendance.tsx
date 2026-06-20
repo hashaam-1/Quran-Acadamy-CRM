@@ -45,6 +45,9 @@ export default function Attendance() {
   const { data: teacherAttendance = [], isLoading: loadingTeachers } = useAttendance({
     userType: 'teacher',
   });
+
+  console.log("Teacher Attendance Data:", teacherAttendance);
+  console.log("Teacher Attendance Length:", teacherAttendance.length);
   
   // For teachers: get their students to mark attendance
   const { data: teacherStudents = [], isLoading: loadingTeacherStudents } = useStudentsForAttendance(

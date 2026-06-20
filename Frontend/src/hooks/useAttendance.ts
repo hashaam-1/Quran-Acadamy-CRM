@@ -40,8 +40,10 @@ export const useAttendance = (params?: { date?: string; studentId?: string; teac
       if (params?.status) queryParams.append('status', params.status);
       if (params?.userType) queryParams.append('userType', params.userType);
       
+      console.log('useAttendance API Call:', `/attendance?${queryParams.toString()}`);
       const response = await api.get(`/attendance?${queryParams.toString()}`);
       const data = response.data;
+      console.log('useAttendance Response:', data);
       return Array.isArray(data) ? data : [];
     },
   });
