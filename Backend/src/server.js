@@ -81,18 +81,18 @@ loadRoute("chat.js", "/api/chats");
 loadRoute("settingRoutes.js", "/api/settings");
 loadRoute("syllabusRoutes.js", "/api/syllabus");
 loadRoute("homeworkRoutes.js", "/api/homework");
-loadRoute("meetingRoutes.js", "/api/meetings");
+// loadRoute("meetingRoutes.js", "/api/meetings"); // COMMENTED OUT ZOOM MEETING FUNCTIONALITY
 
 /* =========================
-   ZOOM ROUTE (IMPORTANT FIXED)
+   ZOOM ROUTE (IMPORTANT FIXED) - COMMENTED OUT
 ========================= */
-try {
-  const zoomRoutes = require("./routes/zoom.js");
-  app.use("/api/zoom", zoomRoutes);
-  console.log("🚀 Zoom route loaded");
-} catch (err) {
-  console.error("❌ Zoom route failed:", err.message);
-}
+// try {
+//   const zoomRoutes = require("./routes/zoom.js");
+//   app.use("/api/zoom", zoomRoutes);
+//   console.log("🚀 Zoom route loaded");
+// } catch (err) {
+//   console.error("❌ Zoom route failed:", err.message);
+// }
 
 /* =========================
    STATIC FILE SERVING
