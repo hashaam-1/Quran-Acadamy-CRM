@@ -78,49 +78,11 @@ const getSchedules = async (req, res) => {
       return result;
     };
     
-    const currentWeekSchedules = allSchedules.filter(schedule => {
-      let scheduleDate;
-      
-      if (schedule.date && schedule.date instanceof Date && !isNaN(schedule.date)) {
-        scheduleDate = schedule.date;
-      } else {
-        scheduleDate = getDateFromDay(schedule.day); // fallback for missing/invalid dates
-      }
-      
-      return scheduleDate >= weekStart && scheduleDate <= weekEnd;
-    });
-    
-    console.log('✅ Found schedules:', {
-      total: totalSchedules,
-      currentWeek: currentWeekSchedules.length,
-      weekStart: weekStart.toISOString().split('T')[0],
-      weekEnd: weekEnd.toISOString().split('T')[0]
-    });
-    
-    // Debug: Log filtered schedules with their calculated dates
-    console.log('📅 Current week schedules:', 
-      currentWeekSchedules.map(s => ({
-        id: s._id,
-        originalDate: s.date,
-        calculatedDate: (s.date && s.date instanceof Date && !isNaN(s.date)) 
-          ? s.date.toISOString().split('T')[0]
-          : getDateFromDay(s.day).toISOString().split('T')[0],
-        day: s.day,
-        studentName: s.studentName
-      }))
-    );
-    
-    // ✅ FIXED: Return consistent response format with weekly filtering
+    // ✅ FIXED: Return all schedules without week filtering
     res.json({
       success: true,
-      data: currentWeekSchedules,
-      count: currentWeekSchedules.length,
-      weekInfo: {
-        weekStart: weekStart.toISOString().split('T')[0],
-        weekEnd: weekEnd.toISOString().split('T')[0],
-        totalSchedules: totalSchedules,
-        currentWeekSchedules: currentWeekSchedules.length
-      }
+      data: allSchedules,
+      count: allSchedules.length
     });
   } catch (error) {
     console.error('❌ Error fetching schedules:', error);
@@ -200,7 +162,7 @@ const createSchedule = async (req, res) => {
       const dayMap = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 0 };
       const targetDay = dayMap[day] || 1;
       let dateOffset = targetDay - currentDay;
-      if (dateOffset <= 0) dateOffset += 7;
+      if (dateOffset < 0) dateOffset += 7;
       const scheduleDate = new Date(today);
       scheduleDate.setDate(today.getDate() + dateOffset);
       scheduleDate.setHours(0, 0, 0, 0);
@@ -215,7 +177,7 @@ const createSchedule = async (req, res) => {
     
     const schedule = new Schedule(scheduleData);
     const newSchedule = await schedule.save();
-    console.log('✅ Schedule created:', newSchedule._id);
+    console.log('✅ Schedule created:', newSchedule._id, 'Date:', newSchedule.date);
     res.status(201).json(newSchedule);
   } catch (error) {
     console.error('Schedule creation error:', error);
