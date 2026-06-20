@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, CheckCircle, XCircle, Clock, User, Calendar, AlertCircle, AlertTriangle, Download, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAttendance, useAttendanceStats, useStudentsForAttendance, useScheduledClasses, useMarkScheduledAttendance, useMarkAttendance, useTeacherTodayAttendance, useTeacherCheckout } from "@/hooks/useAttendance";
+import { useAttendance, useAttendanceStats, useStudentsForAttendance, useScheduledClasses, useMarkScheduledAttendance, useMarkAttendance, useTeacherTodayAttendance, useTeacherCheckout, useMarkTeacherAttendance } from "@/hooks/useAttendance";
 import { toast } from "sonner";
 import { useSchedules } from "@/hooks/useSchedules";
 import { useAuthStore } from "@/lib/auth-store";
@@ -71,6 +71,7 @@ export default function Attendance() {
   const markScheduledAttendanceMutation = useMarkScheduledAttendance();
   const teacherCheckoutMutation = useTeacherCheckout();
   const markAttendance = useMarkAttendance();
+  const markTeacherAttendanceMutation = useMarkTeacherAttendance();
   
   // Get schedules for upcoming classes (must be called before any conditional returns)
   const { data: allSchedules = [] } = useSchedules();
@@ -166,6 +167,15 @@ export default function Attendance() {
       classTime: todayClass?.time || new Date().toLocaleTimeString(),
       course: todayClass?.course || 'General',
       scheduleId: todayClass?.id || todayClass?._id,
+    });
+  };
+
+  const handleTeacherCheckIn = async () => {
+    if (!currentUser?.id) return;
+    console.log('🔥 Teacher check-in called for:', currentUser.id);
+    await markTeacherAttendanceMutation.mutateAsync({
+      teacherId: currentUser.id,
+      status: 'checkin',
     });
   };
 
@@ -515,6 +525,27 @@ export default function Attendance() {
           
           <TabsContent value="myattendance">
             <div className="space-y-6">
+              {/* Teacher Check In Button */}
+              {isTeacher && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-primary" />
+                      Check In
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      onClick={handleTeacherCheckIn} 
+                      disabled={markTeacherAttendanceMutation.isPending}
+                      className="w-full"
+                    >
+                      {markTeacherAttendanceMutation.isPending ? 'Checking in...' : 'Check In Now'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Upcoming Classes Today */}
               {todaySchedules.length > 0 && (
                 <Card>

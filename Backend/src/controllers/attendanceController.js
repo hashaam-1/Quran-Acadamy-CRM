@@ -367,6 +367,9 @@ exports.deleteAttendance = async (req, res) => {
 
 // Mark teacher attendance (check-in/check-out)
 exports.markTeacherAttendance = async (req, res) => {
+  console.log("🔥 MARK TEACHER ATTENDANCE HIT");
+  console.log(req.body);
+  
   try {
     const { teacherId, status, date } = req.body; // status can be 'checkin', 'checkout', 'present', 'absent'
     

@@ -220,8 +220,9 @@ export default function Schedule() {
     }
   };
 
-  const todayClassCount = schedules.filter(s => s.day === weekDays[new Date().getDay() - 1]).length;
-  const completedToday = schedules.filter(s => s.day === weekDays[new Date().getDay() - 1] && s.status === 'completed').length;
+  const currentDay = weekDays[(new Date().getDay() + 6) % 7];
+  const todayClassCount = schedules.filter(s => s.day === currentDay).length;
+  const completedToday = schedules.filter(s => s.day === currentDay && s.status === 'completed').length;
 
   return (
     <MainLayout title="Class Schedule" subtitle="Weekly timetable view">

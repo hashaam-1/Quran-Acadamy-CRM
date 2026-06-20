@@ -144,6 +144,28 @@ export const useTeacherCheckout = () => {
   });
 };
 
+// Mark teacher attendance
+export const useMarkTeacherAttendance = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (data: { teacherId: string; status: string; date?: string }) => {
+      console.log('🔥 useMarkTeacherAttendance called with:', data);
+      const response = await api.post('/attendance/mark-teacher', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
+      queryClient.invalidateQueries({ queryKey: ['teacher', 'attendance'] });
+      toast.success('Teacher attendance marked successfully');
+    },
+    onError: (error: any) => {
+      console.error('Error marking teacher attendance:', error);
+      toast.error(error.response?.data?.message || 'Failed to mark teacher attendance');
+    },
+  });
+};
+
 // Get attendance statistics
 export const useAttendanceStats = () => {
   return useQuery({
