@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 // Import Zoom Meeting SDK from npm package
 import { ZoomMtg } from '@zoom/meetingsdk';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
 
 interface MeetingConfig {
   meetingNumber: string;

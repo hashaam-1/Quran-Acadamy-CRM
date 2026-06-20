@@ -6,8 +6,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
 interface StartClassButtonProps {
   scheduleId?: string;
   className?: string;
