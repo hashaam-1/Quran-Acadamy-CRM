@@ -63,69 +63,8 @@ const loadRoute = (routePath, urlPath) => {
 /* =========================
    ROUTES
 ========================= */
-// ✅ FIXED: Direct mount auth route to ensure it works
-try {
-  console.log("🔍 Loading auth route directly...");
-  const authRoutes = require("./routes/authRoutes.js");
-  app.use("/api/auth", authRoutes);
-  console.log("✅ Auth route mounted directly: /api/auth");
-} catch (err) {
-  console.error("❌ Auth route mount failed:", err);
-  console.error("🔥 FULL ERROR:", err);
-  console.error("🔥 STACK:", err.stack);
-}
-
-// ✅ LAST RESORT: Inline auth route definition to ensure it works
-try {
-  console.log("🔍 Adding inline auth route as backup...");
-  const { unifiedLogin } = require("./controllers/authController.js");
-  app.post("/api/auth/unified-login", unifiedLogin);
-  console.log("✅ Inline auth route added: POST /api/auth/unified-login");
-} catch (err) {
-  console.error("❌ Inline auth route failed:", err);
-  console.error("🔥 FULL ERROR:", err);
-}
-
-// ✅ ULTIMATE FALLBACK: Minimal auth route definition without authController dependency
-try {
-  console.log("🔍 Adding minimal auth route as ultimate fallback...");
-  app.post("/api/auth/unified-login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      console.log('🔐 Minimal auth login attempt:', email);
-      
-      // Admin login
-      if (email.toLowerCase() === 'hashaamamz1@gmail.com' && password === 'hashaam@123') {
-        return res.json({
-          success: true,
-          user: {
-            _id: '1',
-            id: '1',
-            name: 'Admin',
-            email: 'hashaamamz1@gmail.com',
-            role: 'admin'
-          },
-          message: 'Admin login successful'
-        });
-      }
-      
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    } catch (error) {
-      console.error('❌ Minimal auth error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Login failed',
-        error: error.message
-      });
-    }
-  });
-  console.log("✅ Minimal auth route added: POST /api/auth/unified-login");
-} catch (err) {
-  console.error("❌ Minimal auth route failed:", err);
-}
+// Load auth routes
+loadRoute("authRoutes.js", "/api/auth");
 
 loadRoute("leadRoutes.js", "/api/leads");
 loadRoute("studentRoutes.js", "/api/students");
