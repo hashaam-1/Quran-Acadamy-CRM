@@ -130,6 +130,7 @@ exports.teacherLogin = async (req, res) => {
         });
         await attendance.save();
         console.log(`Teacher ${teacher.name} new attendance record created, checked in at ${actualTime}, record ID: ${attendance._id}, date: ${attendance.date}`);
+        console.log(`Teacher attendance data:`, attendance.toObject());
       }
     } catch (attendanceError) {
       console.error('Error marking teacher attendance:', attendanceError);

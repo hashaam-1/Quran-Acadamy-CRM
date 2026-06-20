@@ -4,9 +4,15 @@ import { ClassSchedule } from '../store';
 export const schedulesApi = {
   getAll: async (weekStart?: string, weekEnd?: string) => {
     let url = '/schedules';
+    const params = new URLSearchParams();
     if (weekStart && weekEnd) {
-      url += `?weekStart=${weekStart}&weekEnd=${weekEnd}`;
+      params.append('weekStart', weekStart);
+      params.append('weekEnd', weekEnd);
     }
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+    console.log('schedulesApi.getAll URL:', url);
     const { data } = await api.get(url);
     return data;
   },
