@@ -537,6 +537,22 @@ exports.getAttendanceByStudent = async (req, res) => {
   }
 };
 
+// Get attendance by teacher
+exports.getAttendanceByTeacher = async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    
+    const attendance = await Attendance.find({ teacherId, userType: 'teacher' })
+      .sort({ date: -1 });
+    
+    console.log(`Fetching attendance for teacher ${teacherId}: Found ${attendance.length} records`);
+    res.json(attendance);
+  } catch (error) {
+    console.error('Error fetching teacher attendance:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get attendance statistics
 exports.getAttendanceStats = async (req, res) => {
   try {

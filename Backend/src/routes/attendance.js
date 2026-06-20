@@ -11,6 +11,7 @@ const {
   cleanupTeacherAttendance,
   getStudentsForAttendance,
   getAttendanceByStudent,
+  getAttendanceByTeacher,
 } = require('../controllers/attendanceController.js');
 const {
   getTodayScheduledClasses,
@@ -24,6 +25,7 @@ router.get('/', getAttendance);
 router.get('/stats', getAttendanceStats);
 router.get('/students', getStudentsForAttendance);
 router.get('/student/:studentId', getAttendanceByStudent);
+router.get('/teacher/:teacherId', getAttendanceByTeacher);
 router.get('/scheduled/:teacherId', getTodayScheduledClasses);
 router.get('/schedule-summary/:teacherId', getScheduleAttendanceSummary);
 router.get('/:id', getAttendanceById);
