@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    const uri = process.env.MONGODB_URI;
+    console.log("MONGO URI:", process.env.MONGODB_URI ? "FOUND" : "MISSING");
 
-    console.log("Mongo URI exists:", !!uri);
+    const uri = process.env.MONGODB_URI;
 
     if (!uri) {
       throw new Error("MONGODB_URI missing");
