@@ -169,19 +169,13 @@ const createSchedule = async (req, res) => {
       return scheduleDate;
     };
 
-    const getDayFromDate = (date) => {
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      return days[date.getDay()];
-    };
-
     const scheduleDate = getScheduleDate(req.body.day);
-    const calculatedDay = getDayFromDate(scheduleDate);
 
     const scheduleData = {
       ...req.body,
       className: req.body.className || `${req.body.course || 'Quran'} Class`,
       date: scheduleDate,
-      day: calculatedDay // Ensure day matches the calculated date
+      day: req.body.day // Use the requested day directly
     };
     
     const schedule = new Schedule(scheduleData);
