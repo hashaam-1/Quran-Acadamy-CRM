@@ -417,7 +417,7 @@ export default function Schedule() {
       <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
         <Clock className="h-3 w-3" />
         <span>{slot.time}</span>
-        <span>â¢</span>
+        <span>•</span>
         <span>{slot.duration}</span>
       </div>
     </div>
