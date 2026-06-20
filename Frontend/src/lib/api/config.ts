@@ -38,8 +38,11 @@ api.interceptors.response.use(
   },
   (error) => {
     // Check if response is HTML (error page) instead of JSON
-    if (error.response?.data && typeof error.response.data === 'string' && error.response.data.includes('<!doctype')) {
+    // Only check if content-type is explicitly HTML, not if data happens to contain HTML tags
+    const contentType = error.response?.headers?.['content-type'];
+    if (contentType && contentType.includes('text/html')) {
       console.error('🔴 API Error: Server returned HTML instead of JSON. Backend may be down or misconfigured.');
+      console.error('Content-Type:', contentType);
       return Promise.reject(new Error('Server returned HTML instead of JSON. Backend may be down or misconfigured.'));
     }
     

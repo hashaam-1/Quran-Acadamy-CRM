@@ -167,6 +167,8 @@ export const useAuthStore = create<AuthStore>()(
           // Check if response is HTML (error page) instead of JSON
           const contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('text/html')) {
+            const text = await response.text();
+            console.error('🔴 Server returned HTML instead of JSON:', text.substring(0, 200));
             throw new Error('Server returned HTML instead of JSON. Backend may be down or misconfigured.');
           }
 
