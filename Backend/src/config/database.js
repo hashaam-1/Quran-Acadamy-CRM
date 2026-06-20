@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
+  console.log("🔍 ENV CHECK:", process.env.MONGODB_URI ? "MONGODB_URI FOUND" : "MONGODB_URI NOT FOUND");
+
   try {
     if (!process.env.MONGODB_URI) {
       throw new Error("MONGODB_URI missing in .env");
@@ -17,10 +19,10 @@ const connectDB = async () => {
       minPoolSize: 2, // Minimum connections
     });
 
-    console.log("MongoDB Connected:", mongoose.connection.host);
+    console.log("🟢 MongoDB Connected:", mongoose.connection.host);
   } catch (err) {
-    console.log("MongoDB Error:", err.message);
-    process.exit(1);
+    console.log("❌ MongoDB Error:", err.message);
+    throw err; // Throw instead of process.exit(1) to allow Railway to handle restart
   }
 };
 

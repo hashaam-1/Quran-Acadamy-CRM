@@ -1,5 +1,8 @@
 require("dotenv").config();
 
+// Temporary debugging: Check if Railway variable is loaded
+console.log("🔍 Railway Mongo URI Check:", process.env.MONGODB_URI ? "YES - Variable Found" : "NO - Variable Missing");
+
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -167,12 +170,20 @@ app.use((err, req, res, next) => {
 ========================= */
 const PORT = process.env.PORT || 5000;
 
-// Start server immediately for Railway healthcheck
-app.listen(PORT, () => {
-  console.log("🚀 Server running on port:", PORT);
+// Connect to MongoDB first, then start server
+const startServer = async () => {
+  try {
+    console.log("� Connecting to MongoDB...");
+    await connectDB();
+    console.log("🟢 MongoDB Connected successfully");
 
-  // Connect to MongoDB asynchronously (don't block server startup)
-  connectDB()
-    .then(() => console.log("🟢 MongoDB Connected"))
-    .catch(err => console.error("❌ DB Connection Failed:", err.message));
-});
+    app.listen(PORT, () => {
+      console.log(`� Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Server startup failed:", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
