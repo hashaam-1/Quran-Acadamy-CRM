@@ -164,6 +164,12 @@ export const useAuthStore = create<AuthStore>()(
             body: JSON.stringify({ email: normalizedEmail, password })
           });
 
+          // Check if response is HTML (error page) instead of JSON
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('text/html')) {
+            throw new Error('Server returned HTML instead of JSON. Backend may be down or misconfigured.');
+          }
+
           if (!response.ok) {
             const errorData = await response.json();
             return { success: false, error: errorData.message || 'Login failed' };

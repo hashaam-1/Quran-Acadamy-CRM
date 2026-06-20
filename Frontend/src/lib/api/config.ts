@@ -37,6 +37,12 @@ api.interceptors.response.use(
         return response;
   },
   (error) => {
+    // Check if response is HTML (error page) instead of JSON
+    if (error.response?.data && typeof error.response.data === 'string' && error.response.data.includes('<!doctype')) {
+      console.error('🔴 API Error: Server returned HTML instead of JSON. Backend may be down or misconfigured.');
+      return Promise.reject(new Error('Server returned HTML instead of JSON. Backend may be down or misconfigured.'));
+    }
+    
     // Only log real errors, not expected 404s from login endpoints
     const isLoginEndpoint = error.config?.url?.includes('/login');
     const is404 = error.response?.status === 404;
