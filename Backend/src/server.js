@@ -228,13 +228,12 @@ app.use((err, req, res, next) => {
 ========================= */
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, async () => {
+// Start server immediately for Railway healthcheck
+app.listen(PORT, () => {
   console.log("🚀 Server running on port:", PORT);
 
-  try {
-    await connectDB();
-    console.log("🟢 MongoDB Connected");
-  } catch (err) {
-    console.error("❌ DB Connection Failed:", err.message);
-  }
+  // Connect to MongoDB asynchronously (don't block server startup)
+  connectDB()
+    .then(() => console.log("🟢 MongoDB Connected"))
+    .catch(err => console.error("❌ DB Connection Failed:", err.message));
 });
