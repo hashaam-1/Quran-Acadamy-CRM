@@ -46,6 +46,8 @@ export const useAttendance = (params?: { date?: string; studentId?: string; teac
       console.log('useAttendance Response:', data);
       return Array.isArray(data) ? data : [];
     },
+    staleTime: 0,
+    refetchOnMount: true
   });
 };
 
