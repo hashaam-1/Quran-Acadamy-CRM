@@ -721,11 +721,11 @@ export default function Attendance() {
             <CardContent>
               <div className="rounded-lg border overflow-hidden">
                 <Table>
-                  <TableHeader><TableRow className="bg-muted/50"><TableHead>Teacher</TableHead><TableHead>Date</TableHead><TableHead>Check In</TableHead><TableHead>Check Out</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow className="bg-muted/50"><TableHead>Teacher</TableHead><TableHead>Date</TableHead><TableHead>Day</TableHead><TableHead>Scheduled Time</TableHead><TableHead>Status</TableHead><TableHead>Check In</TableHead><TableHead>Check Out</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {filteredTeacherRecords.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                           No teacher attendance records found
                           {isAdmin && (
                             <div className="mt-2 text-sm">
@@ -738,21 +738,41 @@ export default function Attendance() {
                       filteredTeacherRecords.map((record) => {
                         const teacherName = record.teacherName || 'Unknown';
                         const status = record.status || 'present';
+                        const config = teacherStatusConfig[status];
                         return (
                           <TableRow key={record.id || record._id}>
                             <TableCell><div className="flex items-center gap-3"><div className="h-9 w-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-medium">{teacherName.split(" ").map(n => n[0]).join("")}</div><span className="font-medium">{teacherName}</span></div></TableCell>
                             <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
-                            <TableCell>{record.checkInTime || 'N/A'}</TableCell>
-                            <TableCell>{record.checkOutTime || '-'}</TableCell>
                             <TableCell>
-                              <Badge variant={teacherStatusConfig[status]?.variant || 'default'}>
-                                {teacherStatusConfig[status]?.label || status}
+                              <Badge variant={record.scheduledDay === currentDay ? "default" : "outline"}>
+                                {record.scheduledDay || new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' })}
                               </Badge>
-                              {record.scheduledTime && (
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  Scheduled: {record.scheduledTime}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-3 w-3 text-primary" />
+                                <span className="font-semibold">{record.scheduledTime || record.classTime || 'N/A'}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell><Badge variant={config?.variant || 'default'}>{config?.label || status}</Badge></TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3 text-muted-foreground" />
+                                  <span className={record.status === 'late' ? 'text-warning font-medium' : ''}>
+                                    {record.checkInTime || 'N/A'}
+                                  </span>
                                 </div>
-                              )}
+                                {record.status === 'late' && record.scheduledTime && (
+                                  <span className="text-xs text-warning">Late by {calculateLateDuration(record.scheduledTime, record.checkInTime)}</span>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-3 w-3 text-muted-foreground" />
+                                {record.checkOutTime || '-'}
+                              </div>
                             </TableCell>
                           </TableRow>
                         );
