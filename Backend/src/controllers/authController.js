@@ -176,11 +176,35 @@ const unifiedLogin = async (req, res) => {
           if (!existingAttendance) {
             const currentDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][today.getDay()];
 
-            const schedule = await Schedule.findOne({
+            // Find all schedules for today
+            const schedules = await Schedule.find({
               teacherId: teacher._id,
               day: currentDay,
               status: 'scheduled'
             });
+
+            // Get the upcoming class (next class after current time)
+            let schedule = null;
+            if (schedules && schedules.length > 0) {
+              const parseTime = (timeStr) => {
+                const [time, period] = timeStr.split(' ');
+                let [hours, minutes] = time.split(':').map(Number);
+                if (period === 'PM' && hours !== 12) hours += 12;
+                if (period === 'AM' && hours === 12) hours = 0;
+                return hours * 60 + minutes;
+              };
+
+              const currentMinutes = parseTime(actualTime);
+              const upcomingSchedules = schedules.filter(s => parseTime(s.time) >= currentMinutes - 60); // Allow classes within 1 hour before current time
+
+              if (upcomingSchedules.length > 0) {
+                schedule = upcomingSchedules[0]; // Get the first upcoming class
+              } else {
+                schedule = schedules[0]; // If no upcoming class, get the first class of the day
+              }
+
+              console.log(`🔥 Teacher ${teacher.name} schedules today: ${schedules.length}, Selected schedule: ${schedule?.time}, Course: ${schedule?.course}`);
+            }
 
             let status = 'present';
             if (schedule && schedule.time) {

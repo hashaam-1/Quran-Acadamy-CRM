@@ -695,7 +695,7 @@ export default function Attendance() {
       </div>
 
       <Tabs defaultValue="students">
-        <TabsList className="mb-4"><TabsTrigger value="students">Student Attendance</TabsTrigger><TabsTrigger value="teachers">Teacher Attendance</TabsTrigger><TabsTrigger value="myattendance">My Attendance</TabsTrigger></TabsList>
+        <TabsList className="mb-4"><TabsTrigger value="students">Student Attendance</TabsTrigger><TabsTrigger value="teachers">Teacher Attendance</TabsTrigger></TabsList>
         <TabsContent value="students">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Student Attendance</CardTitle><Button variant="outline" size="sm" className="gap-2"><Download className="h-4 w-4" />Export</Button></CardHeader>
