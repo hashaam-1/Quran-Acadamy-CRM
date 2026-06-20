@@ -45,6 +45,22 @@ app.get("/api/env-test", (req, res) => {
 });
 
 /* =========================
+   DEBUG ENV ROUTE
+========================= */
+app.get("/api/debug-env", (req, res) => {
+  res.json({
+    NODE_ENV: process.env.NODE_ENV,
+    PORT: process.env.PORT,
+    MONGODB_URI_EXISTS: !!process.env.MONGODB_URI,
+    ENV_KEYS: Object.keys(process.env).filter(
+      k =>
+        k.includes("MONGO") ||
+        k.includes("DATABASE")
+    )
+  });
+});
+
+/* =========================
    AUTH TEST ROUTE
 ========================= */
 app.get("/api/auth-test", (req, res) => {
@@ -192,6 +208,16 @@ const startServer = async () => {
     // Don't kill Railway container - let it handle the error
   }
 };
+
+console.log("========== ENV TEST ==========");
+console.log("PORT:", process.env.PORT);
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("MONGODB_URI:", process.env.MONGODB_URI);
+console.log(
+  "ALL MONGO KEYS:",
+  Object.keys(process.env).filter(k => k.includes("MONGO"))
+);
+console.log("==============================");
 
 startServer();
 
