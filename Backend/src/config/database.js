@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
+    console.log("ENV VALUE:", process.env.MONGODB_URI);
     console.log(
       "MONGODB_URI CHECK:",
       process.env.MONGODB_URI ? "FOUND" : "MISSING"
@@ -11,20 +12,18 @@ const connectDB = async () => {
       throw new Error("MONGODB_URI missing");
     }
 
-    const conn = await mongoose.connect(
-      process.env.MONGODB_URI
-    );
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
 
     console.log(
       "MongoDB Connected:",
       conn.connection.host
     );
 
+    return conn;
+
   } catch (error) {
-    console.log(
-      "Mongo Error:",
-      error.message
-    );
+    console.error("Mongo Error:", error.message);
+    throw error; // IMPORTANT: Re-throw to propagate error
   }
 };
 

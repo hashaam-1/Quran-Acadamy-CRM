@@ -35,6 +35,16 @@ app.get("/api/health", (req, res) => {
 });
 
 /* =========================
+   ENV TEST ROUTE
+========================= */
+app.get("/api/env-test", (req, res) => {
+  res.json({
+    mongodbExists: !!process.env.MONGODB_URI,
+    mongodbLength: process.env.MONGODB_URI?.length || 0,
+  });
+});
+
+/* =========================
    AUTH TEST ROUTE
 ========================= */
 app.get("/api/auth-test", (req, res) => {
