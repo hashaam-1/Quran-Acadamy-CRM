@@ -1,8 +1,5 @@
 require("dotenv").config();
 
-// Temporary debugging: Check if Railway variable is loaded
-console.log("🔍 Railway Mongo URI Check:", process.env.MONGODB_URI ? "YES - Variable Found" : "NO - Variable Missing");
-
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -182,7 +179,7 @@ const startServer = async () => {
     });
   } catch (error) {
     console.error("❌ Server startup failed:", error.message);
-    process.exit(1);
+    // Don't kill Railway container - let it handle the error
   }
 };
 
