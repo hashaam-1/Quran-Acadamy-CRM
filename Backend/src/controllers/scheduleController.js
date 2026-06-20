@@ -169,15 +169,24 @@ const createSchedule = async (req, res) => {
       return scheduleDate;
     };
 
+    const getDayFromDate = (date) => {
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      return days[date.getDay()];
+    };
+
+    const scheduleDate = getScheduleDate(req.body.day);
+    const calculatedDay = getDayFromDate(scheduleDate);
+
     const scheduleData = {
       ...req.body,
       className: req.body.className || `${req.body.course || 'Quran'} Class`,
-      date: getScheduleDate(req.body.day)
+      date: scheduleDate,
+      day: calculatedDay // Ensure day matches the calculated date
     };
     
     const schedule = new Schedule(scheduleData);
     const newSchedule = await schedule.save();
-    console.log('✅ Schedule created:', newSchedule._id, 'Date:', newSchedule.date);
+    console.log('✅ Schedule created:', newSchedule._id, 'Date:', newSchedule.date, 'Day:', newSchedule.day);
     res.status(201).json(newSchedule);
   } catch (error) {
     console.error('Schedule creation error:', error);
