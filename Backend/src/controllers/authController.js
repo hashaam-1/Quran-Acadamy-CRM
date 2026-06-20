@@ -1,7 +1,28 @@
 const Student = require('../models/Student');
 const Teacher = require('../models/Teacher');
 const TeamMember = require('../models/TeamMember');
+const Attendance = require('../models/Attendance');
+const Schedule = require('../models/Schedule');
 const bcrypt = require('bcryptjs');
+
+// Helper function to check if teacher is late
+const isTeacherLate = (scheduledTime, actualTime) => {
+  try {
+    const parseTime = (timeStr) => {
+      const [time, period] = timeStr.split(' ');
+      let [hours, minutes] = time.split(':').map(Number);
+      if (period === 'PM' && hours !== 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      return hours * 60 + minutes;
+    };
+    
+    const scheduledMinutes = parseTime(scheduledTime);
+    const actualMinutes = parseTime(actualTime);
+    return actualMinutes > scheduledMinutes + 5; // 5-minute grace period
+  } catch {
+    return false;
+  }
+};
 
 // ✅ UNIFIED LOGIN - Single endpoint for all roles
 const unifiedLogin = async (req, res) => {
@@ -134,6 +155,59 @@ const unifiedLogin = async (req, res) => {
       }
       
       if (isPasswordMatch) {
+        // 🔥 AUTOMATIC TEACHER ATTENDANCE CREATION ON LOGIN
+        try {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const endOfDay = new Date();
+          endOfDay.setHours(23, 59, 59, 999);
+
+          const existingAttendance = await Attendance.findOne({
+            teacherId: teacher._id,
+            userType: 'teacher',
+            date: { $gte: today, $lte: endOfDay }
+          });
+
+          const now = new Date();
+          const actualTime = now.toLocaleTimeString('en-US', {
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+          });
+
+          if (!existingAttendance) {
+            const currentDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][today.getDay()];
+
+            const schedule = await Schedule.findOne({
+              teacherId: teacher._id,
+              day: currentDay,
+              status: 'scheduled'
+            });
+
+            let status = 'present';
+            if (schedule && schedule.time) {
+              const isLate = isTeacherLate(schedule.time, actualTime);
+              status = isLate ? 'late' : 'present';
+              console.log(`🔥 Teacher ${teacher.name} check-in: Scheduled=${schedule.time}, Actual=${actualTime}, Status=${status}`);
+            }
+
+            const attendance = new Attendance({
+              userType: 'teacher',
+              teacherId: teacher._id,
+              teacherName: teacher.name,
+              date: today,
+              checkInTime: actualTime,
+              status: status,
+              scheduledTime: schedule?.time || null,
+              course: schedule?.course || 'Quran'
+            });
+            await attendance.save();
+            console.log(`🔥 Teacher ${teacher.name} checked in at ${actualTime} with status ${status}`);
+          } else {
+            console.log(`🔥 Teacher ${teacher.name} already has attendance record for today`);
+          }
+        } catch (attendanceError) {
+          console.error('🔥 Error marking teacher attendance on login:', attendanceError);
+        }
+
         const user = {
           _id: teacher._id,
           id: teacher._id,
@@ -144,7 +218,7 @@ const unifiedLogin = async (req, res) => {
           createdAt: teacher.createdAt,
           teacherId: teacher._id
         };
-        
+
         console.log('✅ Teacher login successful');
         return res.json({
           success: true,
