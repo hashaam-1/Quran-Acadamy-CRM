@@ -8,6 +8,7 @@ const {
   getTeachersStats,
   updateTeacherStudentCount,
   teacherLogin,
+  teacherLogout,
   getTeacherStudents,
   getTeacherAttendance
 } = require('../controllers/teacherController.js');
@@ -19,6 +20,7 @@ const {
 const router = express.Router();
 
 router.post('/login', teacherLogin);
+router.post('/logout', teacherLogout);
 router.post('/checkout', teacherCheckout);
 router.get('/attendance/today/:teacherId', getTeacherTodayAttendance);
 router.get('/', getTeachers);

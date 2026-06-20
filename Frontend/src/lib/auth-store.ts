@@ -98,7 +98,7 @@ export const useAuthStore = create<AuthStore>()(
         // Auto-checkout teacher on logout
         if (currentUser && currentUser.role === 'teacher') {
           try {
-            const response = await fetch(`${API_BASE_URL}/teachers/checkout`, {
+            const response = await fetch(`${API_BASE_URL}/teachers/logout`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

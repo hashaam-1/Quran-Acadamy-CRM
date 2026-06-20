@@ -22,8 +22,8 @@ const studentStatusConfig = {
 };
 
 const teacherStatusConfig = {
-  checked_in: { label: "Checked In", variant: "success" as const },
-  checked_out: { label: "Checked Out", variant: "muted" as const },
+  present: { label: "Present", variant: "success" as const },
+  late: { label: "Late", variant: "warning" as const },
   absent: { label: "Absent", variant: "destructive" as const },
 };
 
@@ -684,17 +684,8 @@ export default function Attendance() {
         </TabsContent>
         <TabsContent value="teachers">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader>
               <CardTitle>Teacher Attendance</CardTitle>
-              {isAdmin && (
-                <Button size="sm" onClick={() => {
-                  console.log('Manual teacher attendance marking - needs implementation');
-                  toast.info('Manual teacher attendance marking feature coming soon');
-                }}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Mark Attendance
-                </Button>
-              )}
             </CardHeader>
             <CardContent>
               <div className="rounded-lg border overflow-hidden">
@@ -715,14 +706,23 @@ export default function Attendance() {
                     ) : (
                       filteredTeacherRecords.map((record) => {
                         const teacherName = record.teacherName || 'Unknown';
-                        const status = record.status === 'present' ? 'checked_in' : 'checked_out';
+                        const status = record.status || 'present';
                         return (
                           <TableRow key={record.id || record._id}>
                             <TableCell><div className="flex items-center gap-3"><div className="h-9 w-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-medium">{teacherName.split(" ").map(n => n[0]).join("")}</div><span className="font-medium">{teacherName}</span></div></TableCell>
                             <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
                             <TableCell>{record.checkInTime || 'N/A'}</TableCell>
                             <TableCell>{record.checkOutTime || '-'}</TableCell>
-                            <TableCell><Badge variant={teacherStatusConfig[status].variant}>{teacherStatusConfig[status].label}</Badge></TableCell>
+                            <TableCell>
+                              <Badge variant={teacherStatusConfig[status]?.variant || 'default'}>
+                                {teacherStatusConfig[status]?.label || status}
+                              </Badge>
+                              {record.scheduledTime && (
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  Scheduled: {record.scheduledTime}
+                                </div>
+                              )}
+                            </TableCell>
                           </TableRow>
                         );
                       })
