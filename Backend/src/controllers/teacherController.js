@@ -98,7 +98,8 @@ exports.teacherLogin = async (req, res) => {
           date: today,
           checkInTime: actualTime,
           status: status,
-          scheduledTime: schedule?.time || null
+          scheduledTime: schedule?.time || null,
+          course: schedule?.course || 'Quran'
         });
         await attendance.save();
         console.log(`Teacher ${teacher.name} checked in at ${actualTime} with status ${status}`);

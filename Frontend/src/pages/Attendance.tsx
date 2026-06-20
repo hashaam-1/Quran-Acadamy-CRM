@@ -525,27 +525,6 @@ export default function Attendance() {
           
           <TabsContent value="myattendance">
             <div className="space-y-6">
-              {/* Teacher Check In Button */}
-              {isTeacher && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-primary" />
-                      Check In
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      onClick={handleTeacherCheckIn} 
-                      disabled={markTeacherAttendanceMutation.isPending}
-                      className="w-full"
-                    >
-                      {markTeacherAttendanceMutation.isPending ? 'Checking in...' : 'Check In Now'}
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-
               {/* Upcoming Classes Today */}
               {todaySchedules.length > 0 && (
                 <Card>
@@ -721,7 +700,7 @@ export default function Attendance() {
             <CardContent>
               <div className="rounded-lg border overflow-hidden">
                 <Table>
-                  <TableHeader><TableRow className="bg-muted/50"><TableHead>Teacher</TableHead><TableHead>Date</TableHead><TableHead>Day</TableHead><TableHead>Scheduled Time</TableHead><TableHead>Status</TableHead><TableHead>Check In</TableHead><TableHead>Check Out</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow className="bg-muted/50"><TableHead>Teacher</TableHead><TableHead>Date</TableHead><TableHead>Course</TableHead><TableHead>Scheduled Time</TableHead><TableHead>Status</TableHead><TableHead>Check In</TableHead><TableHead>Check Out</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {filteredTeacherRecords.length === 0 ? (
                       <TableRow>
@@ -743,11 +722,7 @@ export default function Attendance() {
                           <TableRow key={record.id || record._id}>
                             <TableCell><div className="flex items-center gap-3"><div className="h-9 w-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-medium">{teacherName.split(" ").map(n => n[0]).join("")}</div><span className="font-medium">{teacherName}</span></div></TableCell>
                             <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
-                            <TableCell>
-                              <Badge variant={record.scheduledDay === currentDay ? "default" : "outline"}>
-                                {record.scheduledDay || new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' })}
-                              </Badge>
-                            </TableCell>
+                            <TableCell><Badge variant="outline">{record.course || 'Quran'}</Badge></TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 <Clock className="h-3 w-3 text-primary" />
