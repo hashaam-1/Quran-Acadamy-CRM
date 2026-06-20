@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, CheckCircle, XCircle, Clock, User, Calendar, AlertCircle, AlertTriangle, Download } from "lucide-react";
+import { Search, CheckCircle, XCircle, Clock, User, Calendar, AlertCircle, AlertTriangle, Download, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAttendance, useAttendanceStats, useStudentsForAttendance, useScheduledClasses, useMarkScheduledAttendance, useMarkAttendance, useTeacherTodayAttendance, useTeacherCheckout } from "@/hooks/useAttendance";
+import { toast } from "sonner";
 import { useSchedules } from "@/hooks/useSchedules";
 import { useAuthStore } from "@/lib/auth-store";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -683,7 +684,18 @@ export default function Attendance() {
         </TabsContent>
         <TabsContent value="teachers">
           <Card>
-            <CardHeader><CardTitle>Teacher Attendance</CardTitle></CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Teacher Attendance</CardTitle>
+              {isAdmin && (
+                <Button size="sm" onClick={() => {
+                  console.log('Manual teacher attendance marking - needs implementation');
+                  toast.info('Manual teacher attendance marking feature coming soon');
+                }}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Mark Attendance
+                </Button>
+              )}
+            </CardHeader>
             <CardContent>
               <div className="rounded-lg border overflow-hidden">
                 <Table>
@@ -693,6 +705,11 @@ export default function Attendance() {
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                           No teacher attendance records found
+                          {isAdmin && (
+                            <div className="mt-2 text-sm">
+                              Teachers need to log in to create attendance records automatically
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     ) : (

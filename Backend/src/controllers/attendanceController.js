@@ -368,24 +368,33 @@ exports.deleteAttendance = async (req, res) => {
 // Mark teacher attendance (check-in/check-out)
 exports.markTeacherAttendance = async (req, res) => {
   try {
-    const { teacherId, status } = req.body; // status can be 'checkin', 'checkout', 'present', 'absent'
+    const { teacherId, status, date } = req.body; // status can be 'checkin', 'checkout', 'present', 'absent'
+    
+    console.log('markTeacherAttendance called with:', { teacherId, status, date });
     
     const teacher = await Teacher.findById(teacherId);
     if (!teacher) {
       return res.status(404).json({ message: 'Teacher not found' });
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
+    const attendanceDate = date ? new Date(date) : new Date();
+    attendanceDate.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(attendanceDate);
     endOfDay.setHours(23, 59, 59, 999);
+
+    console.log('Attendance date range:', {
+      start: attendanceDate.toISOString(),
+      end: endOfDay.toISOString()
+    });
 
     // Check if attendance already exists for today
     let attendance = await Attendance.findOne({
       teacherId,
       userType: 'teacher',
-      date: { $gte: today, $lte: endOfDay }
+      date: { $gte: attendanceDate, $lte: endOfDay }
     });
+
+    console.log('Existing attendance found:', attendance ? 'Yes' : 'No');
 
     const now = new Date();
     const actualTime = now.toLocaleTimeString('en-US', { 
@@ -413,18 +422,19 @@ exports.markTeacherAttendance = async (req, res) => {
         attendance.status = status;
       }
       await attendance.save();
+      console.log('Updated existing attendance:', attendance.toObject());
     } else {
       // Create new attendance record only for check-in
       attendance = new Attendance({
         userType: 'teacher',
         teacherId,
         teacherName: teacher.name,
-        date: today,
+        date: attendanceDate,
         status: status === 'absent' ? 'absent' : 'present',
         checkInTime: (status === 'checkin' || status === 'present') ? actualTime : null,
       });
       await attendance.save();
-      console.log(`New teacher attendance record created for ${teacher.name}`);
+      console.log(`New teacher attendance record created for ${teacher.name}:`, attendance.toObject());
     }
 
     // Map _id to id for frontend compatibility

@@ -7,6 +7,8 @@ import { useAuthStore } from '@/lib/auth-store';
 export const useSchedules = (weekStart?: string, weekEnd?: string) => {
   const { currentUser } = useAuthStore();
   
+  console.log('🔍 useSchedules called with:', { weekStart, weekEnd, caller: new Error().stack?.split('\n')[2]?.trim() });
+  
   return useQuery({
     queryKey: ['schedules', currentUser?.role, currentUser?.id, weekStart, weekEnd],
     queryFn: async () => {

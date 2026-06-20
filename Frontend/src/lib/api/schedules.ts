@@ -5,13 +5,21 @@ export const schedulesApi = {
   getAll: async (weekStart?: string, weekEnd?: string) => {
     let url = '/schedules';
     const params = new URLSearchParams();
-    if (weekStart && weekEnd) {
+    
+    console.log('schedulesApi.getAll - params:', { weekStart, weekEnd });
+    
+    // Only add parameters if they are defined and not empty strings
+    if (weekStart && weekStart !== 'undefined' && weekStart !== 'null') {
       params.append('weekStart', weekStart);
+    }
+    if (weekEnd && weekEnd !== 'undefined' && weekEnd !== 'null') {
       params.append('weekEnd', weekEnd);
     }
+    
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
+    
     console.log('schedulesApi.getAll URL:', url);
     const { data } = await api.get(url);
     return data;
