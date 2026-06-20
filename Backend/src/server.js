@@ -30,7 +30,7 @@ app.get("/api/health", (req, res) => {
     success: true,
     message: "Backend Running",
     db: mongoose.connection.readyState === 1 ? "connected" : "not connected",
-    time: new Date().toISOString(),
+    time: new Date(),
   });
 });
 
@@ -184,3 +184,12 @@ const startServer = async () => {
 };
 
 startServer();
+
+// Add mongoose connection event listeners
+mongoose.connection.on("connected", () => {
+  console.log("🔥 MONGO READY EVENT");
+});
+
+mongoose.connection.on("error", (err) => {
+  console.log("Mongo event error", err);
+});
