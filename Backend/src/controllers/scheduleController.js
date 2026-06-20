@@ -194,99 +194,31 @@ const getScheduleById = async (req, res) => {
 // Create schedule
 const createSchedule = async (req, res) => {
   try {
-    const { createZoomMeeting } = require('./meetingController');
-    
-    // ✅ Create REAL Zoom meeting first
-    const meetingDateTime = new Date();
-    meetingDateTime.setHours(meetingDateTime.getHours() + 1); // 1 hour from now
-    
-    const zoomMeeting = await createZoomMeeting({
-      topic: `${req.body.course || 'Quran'} Class - ${req.body.studentName || 'Student'}`,
-      startTime: meetingDateTime.toISOString(),
-      duration: parseInt(req.body.duration) || 60
-    });
-    
-    if (!zoomMeeting || !zoomMeeting.id) {
-      return res.status(500).json({ 
-        success: false, 
-        message: "Failed to create Zoom meeting" 
-      });
-    }
-    
-    console.log('✅ Real Zoom meeting created:', zoomMeeting.id);
-    
-    // ✅ Save meeting to Meeting collection as well
-    const Meeting = require('../models/Meeting');
-    const meeting = new Meeting({
-      className: req.body.className || `${req.body.course || 'Quran'} Class`, // ✅ REQUIRED: Add className
-      meetingNumber: zoomMeeting.id.toString(), // ✅ REAL Zoom meeting ID as string
-      zoomMeetingId: zoomMeeting.id.toString(),
-      joinUrl: zoomMeeting.join_url,
-      startUrl: zoomMeeting.start_url,
-      password: zoomMeeting.password || "123456",
-      zoomPassword: zoomMeeting.password || "123456", // ✅ Store Zoom password
-      plainPassword: zoomMeeting.password || "123456", // ✅ Store plain password
-      topic: `${req.body.course || 'Quran'} Class - ${req.body.studentName || 'Student'}`,
-      teacherId: req.body.teacherId,
-      studentId: req.body.studentId,
-      teacherName: req.body.teacherName,
-      studentName: req.body.studentName,
-      course: req.body.course,
-      time: req.body.time,
-      duration: parseInt(req.body.duration) || 60,
-      status: 'scheduled',
-      participants: []
-    });
-    
-    await meeting.save();
-    console.log('✅ Meeting saved to Meeting collection:', meeting.meetingNumber);
-    
-    // ✅ FIXED: Calculate proper date for the schedule based on day
     const getScheduleDate = (day) => {
       const today = new Date();
-      const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
-      const dayMap = {
-        'Monday': 1,
-        'Tuesday': 2,
-        'Wednesday': 3,
-        'Thursday': 4,
-        'Friday': 5,
-        'Saturday': 6,
-        'Sunday': 0
-      };
-      
+      const currentDay = today.getDay();
+      const dayMap = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 0 };
       const targetDay = dayMap[day] || 1;
       let dateOffset = targetDay - currentDay;
-      
-      // If the day is earlier in the week, schedule for next week
-      if (dateOffset <= 0) {
-        dateOffset += 7;
-      }
-      
+      if (dateOffset <= 0) dateOffset += 7;
       const scheduleDate = new Date(today);
       scheduleDate.setDate(today.getDate() + dateOffset);
       scheduleDate.setHours(0, 0, 0, 0);
-      
       return scheduleDate;
     };
 
-    // Ensure required fields have fallbacks to prevent undefined data
     const scheduleData = {
       ...req.body,
       className: req.body.className || `${req.body.course || 'Quran'} Class`,
-      meetingNumber: zoomMeeting.id.toString(), // ✅ REAL Zoom meeting ID
-      joinUrl: zoomMeeting.join_url,
-      startUrl: zoomMeeting.start_url,
-      zoomMeetingId: zoomMeeting.id,
-      date: getScheduleDate(req.body.day) // ✅ FIXED: Add proper date calculation
+      date: getScheduleDate(req.body.day)
     };
     
     const schedule = new Schedule(scheduleData);
     const newSchedule = await schedule.save();
-    console.log('✅ Schedule created with real meeting ID:', newSchedule.meetingNumber);
+    console.log('✅ Schedule created:', newSchedule._id);
     res.status(201).json(newSchedule);
   } catch (error) {
-    console.error(' Schedule creation error:', error);
+    console.error('Schedule creation error:', error);
     res.status(400).json({ message: error.message });
   }
 };
