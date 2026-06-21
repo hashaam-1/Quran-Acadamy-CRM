@@ -62,10 +62,10 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
       console.log('PAYMENT BODY:', JSON.stringify({
         sessionId: sessionData.sessionId,
         orderId: sessionData.orderId,
+        invoiceId: sessionData.invoiceId,
         cardNumber: cardNumber.replace(/\s/g, ''),
         cardExpiry,
-        cardCvc,
-        cardHolderName
+        cardCvc
       }));
       
       const paymentResponse = await fetch(`${API_BASE_URL}/payments/process`, {
@@ -74,10 +74,10 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
         body: JSON.stringify({
           sessionId: sessionData.sessionId,
           orderId: sessionData.orderId,
+          invoiceId: sessionData.invoiceId,
           cardNumber: cardNumber.replace(/\s/g, ''),
           cardExpiry,
-          cardCvc,
-          cardHolderName
+          cardCvc
         })
       });
       

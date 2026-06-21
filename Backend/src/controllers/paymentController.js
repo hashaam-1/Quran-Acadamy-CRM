@@ -57,7 +57,7 @@ exports.createPaymentSession = async (req, res) => {
       return res.status(500).json({ message: 'MPGS API returned error page. Check credentials and endpoint.' });
     }
     
-    res.json({ success: true, sessionId: response.data.session.id, orderId, amount: paymentAmount, currency: paymentCurrency });
+    res.json({ success: true, sessionId: response.data.session.id, orderId, invoiceId, amount: paymentAmount, currency: paymentCurrency });
   } catch (error) {
     console.error('❌ Payment session error:', error.message);
     console.error('❌ MPGS ERROR STATUS:', error.response?.status);
@@ -77,8 +77,10 @@ exports.processPayment = async (req, res) => {
     console.log("🔥 PROCESS PAYMENT HIT");
     console.log("BODY:", req.body);
     
-    const { sessionId, orderId, cardNumber, cardExpiry, cardCvc, cardHolderName } = req.body;
+    const { sessionId, orderId, invoiceId, cardNumber, cardExpiry, cardCvc } = req.body;
     const [month, year] = cardExpiry.split('/');
+    console.log("Expiry Month:", month);
+    console.log("Expiry Year:", year);
     const transactionId = `TXN-${Date.now()}`;
     const paymentRequest = {
       apiOperation: 'PAY',
@@ -91,8 +93,7 @@ exports.processPayment = async (req, res) => {
             number: cardNumber.replace(/\s/g, ''),
             expiry: { year, month },
             securityCode: cardCvc
-          },
-          cardHolder: { name: cardHolderName }
+          }
         }
       }
     };
@@ -105,7 +106,7 @@ exports.processPayment = async (req, res) => {
     );
 
     if (response.data.result === 'SUCCESS') {
-      await Invoice.findOneAndUpdate({ invoiceNo: orderId.replace('ORDER-', '').split('-')[0] }, { status: 'paid', paymentDate: new Date() });
+      await Invoice.findByIdAndUpdate(invoiceId, { status: 'paid', paymentDate: new Date() });
       res.json({ success: true, message: 'Payment successful' });
     } else {
       res.status(400).json({ success: false, message: 'Payment failed', error: response.data });
