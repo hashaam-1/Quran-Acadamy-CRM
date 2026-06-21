@@ -629,6 +629,12 @@ export default function Invoices() {
       {/* Payment Dialog */}
       <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
         <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Secure Payment</DialogTitle>
+            <DialogDescription>
+              Enter your card details to complete the payment for invoice #{current?.invoiceNo}
+            </DialogDescription>
+          </DialogHeader>
           <PaymentForm
             invoiceId={current?._id || current?.id || ''}
             amount={current?.amount || 0}

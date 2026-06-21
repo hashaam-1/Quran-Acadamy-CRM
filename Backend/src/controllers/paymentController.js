@@ -36,6 +36,7 @@ exports.createPaymentSession = async (req, res) => {
 
     const auth = Buffer.from(`${MPGS_CONFIG.merchantUsername}:${MPGS_CONFIG.apiPassword}`).toString('base64');
     console.log('🔍 MPGS Config:', { merchantId: MPGS_CONFIG.merchantId, gatewayUrl: MPGS_CONFIG.gatewayUrl });
+    console.log('🔍 Request URL:', `${MPGS_CONFIG.gatewayUrl}api/rest/version/59/merchant/${MPGS_CONFIG.merchantId}/session`);
     
     const response = await axios.post(
       `${MPGS_CONFIG.gatewayUrl}api/rest/version/59/merchant/${MPGS_CONFIG.merchantId}/session`,
@@ -43,7 +44,16 @@ exports.createPaymentSession = async (req, res) => {
       { headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' } }
     );
 
-    console.log('✅ MPGS session created:', response.data);
+    console.log('✅ MPGS Response Status:', response.status);
+    console.log('✅ MPGS Response Data:', response.data);
+    
+    // Check if response is HTML (error page)
+    if (typeof response.data === 'string' && response.data.includes('<!doctype')) {
+      console.error('❌ MPGS returned HTML error page instead of JSON');
+      console.error('❌ HTML Response:', response.data.substring(0, 500));
+      return res.status(500).json({ message: 'MPGS API returned error page. Check credentials and endpoint.' });
+    }
+    
     res.json({ success: true, sessionId: response.data.session.id, orderId, amount: paymentAmount, currency: paymentCurrency });
   } catch (error) {
     console.error('❌ Payment session error:', error.message);

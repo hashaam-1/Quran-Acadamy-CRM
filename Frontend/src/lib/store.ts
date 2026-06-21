@@ -88,6 +88,8 @@ export interface Conversation {
 
 export interface Invoice {
   id: string;
+  _id?: string;
+  invoiceNo?: string;
   studentName: string;
   studentId: string;
   amount: number;
@@ -97,6 +99,7 @@ export interface Invoice {
   paidAmount: number;
   discount?: number;
   estimatedAmount?: number;
+  currency?: string;
 }
 
 export interface ClassSchedule {

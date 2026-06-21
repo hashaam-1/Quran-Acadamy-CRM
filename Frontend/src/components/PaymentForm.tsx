@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CreditCard, Lock } from "lucide-react";
+import { CreditCard, Lock, Shield, CheckCircle2 } from "lucide-react";
 import {
   VisuallyHidden,
 } from "@radix-ui/react-visually-hidden";
@@ -30,15 +30,26 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
 
+      console.log('🔍 Creating payment session...');
       const sessionResponse = await fetch(`${API_BASE_URL}/payments/create-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ invoiceId, amount, currency })
       });
-      const sessionData = await sessionResponse.json();
+      
+      const sessionText = await sessionResponse.text();
+      console.log('🔍 Session Response:', sessionText.substring(0, 200));
+      
+      let sessionData;
+      try {
+        sessionData = JSON.parse(sessionText);
+      } catch {
+        throw new Error('Invalid response from server. Please check backend logs.');
+      }
 
-      if (!sessionData.success) throw new Error('Failed to create payment session');
+      if (!sessionData.success) throw new Error(sessionData.message || 'Failed to create payment session');
 
+      console.log('🔍 Processing payment...');
       const paymentResponse = await fetch(`${API_BASE_URL}/payments/process`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
