@@ -58,19 +58,32 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
       if (!sessionData.success) throw new Error(sessionData.message || 'Failed to create payment session');
 
       console.log('🔍 Processing payment...');
+      console.log('PAYMENT URL:', `${API_BASE_URL}/payments/process`);
+      console.log('PAYMENT BODY:', JSON.stringify({
+        sessionId: sessionData.sessionId,
+        orderId: sessionData.orderId,
+        cardNumber: cardNumber.replace(/\s/g, ''),
+        cardExpiry,
+        cardCvc,
+        cardHolderName
+      }));
+      
       const paymentResponse = await fetch(`${API_BASE_URL}/payments/process`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId: sessionData.sessionId,
           orderId: sessionData.orderId,
-          cardNumber,
+          cardNumber: cardNumber.replace(/\s/g, ''),
           cardExpiry,
           cardCvc,
           cardHolderName
         })
       });
-      const paymentData = await paymentResponse.json();
+      
+      const paymentText = await paymentResponse.text();
+      console.log('PAYMENT RESPONSE:', paymentText);
+      const paymentData = JSON.parse(paymentText);
 
       if (paymentData.success) {
         onSuccess();
