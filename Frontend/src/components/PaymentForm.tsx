@@ -32,8 +32,8 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
 
     try {
       console.log("VITE_API_URL =", import.meta.env.VITE_API_URL);
-      // Temporarily hardcoded for testing
-      const API_BASE_URL = "https://quran-academy-crm-backend-production.up.railway.app/api";
+      // Temporarily hardcoded for testing (correct spelling: acadamy)
+      const API_BASE_URL = "https://quran-acadamy-crm-backend-production.up.railway.app/api";
 
       console.log("API_BASE_URL =", API_BASE_URL);
       console.log("Calling:", `${API_BASE_URL}/payments/create-session`);
