@@ -1,4 +1,5 @@
 const Invoice = require('../models/Invoice.js');
+const Student = require('../models/Student.js');
 
 // Get all invoices
 exports.getInvoices = async (req, res) => {
@@ -29,7 +30,14 @@ exports.getInvoiceById = async (req, res) => {
 // Create invoice
 exports.createInvoice = async (req, res) => {
   try {
-    const invoice = new Invoice(req.body);
+    const { studentId, amount } = req.body;
+    const student = await Student.findById(studentId);
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+
+    const invoice = new Invoice({
+      ...req.body,
+      currency: student.currency || 'USD'
+    });
     const newInvoice = await invoice.save();
     res.status(201).json(newInvoice);
   } catch (error) {

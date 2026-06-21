@@ -17,6 +17,12 @@ const studentSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  currency: {
+    type: String,
+    required: true,
+    enum: ['USD', 'GBP', 'CAD', 'AUD', 'PKR'],
+    default: 'USD'
+  },
   timezone: {
     type: String,
     required: true,

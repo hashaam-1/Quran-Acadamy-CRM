@@ -37,6 +37,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { PaymentForm } from "@/components/PaymentForm";
 import {
   Search,
   DollarSign,
@@ -101,6 +102,7 @@ export default function Invoices() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [current, setCurrent] = useState<Invoice | null>(null);
   const [formData, setFormData] = useState(emptyInvoice);
 
@@ -486,9 +488,14 @@ export default function Invoices() {
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           {invoice.status !== 'paid' && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => handleMarkPaid(invoice)} title="Mark as Paid">
-                              <CheckCircle className="h-4 w-4" />
-                            </Button>
+                            <>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => handleMarkPaid(invoice)} title="Mark as Paid">
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" onClick={() => { setCurrent(invoice); setIsPaymentOpen(true); }} title="Pay Now">
+                                <CreditCard className="h-4 w-4" />
+                              </Button>
+                            </>
                           )}
                           <Button variant="ghost" size="icon" className="h-8 w-8" title="Download" onClick={() => handleDownload(invoice)}><Download className="h-4 w-4" /></Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setCurrent(invoice); setFormData(invoice); setIsEditOpen(true); }}><Pencil className="h-4 w-4" /></Button>
@@ -609,6 +616,22 @@ export default function Invoices() {
           <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Payment Dialog */}
+      <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
+        <DialogContent className="max-w-md">
+          <PaymentForm
+            invoiceId={current?._id || current?.id || ''}
+            amount={current?.amount || 0}
+            currency={current?.currency || 'USD'}
+            onSuccess={() => {
+              setIsPaymentOpen(false);
+              window.location.reload();
+            }}
+            onCancel={() => setIsPaymentOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 }

@@ -81,6 +81,7 @@ loadRoute("chat.js", "/api/chats");
 loadRoute("settingRoutes.js", "/api/settings");
 loadRoute("syllabusRoutes.js", "/api/syllabus");
 loadRoute("homeworkRoutes.js", "/api/homework");
+loadRoute("paymentRoutes.js", "/api/payments");
 // loadRoute("meetingRoutes.js", "/api/meetings"); // COMMENTED OUT ZOOM MEETING FUNCTIONALITY
 
 /* =========================
