@@ -57,8 +57,15 @@ exports.createPaymentSession = async (req, res) => {
     res.json({ success: true, sessionId: response.data.session.id, orderId, amount: paymentAmount, currency: paymentCurrency });
   } catch (error) {
     console.error('❌ Payment session error:', error.message);
-    console.error('❌ Error details:', error.response?.data || error);
-    res.status(500).json({ message: 'Failed to create payment session', error: error.message });
+    console.error('❌ MPGS ERROR STATUS:', error.response?.status);
+    console.error('❌ MPGS ERROR DATA:', error.response?.data);
+    console.error('❌ Full error:', error);
+    res.status(500).json({ 
+      message: 'Failed to create payment session', 
+      error: error.message,
+      mpgsStatus: error.response?.status,
+      mpgsError: error.response?.data
+    });
   }
 };
 
