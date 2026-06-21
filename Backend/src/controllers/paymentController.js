@@ -78,6 +78,8 @@ exports.processPayment = async (req, res) => {
     console.log("BODY:", req.body);
     
     const { sessionId, orderId, cardNumber, cardExpiry, cardCvc, cardHolderName } = req.body;
+    const [month, year] = cardExpiry.split('/');
+    const transactionId = `TXN-${Date.now()}`;
     const paymentRequest = {
       apiOperation: 'PAY',
       session: { id: sessionId },
@@ -86,8 +88,8 @@ exports.processPayment = async (req, res) => {
         type: 'CARD',
         provided: {
           card: {
-            number: cardNumber,
-            expiry: { year: cardExpiry.slice(-2), month: cardExpiry.slice(0, 2) },
+            number: cardNumber.replace(/\s/g, ''),
+            expiry: { year: `20${year}`, month },
             securityCode: cardCvc
           },
           cardHolder: { name: cardHolderName }
@@ -96,8 +98,8 @@ exports.processPayment = async (req, res) => {
     };
 
     const auth = Buffer.from(`${MPGS_CONFIG.merchantUsername}:${MPGS_CONFIG.apiPassword}`).toString('base64');
-    const response = await axios.post(
-      `${MPGS_CONFIG.gatewayUrl}api/rest/version/59/merchant/${MPGS_CONFIG.merchantId}/order/${orderId}/transaction`,
+    const response = await axios.put(
+      `${MPGS_CONFIG.gatewayUrl}api/rest/version/59/merchant/${MPGS_CONFIG.merchantId}/order/${orderId}/transaction/${transactionId}`,
       paymentRequest,
       { headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' } }
     );
