@@ -132,6 +132,7 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
             </Button>
           </div>
         </form>
+      </CardContent>
     </Card>
   );
 }

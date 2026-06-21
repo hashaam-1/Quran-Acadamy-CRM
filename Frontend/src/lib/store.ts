@@ -29,6 +29,7 @@ export interface Student {
   name: string;
   age: number;
   country: string;
+  currency?: string;
   timezone: string;
   course: string;
   teacher: string;
