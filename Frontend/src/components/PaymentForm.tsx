@@ -28,7 +28,15 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
     setLoading(true);
 
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
+      console.log("VITE_API_URL =", import.meta.env.VITE_API_URL);
+      const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+      if (!API_BASE_URL) {
+        throw new Error("VITE_API_URL is not configured. Please set the environment variable in Railway.");
+      }
+
+      console.log("API_BASE_URL =", API_BASE_URL);
+      console.log("Calling:", `${API_BASE_URL}/payments/create-session`);
 
       console.log('🔍 Creating payment session...');
       const sessionResponse = await fetch(`${API_BASE_URL}/payments/create-session`, {
