@@ -56,6 +56,7 @@ import {
   Phone,
   Mail,
   MapPin,
+  CreditCard,
 } from "lucide-react";
 import { Invoice } from "@/lib/store";
 import { toast } from "sonner";
