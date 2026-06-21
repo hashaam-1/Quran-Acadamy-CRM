@@ -25,7 +25,8 @@ exports.createPaymentSession = async (req, res) => {
     const student = await Student.findById(invoice.studentId);
     const paymentCurrency = currency || student?.currency || 'USD';
     const paymentAmount = amount || invoice.amount;
-    const orderId = `ORDER-${invoiceId}-${Date.now()}`;
+    // MPGS-compliant order ID (only alphanumeric, dash, underscore)
+    const orderId = `ORD-${Math.floor(Date.now() / 1000)}`;
 
     console.log('🔍 Creating MPGS session:', { orderId, amount: paymentAmount, currency: paymentCurrency });
     const sessionRequest = {
