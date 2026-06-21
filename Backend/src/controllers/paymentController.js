@@ -89,7 +89,7 @@ exports.processPayment = async (req, res) => {
         provided: {
           card: {
             number: cardNumber.replace(/\s/g, ''),
-            expiry: { year: `20${year}`, month },
+            expiry: { year, month },
             securityCode: cardCvc
           },
           cardHolder: { name: cardHolderName }
