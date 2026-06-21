@@ -17,6 +17,9 @@ interface PaymentFormProps {
 }
 
 export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }: PaymentFormProps) {
+  console.log("ENV CHECK:", import.meta.env);
+  console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
+  
   const [cardHolderName, setCardHolderName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
