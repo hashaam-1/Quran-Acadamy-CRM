@@ -74,6 +74,9 @@ exports.createPaymentSession = async (req, res) => {
 
 exports.processPayment = async (req, res) => {
   try {
+    console.log("🔥 PROCESS PAYMENT HIT");
+    console.log("BODY:", req.body);
+    
     const { sessionId, orderId, cardNumber, cardExpiry, cardCvc, cardHolderName } = req.body;
     const paymentRequest = {
       apiOperation: 'PAY',
@@ -106,6 +109,15 @@ exports.processPayment = async (req, res) => {
       res.status(400).json({ success: false, message: 'Payment failed', error: response.data });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Payment processing failed', error: error.message });
+    console.error("🔥 PROCESS PAYMENT ERROR");
+    console.error(error.response?.data);
+    console.error(error);
+    
+    res.status(500).json({ 
+      message: 'Payment processing failed', 
+      error: error.message,
+      mpgsStatus: error.response?.status,
+      mpgsError: error.response?.data
+    });
   }
 };
