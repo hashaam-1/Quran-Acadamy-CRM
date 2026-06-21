@@ -31,9 +31,11 @@ exports.createPaymentSession = async (req, res) => {
     console.log('🔍 Creating MPGS session:', { orderId, amount: paymentAmount, currency: paymentCurrency });
     const sessionRequest = {
       apiOperation: 'CREATE_CHECKOUT_SESSION',
-      interaction: { operation: 'AUTHORIZE', merchant: { name: 'Quran Academy' } },
+      interaction: { operation: 'PURCHASE', merchant: { name: 'Quran Academy' } },
       order: { amount: paymentAmount.toFixed(2), currency: paymentCurrency, description: `Invoice ${invoice.invoiceNo}`, id: orderId }
     };
+
+    console.log('🔍 MPGS REQUEST BODY:', JSON.stringify(sessionRequest, null, 2));
 
     const auth = Buffer.from(`${MPGS_CONFIG.merchantUsername}:${MPGS_CONFIG.apiPassword}`).toString('base64');
     console.log('🔍 MPGS Config:', { merchantId: MPGS_CONFIG.merchantId, gatewayUrl: MPGS_CONFIG.gatewayUrl });
