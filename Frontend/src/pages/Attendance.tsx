@@ -786,11 +786,11 @@ export default function Attendance() {
                           <TableRow key={record.id || record._id}>
                             <TableCell><div className="flex items-center gap-3"><div className="h-9 w-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-medium">{teacherName.split(" ").map(n => n[0]).join("")}</div><span className="font-medium">{teacherName}</span></div></TableCell>
                             <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
-                            <TableCell><Badge variant="outline">{record.course || 'Quran'}</Badge></TableCell>
+                            <TableCell><Badge variant="outline">{record.course || 'N/A'}</Badge></TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-3 w-3 text-primary" />
-                                <span className="font-semibold">{record.scheduledTime || record.classTime || 'N/A'}</span>
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3 text-muted-foreground" />
+                                {record.scheduledTime || record.classTime || 'N/A'}
                               </div>
                             </TableCell>
                             <TableCell><Badge variant={config?.variant || 'default'}>{config?.label || status}</Badge></TableCell>

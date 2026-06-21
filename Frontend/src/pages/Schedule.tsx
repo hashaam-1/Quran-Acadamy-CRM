@@ -163,9 +163,21 @@ export default function Schedule() {
     const filtered = schedules.filter(s => {
       const matchesDay = s.day?.trim().toLowerCase() === day.toLowerCase();
       const matchesTeacher = teacherFilter === "all" || s.teacherId === teacherFilter;
-      
-      // Always show schedules based on day (recurring weekly)
-      // Remove date filtering that was hiding all schedules
+
+      // Filter by date range of the selected week
+      if (s.date) {
+        const scheduleDate = new Date(s.date);
+        const weekStart = new Date(currentWeek);
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
+        weekStart.setHours(0, 0, 0, 0);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+
+        const isWithinWeek = scheduleDate >= weekStart && scheduleDate <= weekEnd;
+        return matchesDay && matchesTeacher && isWithinWeek;
+      }
+
       return matchesDay && matchesTeacher;
     });
 
