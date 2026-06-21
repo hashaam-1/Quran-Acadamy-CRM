@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CreditCard, Lock } from "lucide-react";
+import {
+  VisuallyHidden,
+} from "@radix-ui/react-visually-hidden";
 
 interface PaymentFormProps {
   invoiceId: string;
@@ -65,6 +68,9 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
+        <VisuallyHidden>
+          <CardTitle>Payment Details</CardTitle>
+        </VisuallyHidden>
         <CardTitle className="flex items-center gap-2">
           <CreditCard className="h-5 w-5" />
           Payment Details

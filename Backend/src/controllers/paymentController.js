@@ -11,15 +11,23 @@ const MPGS_CONFIG = {
 
 exports.createPaymentSession = async (req, res) => {
   try {
+    console.log('🔍 Payment session request received:', req.body);
     const { invoiceId, amount, currency } = req.body;
+    
+    console.log('🔍 Finding invoice:', invoiceId);
     const invoice = await Invoice.findById(invoiceId).populate('studentId');
-    if (!invoice) return res.status(404).json({ message: 'Invoice not found' });
+    if (!invoice) {
+      console.log('❌ Invoice not found');
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
 
+    console.log('🔍 Invoice found:', invoice);
     const student = await Student.findById(invoice.studentId);
-    const paymentCurrency = currency || student.currency || 'USD';
+    const paymentCurrency = currency || student?.currency || 'USD';
     const paymentAmount = amount || invoice.amount;
     const orderId = `ORDER-${invoiceId}-${Date.now()}`;
 
+    console.log('🔍 Creating MPGS session:', { orderId, amount: paymentAmount, currency: paymentCurrency });
     const sessionRequest = {
       apiOperation: 'CREATE_CHECKOUT_SESSION',
       interaction: { operation: 'AUTHORIZE', merchant: { name: 'Quran Academy' } },
@@ -27,14 +35,19 @@ exports.createPaymentSession = async (req, res) => {
     };
 
     const auth = Buffer.from(`${MPGS_CONFIG.merchantUsername}:${MPGS_CONFIG.apiPassword}`).toString('base64');
+    console.log('🔍 MPGS Config:', { merchantId: MPGS_CONFIG.merchantId, gatewayUrl: MPGS_CONFIG.gatewayUrl });
+    
     const response = await axios.post(
       `${MPGS_CONFIG.gatewayUrl}api/rest/version/59/merchant/${MPGS_CONFIG.merchantId}/session`,
       sessionRequest,
       { headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' } }
     );
 
+    console.log('✅ MPGS session created:', response.data);
     res.json({ success: true, sessionId: response.data.session.id, orderId, amount: paymentAmount, currency: paymentCurrency });
   } catch (error) {
+    console.error('❌ Payment session error:', error.message);
+    console.error('❌ Error details:', error.response?.data || error);
     res.status(500).json({ message: 'Failed to create payment session', error: error.message });
   }
 };
