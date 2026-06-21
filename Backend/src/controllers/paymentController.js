@@ -85,7 +85,6 @@ exports.processPayment = async (req, res) => {
     const paymentRequest = {
       apiOperation: 'PAY',
       session: { id: sessionId },
-      order: { id: orderId },
       sourceOfFunds: {
         type: 'CARD',
         provided: {
@@ -98,12 +97,16 @@ exports.processPayment = async (req, res) => {
       }
     };
 
+    console.log("PAY REQUEST:", JSON.stringify(paymentRequest, null, 2));
+
     const auth = Buffer.from(`${MPGS_CONFIG.merchantUsername}:${MPGS_CONFIG.apiPassword}`).toString('base64');
     const response = await axios.put(
       `${MPGS_CONFIG.gatewayUrl}api/rest/version/59/merchant/${MPGS_CONFIG.merchantId}/order/${orderId}/transaction/${transactionId}`,
       paymentRequest,
       { headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' } }
     );
+
+    console.log("MPGS RESPONSE:", JSON.stringify(response.data, null, 2));
 
     if (response.data.result === 'SUCCESS') {
       await Invoice.findByIdAndUpdate(invoiceId, { status: 'paid', paymentDate: new Date() });
