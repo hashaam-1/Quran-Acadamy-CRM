@@ -490,17 +490,25 @@ export default function Invoices() {
                         <div className="flex items-center justify-end gap-1">
                           {invoice.status !== 'paid' && (
                             <>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => handleMarkPaid(invoice)} title="Mark as Paid">
-                                <CheckCircle className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" onClick={() => { setCurrent(invoice); setIsPaymentOpen(true); }} title="Pay Now">
-                                <CreditCard className="h-4 w-4" />
-                              </Button>
+                              {(currentUser?.role === 'admin' || currentUser?.role === 'sales_team') && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-success" onClick={() => handleMarkPaid(invoice)} title="Mark as Paid">
+                                  <CheckCircle className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {currentUser?.role === 'student' && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" onClick={() => { setCurrent(invoice); setIsPaymentOpen(true); }} title="Pay Now">
+                                  <CreditCard className="h-4 w-4" />
+                                </Button>
+                              )}
                             </>
                           )}
                           <Button variant="ghost" size="icon" className="h-8 w-8" title="Download" onClick={() => handleDownload(invoice)}><Download className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setCurrent(invoice); setFormData(invoice); setIsEditOpen(true); }}><Pencil className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => { setCurrent(invoice); setIsDeleteOpen(true); }}><Trash2 className="h-4 w-4" /></Button>
+                          {(currentUser?.role === 'admin' || currentUser?.role === 'sales_team') && (
+                            <>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setCurrent(invoice); setFormData(invoice); setIsEditOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => { setCurrent(invoice); setIsDeleteOpen(true); }}><Trash2 className="h-4 w-4" /></Button>
+                            </>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
