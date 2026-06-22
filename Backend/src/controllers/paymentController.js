@@ -61,8 +61,10 @@ exports.createPaymentSession = async (req, res) => {
 
     const auth = Buffer.from(`${MPGS_CONFIG.merchantUsername}:${MPGS_CONFIG.apiPassword}`).toString('base64');
     console.log('🔍 MPGS Config:', { merchantId: MPGS_CONFIG.merchantId, gatewayUrl: MPGS_CONFIG.gatewayUrl });
-    console.log('🔍 Request URL:', `${MPGS_CONFIG.gatewayUrl}api/rest/version/59/merchant/${MPGS_CONFIG.merchantId}/session`);
-    
+    const fullUrl = `${MPGS_CONFIG.gatewayUrl}api/rest/version/59/merchant/${MPGS_CONFIG.merchantId}/session`;
+    console.log("FULL MPGS URL:", fullUrl);
+    console.log("FULL MPGS PAYLOAD:", JSON.stringify(sessionRequest, null, 2));
+
     const response = await axios.post(
       `${MPGS_CONFIG.gatewayUrl}api/rest/version/59/merchant/${MPGS_CONFIG.merchantId}/session`,
       sessionRequest,
@@ -92,7 +94,7 @@ exports.createPaymentSession = async (req, res) => {
     console.log("🔥 ERROR:", error.message);
     if (error.response) {
       console.log("🔥 MPGS STATUS:", error.response.status);
-      console.log("🔥 MPGS RESPONSE:", JSON.stringify(error.response.data, null, 2));
+      console.log("FULL MPGS ERROR:", JSON.stringify(error.response.data, null, 2));
     }
     return res.status(500).json({
       success: false,
