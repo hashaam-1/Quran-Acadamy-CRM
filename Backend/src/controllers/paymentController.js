@@ -1,3 +1,5 @@
+console.log("🔥 PAYMENT CONTROLLER FILE LOADED");
+
 const axios = require('axios');
 const Invoice = require('../models/Invoice');
 const Student = require('../models/Student');
