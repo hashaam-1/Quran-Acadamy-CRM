@@ -11,8 +11,8 @@ router.get('/test', (req, res) => {
 // Debug route to test POST requests
 router.post('/debug', (req, res) => {
   console.log("🔥 DEBUG PAYMENT BODY:", req.body);
-  res.json({ 
-    success: true, 
+  res.json({
+    success: true,
     body: req.body,
     env: {
       merchantId: process.env.MPGS_MERCHANT_ID,
@@ -24,7 +24,14 @@ router.post('/debug', (req, res) => {
   });
 });
 
-router.post('/create-session', createPaymentSession);
+// Create session route with logging
+router.post('/create-session', (req, res, next) => {
+  console.log("🔥 PAYMENT ROUTE /create-session HIT");
+  console.log("🔥 REQUEST BODY:", JSON.stringify(req.body, null, 2));
+  console.log("🔥 REQUEST HEADERS:", JSON.stringify(req.headers, null, 2));
+  next();
+}, createPaymentSession);
+
 router.post('/verify', verifyPayment);
 
 module.exports = router;

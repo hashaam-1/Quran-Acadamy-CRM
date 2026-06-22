@@ -32,12 +32,20 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
     setLoading(true);
     try {
       const API_BASE_URL = "https://quran-acadamy-crm-backend-production.up.railway.app/api";
+      console.log("🔥 PAYMENT REQUEST SENDING:", {
+        url: `${API_BASE_URL}/payments/create-session`,
+        body: { invoiceId, amount, currency }
+      });
+
       const response = await fetch(`${API_BASE_URL}/payments/create-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ invoiceId, amount, currency })
       });
+
+      console.log("🔥 PAYMENT RESPONSE STATUS:", response.status);
       const data = await response.json();
+      console.log("🔥 PAYMENT RESPONSE DATA:", data);
       setSessionData(data);
       
       if (data.success) {
