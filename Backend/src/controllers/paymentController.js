@@ -43,7 +43,7 @@ exports.createPaymentSession = async (req, res) => {
     console.log('🔍 Invoice found:', invoice);
     const student = await Student.findById(invoice.studentId);
     const paymentCurrency = currency || student?.currency || 'USD';
-    const paymentAmount = amount || invoice.amount;
+    const paymentAmount = Number(amount || invoice.amount);
     // MPGS-compliant order ID (only alphanumeric, dash, underscore)
     const orderId = `ORD-${Math.floor(Date.now() / 1000)}`;
 
@@ -52,7 +52,6 @@ exports.createPaymentSession = async (req, res) => {
       apiOperation: 'INITIATE_CHECKOUT',
       interaction: {
         operation: 'PAY',
-        merchant: { name: 'Quran Academy' },
         returnUrl: `${process.env.FRONTEND_URL}/payment/success`
       },
       order: { amount: paymentAmount.toFixed(2), currency: paymentCurrency, description: `Invoice for ${invoice.studentName} - ${invoice.month}`, id: orderId }
@@ -90,10 +89,17 @@ exports.createPaymentSession = async (req, res) => {
       currency: paymentCurrency 
     });
   } catch (error) {
-    console.log("🔥 PAYMENT FULL ERROR:", error.message);
-    console.log(error.stack);
-    console.log("MPGS RESPONSE:", JSON.stringify(error.response?.data, null, 2));
-    res.status(500).json({ message: 'Failed to create payment session', error: error.message });
+    console.log("🔥 ERROR:", error.message);
+    if (error.response) {
+      console.log("🔥 MPGS STATUS:", error.response.status);
+      console.log("🔥 MPGS RESPONSE:", JSON.stringify(error.response.data, null, 2));
+    }
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create payment session",
+      error: error.message,
+      mpgsResponse: error.response?.data
+    });
   }
 };
 
