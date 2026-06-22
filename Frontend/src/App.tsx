@@ -22,6 +22,7 @@ import Settings from "./pages/Settings";
 import StudentProfile from "./pages/StudentProfile";
 import StudentZoom from "./pages/StudentZoom";
 import ZoomMeetingClean from "./components/zoom/ZoomMeetingClean";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 
@@ -58,6 +59,7 @@ function AppRoutes() {
       <Route path="/profile" element={<ProtectedRoute><StudentProfile /></ProtectedRoute>} />
       <Route path="/zoom-student" element={<ProtectedRoute><StudentZoom /></ProtectedRoute>} />
       <Route path="/zoom-join/:meetingNumber?" element={<ProtectedRoute><ZoomMeetingClean /></ProtectedRoute>} />
+      <Route path="/payment/success" element={<PaymentSuccess />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
