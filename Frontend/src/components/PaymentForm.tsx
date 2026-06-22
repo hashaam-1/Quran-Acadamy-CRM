@@ -23,7 +23,9 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
     script.src = 'https://test-mcbpk.mtf.gateway.mastercard.com/static/checkout/checkout.min.js';
     script.async = true;
     document.body.appendChild(script);
-    return () => document.body.removeChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   const handlePay = async () => {
