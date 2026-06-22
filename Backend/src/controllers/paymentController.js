@@ -32,7 +32,7 @@ exports.createPaymentSession = async (req, res) => {
     const sessionRequest = {
       apiOperation: 'CREATE_CHECKOUT_SESSION',
       interaction: { 
-        operation: 'PURCHASE', 
+        operation: 'PAY', 
         merchant: { name: 'Quran Academy' },
         returnUrl: `${process.env.FRONTEND_URL}/payment/success`
       },
