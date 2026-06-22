@@ -25,6 +25,13 @@ exports.createPaymentSession = async (req, res) => {
   try {
     console.log('🔍 Payment session request received:', req.body);
     const { invoiceId, amount, currency } = req.body;
+
+    // Validate invoiceId
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(invoiceId)) {
+      console.log('❌ Invalid invoice ID:', invoiceId);
+      return res.status(400).json({ success: false, message: 'Invalid invoice ID', invoiceId });
+    }
     
     console.log('🔍 Finding invoice:', invoiceId);
     const invoice = await Invoice.findById(invoiceId).populate('studentId');

@@ -8,6 +8,22 @@ router.get('/test', (req, res) => {
   res.json({ success: true, message: 'Payment routes working' });
 });
 
+// Debug route to test POST requests
+router.post('/debug', (req, res) => {
+  console.log("🔥 DEBUG PAYMENT BODY:", req.body);
+  res.json({ 
+    success: true, 
+    body: req.body,
+    env: {
+      merchantId: process.env.MPGS_MERCHANT_ID,
+      merchantUsername: process.env.MPGS_MERCHANT_USERNAME,
+      passwordExists: !!process.env.MPGS_API_PASSWORD,
+      gatewayUrl: process.env.MPGS_GATEWAY_URL,
+      frontendUrl: process.env.FRONTEND_URL
+    }
+  });
+});
+
 router.post('/create-session', createPaymentSession);
 router.post('/verify', verifyPayment);
 
