@@ -10,6 +10,16 @@ const MPGS_CONFIG = {
 };
 
 exports.createPaymentSession = async (req, res) => {
+  console.log("🔥 PAYMENT CONTROLLER HIT");
+  console.log("BODY:", JSON.stringify(req.body, null, 2));
+  console.log("ENV CHECK", {
+    merchantId: process.env.MPGS_MERCHANT_ID,
+    merchantUsername: process.env.MPGS_MERCHANT_USERNAME,
+    passwordExists: !!process.env.MPGS_API_PASSWORD,
+    frontend: process.env.FRONTEND_URL,
+    gatewayUrl: process.env.MPGS_GATEWAY_URL
+  });
+
   try {
     console.log('🔍 Payment session request received:', req.body);
     const { invoiceId, amount, currency } = req.body;
@@ -71,16 +81,10 @@ exports.createPaymentSession = async (req, res) => {
       currency: paymentCurrency 
     });
   } catch (error) {
-    console.error('❌ Payment session error:', error.message);
-    console.error('❌ MPGS ERROR STATUS:', error.response?.status);
-    console.error('❌ MPGS ERROR DATA:', error.response?.data);
-    console.error('❌ Full error:', error);
-    res.status(500).json({ 
-      message: 'Failed to create payment session', 
-      error: error.message,
-      mpgsStatus: error.response?.status,
-      mpgsError: error.response?.data
-    });
+    console.log("🔥 PAYMENT FULL ERROR:", error.message);
+    console.log(error.stack);
+    console.log("MPGS RESPONSE:", JSON.stringify(error.response?.data, null, 2));
+    res.status(500).json({ message: 'Failed to create payment session', error: error.message });
   }
 };
 
