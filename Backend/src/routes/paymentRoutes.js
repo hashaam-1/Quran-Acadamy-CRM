@@ -4,8 +4,8 @@ const router = express.Router();
 
 // Test route to verify payment routes are working
 router.get('/test', (req, res) => {
-  console.log("🔥 PAYMENT ROUTE TEST HIT");
-  res.json({ success: true, message: 'Payment routes working' });
+  console.log("🔥🔥🔥 PAYMENT ROUTE TEST HIT");
+  res.json({ success: true, message: 'Payment routes working', timestamp: new Date().toISOString() });
 });
 
 // Debug route to test POST requests
@@ -26,9 +26,12 @@ router.post('/debug', (req, res) => {
 
 // Create session route with logging
 router.post('/create-session', (req, res, next) => {
-  console.log("🔥 PAYMENT ROUTE /create-session HIT");
-  console.log("🔥 REQUEST BODY:", JSON.stringify(req.body, null, 2));
-  console.log("🔥 REQUEST HEADERS:", JSON.stringify(req.headers, null, 2));
+  console.log("🔥🔥🔥 PAYMENT ROUTE /create-session HIT");
+  console.log("🔥🔥🔥 REQUEST BODY:", JSON.stringify(req.body, null, 2));
+  console.log("🔥🔥🔥 REQUEST HEADERS:", JSON.stringify(req.headers, null, 2));
+  console.log("🔥🔥🔥 REQUEST METHOD:", req.method);
+  console.log("🔥🔥🔥 REQUEST URL:", req.url);
+  console.log("🔥🔥🔥 REQUEST QUERY:", JSON.stringify(req.query, null, 2));
   next();
 }, createPaymentSession);
 

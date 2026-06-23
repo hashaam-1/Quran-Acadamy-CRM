@@ -12,9 +12,9 @@ const MPGS_CONFIG = {
 };
 
 exports.createPaymentSession = async (req, res) => {
-  console.log("🔥 PAYMENT CONTROLLER HIT");
-  console.log("BODY:", JSON.stringify(req.body, null, 2));
-  console.log("ENV CHECK", {
+  console.log("🔥🔥🔥 PAYMENT CONTROLLER HIT");
+  console.log("🔥🔥🔥 BODY:", JSON.stringify(req.body, null, 2));
+  console.log("🔥🔥🔥 ENV CHECK", {
     merchantId: process.env.MPGS_MERCHANT_ID,
     merchantUsername: process.env.MPGS_MERCHANT_USERNAME,
     passwordExists: !!process.env.MPGS_API_PASSWORD,
@@ -23,7 +23,7 @@ exports.createPaymentSession = async (req, res) => {
   });
 
   try {
-    console.log('🔍 Payment session request received:', req.body);
+    console.log('🔥🔥� Payment session request received:', req.body);
     const { invoiceId, amount, currency } = req.body;
 
     // Validate invoiceId
