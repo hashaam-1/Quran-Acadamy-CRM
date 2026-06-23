@@ -56,8 +56,7 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
         }));
         
         (window as any).Checkout.configure({
-          session: { id: data.sessionId },
-          operation: 'PURCHASE'
+          session: { id: data.sessionId }
         });
         (window as any).Checkout.showPaymentPage();
       }
