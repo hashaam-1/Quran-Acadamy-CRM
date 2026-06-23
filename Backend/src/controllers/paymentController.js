@@ -49,11 +49,7 @@ exports.createPaymentSession = async (req, res) => {
 
     console.log('🔍 Creating MPGS session:', { orderId, amount: paymentAmount, currency: paymentCurrency });
     const sessionRequest = {
-      apiOperation: 'INITIATE_CHECKOUT',
-      interaction: {
-        returnUrl: `${process.env.FRONTEND_URL}/payment/success`
-      },
-      order: { id: orderId }
+      apiOperation: 'INITIATE_CHECKOUT'
     };
 
     console.log('🔍 MPGS REQUEST BODY:', JSON.stringify(sessionRequest, null, 2));
