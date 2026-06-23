@@ -57,12 +57,7 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
         
         (window as any).Checkout.configure({
           session: { id: data.sessionId },
-          interaction: {
-            operation: 'PURCHASE',
-            merchant: {
-              name: 'Quran Academy'
-            }
-          }
+          operation: 'PURCHASE'
         });
         (window as any).Checkout.showPaymentPage();
       }

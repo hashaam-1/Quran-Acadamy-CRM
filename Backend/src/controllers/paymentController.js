@@ -49,7 +49,21 @@ exports.createPaymentSession = async (req, res) => {
 
     console.log('🔍 Creating MPGS session:', { orderId, amount: paymentAmount, currency: paymentCurrency });
     const sessionRequest = {
-      apiOperation: 'INITIATE_CHECKOUT'
+      apiOperation: 'INITIATE_CHECKOUT',
+      order: {
+        id: orderId,
+        amount: String(paymentAmount),
+        currency: paymentCurrency,
+        description: `Quran Class Fee Payment - ${invoice.studentName}`
+      },
+      interaction: {
+        operation: 'PURCHASE',
+        merchant: {
+          name: 'Quran Academy',
+          url: process.env.FRONTEND_URL
+        },
+        returnUrl: `${process.env.FRONTEND_URL}/payment-success`
+      }
     };
 
     console.log('🔍 MPGS REQUEST BODY:', JSON.stringify(sessionRequest, null, 2));
