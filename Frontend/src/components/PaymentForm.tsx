@@ -56,7 +56,25 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
         }));
         
         (window as any).Checkout.configure({
-          session: { id: data.sessionId }
+          session: { id: data.sessionId },
+          interaction: {
+            merchant: {
+              name: 'Quran Academy'
+            }
+          },
+          error: (error: any) => {
+            console.error('MPGS Error:', error);
+            alert('Payment error: ' + (error.explanation || error.cause || 'Unknown error'));
+          },
+          complete: (response: any) => {
+            console.log('Payment Success:', response);
+            // Navigate to success page
+            window.location.href = '/payment-success';
+          },
+          cancel: () => {
+            console.log('Payment Cancelled');
+            setLoading(false);
+          }
         });
         (window as any).Checkout.showPaymentPage();
       }
