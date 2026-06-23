@@ -54,7 +54,7 @@ exports.createPaymentSession = async (req, res) => {
         operation: 'PAY',
         returnUrl: `${process.env.FRONTEND_URL}/payment/success`
       },
-      order: { amount: paymentAmount.toFixed(2), currency: paymentCurrency, id: orderId }
+      order: { id: orderId }
     };
 
     console.log('🔍 MPGS REQUEST BODY:', JSON.stringify(sessionRequest, null, 2));
