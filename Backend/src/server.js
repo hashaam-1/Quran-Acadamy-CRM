@@ -17,6 +17,18 @@ const app = express();
 ========================= */
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
+
+// Global request logger to catch ALL requests
+app.use((req, res, next) => {
+  console.log("🌐 GLOBAL REQUEST:", {
+    method: req.method,
+    url: req.url,
+    path: req.path,
+    headers: req.headers,
+    body: req.body
+  });
+  next();
+});
 app.use(cors({
   origin: [
     'https://quran-academy-crm-frontend-production.up.railway.app',
