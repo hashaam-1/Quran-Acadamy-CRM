@@ -52,6 +52,9 @@ exports.createPaymentSession = async (req, res) => {
       apiOperation: 'INITIATE_CHECKOUT',
       order: {
         id: orderId,
+        currency: paymentCurrency
+      },
+      transaction: {
         amount: Number(paymentAmount).toFixed(2),
         currency: paymentCurrency
       },
