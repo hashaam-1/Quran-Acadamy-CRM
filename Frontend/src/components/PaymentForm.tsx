@@ -61,22 +61,21 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
             merchant: {
               name: 'Quran Academy'
             }
-          },
-          error: (error: any) => {
-            console.error('MPGS Error:', error);
-            alert('Payment error: ' + (error.explanation || error.cause || 'Unknown error'));
-          },
-          complete: (response: any) => {
-            console.log('Payment Success:', response);
-            // Navigate to success page
-            window.location.href = '/payment-success';
-          },
-          cancel: () => {
-            console.log('Payment Cancelled');
-            setLoading(false);
           }
         });
-        (window as any).Checkout.showPaymentPage();
+
+        (window as any).Checkout.showPaymentPage().on('error', (error: any) => {
+          console.error('FULL MPGS ERROR:', error);
+          const errorMessage = error?.error?.explanation || error?.explanation || error?.cause || error?.message || 'Payment failed';
+          alert('Payment error: ' + errorMessage);
+          setLoading(false);
+        }).on('cancel', () => {
+          console.log('Payment Cancelled');
+          setLoading(false);
+        }).on('complete', (response: any) => {
+          console.log('Payment Success:', response);
+          window.location.href = '/payment-success';
+        });
       }
     } catch (error) {
       alert('Failed to create payment session');
