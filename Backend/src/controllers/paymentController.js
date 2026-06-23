@@ -55,8 +55,7 @@ exports.createPaymentSession = async (req, res) => {
         currency: paymentCurrency
       },
       transaction: {
-        amount: Number(paymentAmount).toFixed(2),
-        currency: paymentCurrency
+        amount: Number(paymentAmount).toFixed(2)
       },
       interaction: {
         operation: 'PURCHASE',
