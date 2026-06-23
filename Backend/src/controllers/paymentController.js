@@ -51,7 +51,6 @@ exports.createPaymentSession = async (req, res) => {
     const sessionRequest = {
       apiOperation: 'INITIATE_CHECKOUT',
       interaction: {
-        operation: 'PAY',
         returnUrl: `${process.env.FRONTEND_URL}/payment/success`
       },
       order: { id: orderId }
