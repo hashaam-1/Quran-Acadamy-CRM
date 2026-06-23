@@ -53,7 +53,8 @@ exports.createPaymentSession = async (req, res) => {
       order: {
         id: orderId,
         amount: Number(paymentAmount).toFixed(2),
-        currency: paymentCurrency
+        currency: paymentCurrency,
+        description: `Invoice Payment - ${invoice.studentName} - ${invoice.month}`
       },
       interaction: {
         operation: 'PURCHASE',
