@@ -1,4 +1,4 @@
-console.log("🔥 PAYMENT CONTROLLER FILE LOADED");
+console.log("🔥 PAYMENT CONTROLLER FILE LOADED - VERSION 2");
 
 const axios = require('axios');
 const Invoice = require('../models/Invoice');
@@ -23,7 +23,7 @@ exports.createPaymentSession = async (req, res) => {
   });
 
   try {
-    console.log('🔥🔥� Payment session request received:', req.body);
+    console.log('🔥�� Payment session request received:', req.body);
     const { invoiceId, amount, currency } = req.body;
 
     // Validate invoiceId
