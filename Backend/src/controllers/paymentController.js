@@ -59,8 +59,7 @@ exports.createPaymentSession = async (req, res) => {
       interaction: {
         operation: 'PURCHASE',
         merchant: {
-          name: 'Quran Academy',
-          url: process.env.FRONTEND_URL
+          name: 'Quran Academy'
         },
         returnUrl: `${process.env.FRONTEND_URL}/payment-success`
       }
