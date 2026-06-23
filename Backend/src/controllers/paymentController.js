@@ -52,9 +52,8 @@ exports.createPaymentSession = async (req, res) => {
       apiOperation: 'INITIATE_CHECKOUT',
       order: {
         id: orderId,
-        amount: String(paymentAmount),
-        currency: paymentCurrency,
-        description: `Quran Class Fee Payment - ${invoice.studentName}`
+        amount: Number(paymentAmount).toFixed(2),
+        currency: paymentCurrency
       },
       interaction: {
         operation: 'PURCHASE',
