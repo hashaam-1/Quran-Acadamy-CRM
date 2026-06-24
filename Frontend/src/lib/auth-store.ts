@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthStore>()(
     (set, get) => ({
       currentUser: null,
       isAuthenticated: false,
-      isLoading: false, // Start with not loading
+      isLoading: true, // Start with loading to prevent auth flash during rehydration
       users: initialUsers,
       token: undefined,
 
