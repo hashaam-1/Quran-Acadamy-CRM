@@ -4,6 +4,7 @@ const TeamMember = require('../models/TeamMember');
 const Attendance = require('../models/Attendance');
 const Schedule = require('../models/Schedule');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 // Helper function to check if teacher is late
 const isTeacherLate = (scheduledTime, actualTime) => {
@@ -22,6 +23,20 @@ const isTeacherLate = (scheduledTime, actualTime) => {
   } catch {
     return false;
   }
+};
+
+// Helper function to generate JWT token
+const generateToken = (user) => {
+  const JWT_SECRET = process.env.JWT_SECRET || 'quran-academy-secret-key-2024';
+  return jwt.sign(
+    { 
+      id: user._id || user.id,
+      email: user.email,
+      role: user.role 
+    },
+    JWT_SECRET,
+    { expiresIn: '7d' } // Token expires in 7 days
+  );
 };
 
 // ✅ UNIFIED LOGIN - Single endpoint for all roles
@@ -55,10 +70,13 @@ const unifiedLogin = async (req, res) => {
         createdAt: '2023-01-01'
       };
       
+      const token = generateToken(adminUser);
+      
       console.log('✅ Admin login successful');
       return res.json({
         success: true,
         user: adminUser,
+        token: token,
         message: 'Admin login successful'
       });
     }
@@ -110,10 +128,13 @@ const unifiedLogin = async (req, res) => {
           studentId: student._id
         };
         
+        const token = generateToken(user);
+        
         console.log('✅ Student login successful');
         return res.json({
           success: true,
           user: user,
+          token: token,
           message: 'Student login successful'
         });
       }
@@ -243,10 +264,13 @@ const unifiedLogin = async (req, res) => {
           teacherId: teacher._id
         };
 
+        const token = generateToken(user);
+
         console.log('✅ Teacher login successful');
         return res.json({
           success: true,
           user: user,
+          token: token,
           message: 'Teacher login successful'
         });
       }
@@ -299,10 +323,13 @@ const unifiedLogin = async (req, res) => {
           createdAt: teamMember.createdAt
         };
         
+        const token = generateToken(user);
+        
         console.log('✅ Team member login successful');
         return res.json({
           success: true,
           user: user,
+          token: token,
           message: 'Team member login successful'
         });
       }
@@ -329,43 +356,29 @@ const unifiedLogin = async (req, res) => {
 const verifyToken = async (req, res) => {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ success: false, message: 'No token provided' });
     
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'No token provided'
-      });
+    const JWT_SECRET = process.env.JWT_SECRET || 'quran-academy-secret-key-2024';
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    let user;
+    if (decoded.role === 'admin') {
+      user = { _id: '1', id: '1', name: 'Admin', email: 'hashaamamz1@gmail.com', phone: '+92300111222', role: 'admin', createdAt: '2023-01-01' };
+    } else if (decoded.role === 'student') {
+      const student = await Student.findById(decoded.id);
+      if (student) user = { _id: student._id, id: student._id, name: student.name, email: student.email, phone: student.phone || '', role: 'student', createdAt: student.createdAt, studentId: student._id };
+    } else if (decoded.role === 'teacher') {
+      const teacher = await Teacher.findById(decoded.id);
+      if (teacher) user = { _id: teacher._id, id: teacher._id, name: teacher.name, email: teacher.email, phone: teacher.phone || '', role: 'teacher', createdAt: teacher.createdAt, teacherId: teacher._id };
+    } else if (decoded.role === 'sales_team' || decoded.role === 'team_leader') {
+      const teamMember = await TeamMember.findById(decoded.id);
+      if (teamMember) user = { _id: teamMember._id, id: teamMember._id, name: teamMember.name, email: teamMember.email, phone: teamMember.phone || '', role: teamMember.role, createdAt: teamMember.createdAt };
     }
     
-    console.log('🔍 Token verification request received');
-    
-    // ✅ For now, implement a simple token validation
-    // In production, you should decode JWT token and validate against database
-    // For now, we'll return a mock admin user to prevent infinite loading
-    const mockUser = {
-      _id: '1',
-      id: '1',
-      name: 'Admin',
-      email: 'hashaamamz1@gmail.com',
-      phone: '+92300111222',
-      role: 'admin',
-      createdAt: '2023-01-01'
-    };
-    
-    console.log('✅ Token verification successful - returning mock user');
-    return res.json({
-      success: true,
-      user: mockUser,
-      message: 'Token verified successfully'
-    });
-    
+    if (!user) return res.status(401).json({ success: false, message: 'User not found' });
+    return res.json({ success: true, user, message: 'Token verified successfully' });
   } catch (error) {
-    console.error('❌ Token verification error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Token verification failed',
-      error: error.message
-    });
+    return res.status(401).json({ success: false, message: 'Invalid token' });
   }
 };
 
