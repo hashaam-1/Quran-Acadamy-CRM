@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthStore>()(
     (set, get) => ({
       currentUser: null,
       isAuthenticated: false,
-      isLoading: true, // Start with loading to prevent auth flash during rehydration
+      isLoading: false, // Start with not loading
       users: initialUsers,
       token: undefined,
 
@@ -231,36 +231,9 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({ token: state.token }),
-      onRehydrateStorage: () => (state) => {
-        console.log('🔄 onRehydrateStorage:', state);
-        if (!state?.token) return { currentUser: null, isAuthenticated: false, isLoading: false, token: undefined };
-        const initialState = { currentUser: null, isAuthenticated: false, isLoading: true, token: state.token };
-        (async () => {
-          try {
-            const res = await fetch(`${API_BASE_URL}/auth/verify-token`, { headers: { Authorization: `Bearer ${state.token}`, 'Content-Type': 'application/json' } });
-            if (!res.ok) throw new Error("Invalid token");
-            const data = await res.json();
-            if (data.success && data.user) {
-              const user = { id: data.user._id || data.user.id, name: data.user.name, email: data.user.email, phone: data.user.phone || '', role: data.user.role, createdAt: data.user.createdAt, ...(data.user.studentId && { studentId: data.user.studentId }), ...(data.user.teacherId && { teacherId: data.user.teacherId }) };
-              useAuthStore.setState({ currentUser: user, isAuthenticated: true, token: state.token, isLoading: false });
-            } else throw new Error('Invalid token response');
-          } catch (err) {
-            useAuthStore.setState({ currentUser: null, isAuthenticated: false, token: undefined, isLoading: false });
-          }
-        })();
-        // Fallback timeout to prevent infinite loading
-        setTimeout(() => {
-          const currentState = useAuthStore.getState();
-          if (currentState.isLoading) {
-            console.log('🔄 Timeout fallback - setting isLoading to false');
-            useAuthStore.setState({ isLoading: false });
-          }
-        }, 3000);
-        return initialState;
-      },
     }
   )
 );
