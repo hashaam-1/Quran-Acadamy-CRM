@@ -232,7 +232,7 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: 'auth-token', // localStorage key - only store token
       version: 2, // Version for token-only storage
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => localStorage), // ✅ Use localStorage for persistence across refresh
       // 🔒 CRITICAL: Store only token, not full user object
       partialize: (state) => ({ 
         token: state.token 

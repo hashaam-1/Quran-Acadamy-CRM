@@ -34,7 +34,10 @@ export default function Auth() {
     
     if (result.success) {
       toast.success('Welcome back!');
-      navigate('/');
+      // ✅ Redirect to the page user was trying to access, or home
+      const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || '/';
+      sessionStorage.removeItem('redirectAfterLogin');
+      navigate(redirectUrl);
     } else {
       toast.error(result.error || 'Login failed');
     }
