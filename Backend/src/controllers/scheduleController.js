@@ -10,8 +10,9 @@ const getSchedules = async (req, res) => {
     res.set('Pragma', 'no-cache');
     res.set('Expires', '0');
     
-    // ✅ FIXED: Accept week parameters from frontend or use current week
+    // ✅ FIXED: Accept week parameters from frontend, return all if not provided
     let weekStart, weekEnd;
+    let shouldFilterByWeek = false;
     
     if (req.query.weekStart && req.query.weekEnd) {
       // Use provided week range from frontend
@@ -19,6 +20,7 @@ const getSchedules = async (req, res) => {
       weekEnd = new Date(req.query.weekEnd);
       weekStart.setHours(0, 0, 0, 0);
       weekEnd.setHours(23, 59, 59, 999);
+      shouldFilterByWeek = true;
       
       console.log('📅 FRONTEND WEEK CHANGE DETECTED!');
       console.log('🔄 Week range from frontend:', {
@@ -27,23 +29,9 @@ const getSchedules = async (req, res) => {
         source: 'frontend_control'
       });
     } else {
-      // Use current week as default
-      const today = new Date();
-      const currentDay = today.getDay(); // 0 = Sunday, 6 = Saturday
-      weekStart = new Date(today);
-      weekStart.setDate(today.getDate() - currentDay + (currentDay === 0 ? -6 : 1)); // Start from Monday
-      weekStart.setHours(0, 0, 0, 0);
-      
-      weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6); // End on Sunday
-      weekEnd.setHours(23, 59, 59, 999);
-      
-      console.log('📅 Using current week (default):', {
-        start: weekStart.toISOString().split('T')[0],
-        end: weekEnd.toISOString().split('T')[0],
-        today: today.toISOString().split('T')[0],
-        source: 'current_week_default'
-      });
+      // No week parameters - return all schedules (for RecentActivity, etc.)
+      console.log('📅 No week parameters provided - returning ALL schedules');
+      console.log('📅 Source: no_week_filter');
     }
     
     // ✅ DEBUG: Check all schedules to see date fields
@@ -78,11 +66,35 @@ const getSchedules = async (req, res) => {
       return result;
     };
     
-    // ✅ FIXED: Return all schedules without week filtering
+    // ✅ FIXED: Filter schedules by week range only if week parameters provided
+    let filteredSchedules = allSchedules;
+    
+    if (shouldFilterByWeek) {
+      filteredSchedules = allSchedules.filter(schedule => {
+        if (!schedule.date) return false;
+        
+        const scheduleDate = new Date(schedule.date);
+        scheduleDate.setHours(0, 0, 0, 0);
+        
+        return scheduleDate >= weekStart && scheduleDate <= weekEnd;
+      });
+      
+      console.log('📅 Week filtering results:', {
+        total: allSchedules.length,
+        filtered: filteredSchedules.length,
+        weekRange: {
+          start: weekStart.toISOString().split('T')[0],
+          end: weekEnd.toISOString().split('T')[0]
+        }
+      });
+    } else {
+      console.log('📅 No week filter applied - returning all schedules:', allSchedules.length);
+    }
+    
     res.json({
       success: true,
-      data: allSchedules,
-      count: allSchedules.length
+      data: filteredSchedules,
+      count: filteredSchedules.length
     });
   } catch (error) {
     console.error('❌ Error fetching schedules:', error);

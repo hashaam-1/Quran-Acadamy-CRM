@@ -164,17 +164,15 @@ export default function Schedule() {
       const matchesDay = s.day?.trim().toLowerCase() === day.toLowerCase();
       const matchesTeacher = teacherFilter === "all" || s.teacherId === teacherFilter;
 
-      // Filter by date range of the selected week
+      // Filter by date range of the selected week using the pre-calculated weekStart and weekEnd
       if (s.date) {
         const scheduleDate = new Date(s.date);
-        const weekStart = new Date(currentWeek);
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
-        weekStart.setHours(0, 0, 0, 0);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        weekEnd.setHours(23, 59, 59, 999);
+        const weekStartDate = new Date(weekStart);
+        weekStartDate.setHours(0, 0, 0, 0);
+        const weekEndDate = new Date(weekEnd);
+        weekEndDate.setHours(23, 59, 59, 999);
 
-        const isWithinWeek = scheduleDate >= weekStart && scheduleDate <= weekEnd;
+        const isWithinWeek = scheduleDate >= weekStartDate && scheduleDate <= weekEndDate;
         return matchesDay && matchesTeacher && isWithinWeek;
       }
 
