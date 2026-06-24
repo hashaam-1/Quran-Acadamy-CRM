@@ -231,9 +231,11 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => sessionStorage), // sessionStorage is per-tab, so different tabs require separate login
+      version: 3,
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({ token: state.token }),
       onRehydrateStorage: () => (state) => {
+        console.log('🔄 onRehydrateStorage:', state);
         if (!state?.token) return { currentUser: null, isAuthenticated: false, isLoading: false, token: undefined };
         const initialState = { currentUser: null, isAuthenticated: false, isLoading: true, token: state.token };
         (async () => {
@@ -249,6 +251,14 @@ export const useAuthStore = create<AuthStore>()(
             useAuthStore.setState({ currentUser: null, isAuthenticated: false, token: undefined, isLoading: false });
           }
         })();
+        // Fallback timeout to prevent infinite loading
+        setTimeout(() => {
+          const currentState = useAuthStore.getState();
+          if (currentState.isLoading) {
+            console.log('🔄 Timeout fallback - setting isLoading to false');
+            useAuthStore.setState({ isLoading: false });
+          }
+        }, 3000);
         return initialState;
       },
     }
