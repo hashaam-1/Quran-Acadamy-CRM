@@ -231,7 +231,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage), // sessionStorage is per-tab, so different tabs require separate login
       partialize: (state) => ({ token: state.token }),
       onRehydrateStorage: () => (state) => {
         if (!state?.token) return { currentUser: null, isAuthenticated: false, isLoading: false, token: undefined };
