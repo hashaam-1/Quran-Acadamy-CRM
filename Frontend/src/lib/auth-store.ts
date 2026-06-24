@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthStore>()(
     (set, get) => ({
       currentUser: null,
       isAuthenticated: false,
-      isLoading: false, // ✅ Instant UI - don't block on token verification
+      isLoading: false, // ✅ Start with not loading - let persist middleware handle it
       users: initialUsers,
       token: undefined,
 
@@ -238,9 +238,10 @@ export const useAuthStore = create<AuthStore>()(
         token: state.token 
       }),
       onRehydrateStorage: () => async (state) => {
-        console.log('🔄 Rehydrating auth...');
+        console.log('🔄 Rehydrating auth...', state);
 
         if (!state?.token) {
+          console.log('🔄 No token found - setting unauthenticated');
           // ✅ No token - set unauthenticated state immediately
           return {
             currentUser: null,
@@ -249,6 +250,8 @@ export const useAuthStore = create<AuthStore>()(
             token: undefined,
           };
         }
+
+        console.log('🔄 Token found - verifying...');
 
         // ✅ Set loading state during token verification to prevent redirect
         const initialState = {
@@ -261,6 +264,7 @@ export const useAuthStore = create<AuthStore>()(
         // ✅ Verify token in background without blocking UI
         (async () => {
           try {
+            console.log('🔄 Calling verify-token endpoint...');
             const res = await fetch(`${API_BASE_URL}/auth/verify-token`, {
               headers: {
                 Authorization: `Bearer ${state.token}`,
@@ -268,9 +272,12 @@ export const useAuthStore = create<AuthStore>()(
               },
             });
 
+            console.log('🔄 Verify-token response status:', res.status);
+
             if (!res.ok) throw new Error("Invalid token");
 
             const data = await res.json();
+            console.log('🔄 Verify-token response data:', data);
 
             if (data.success && data.user) {
               const user = {
