@@ -1,5 +1,5 @@
 const Syllabus = require('../models/Syllabus');
-const { uploadToCloudinary } = require('../middleware/upload');
+const { uploadToR2 } = require('../middleware/upload');
 
 // Get all syllabi
 exports.getSyllabi = async (req, res) => {
@@ -67,26 +67,25 @@ exports.createSyllabus = async (req, res) => {
     });
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-        console.log('📄 Processing file for direct Cloudinary upload:', {
+        console.log('📄 Processing file for R2 upload:', {
           originalname: file.originalname,
           size: file.size,
           mimetype: file.mimetype
         });
         
         try {
-          // Upload directly to Cloudinary with resource_type: "raw"
-          const uploadResult = await uploadToCloudinary(file);
+          // Upload to R2
+          const uploadResult = await uploadToR2(file);
           
           console.log('✅ File uploaded successfully:', {
             fileName: file.originalname,
-            secure_url: uploadResult.secure_url,
-            resource_type: uploadResult.resource_type
+            fileUrl: uploadResult.fileUrl
           });
           
-          // Use the correct Cloudinary URL from direct upload
+          // Use the R2 URL
           attachments.push({
             fileName: file.originalname,
-            fileUrl: uploadResult.secure_url, // Direct Cloudinary URL with /raw/upload/
+            fileUrl: uploadResult.fileUrl,
             fileType: file.mimetype
           });
         } catch (uploadError) {
@@ -256,31 +255,30 @@ exports.updateSyllabus = async (req, res) => {
       parsedAssessmentCriteria = assessmentCriteria;
     }
     
-    // Handle file uploads with direct Cloudinary for updates
+    // Handle file uploads with R2 for updates
     if (req.files && req.files.length > 0) {
       const attachments = [];
       console.log('📤 Files received in update request:', req.files.length);
       for (const file of req.files) {
-        console.log('📄 Processing file for direct Cloudinary upload (update):', {
+        console.log('📄 Processing file for R2 upload (update):', {
           originalname: file.originalname,
           size: file.size,
           mimetype: file.mimetype
         });
         
         try {
-          // Upload directly to Cloudinary with resource_type: "raw"
-          const uploadResult = await uploadToCloudinary(file);
+          // Upload to R2
+          const uploadResult = await uploadToR2(file);
           
           console.log('✅ File uploaded successfully in update:', {
             fileName: file.originalname,
-            secure_url: uploadResult.secure_url,
-            resource_type: uploadResult.resource_type
+            fileUrl: uploadResult.fileUrl
           });
           
-          // Use the correct Cloudinary URL from direct upload
+          // Use the R2 URL
           attachments.push({
             fileName: file.originalname,
-            fileUrl: uploadResult.secure_url, // Direct Cloudinary URL with /raw/upload/
+            fileUrl: uploadResult.fileUrl,
             fileType: file.mimetype
           });
         } catch (uploadError) {

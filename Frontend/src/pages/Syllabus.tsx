@@ -1131,7 +1131,7 @@ export default function Syllabus() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* PDF Viewer Modal - Removed - Now using new tab approach for better Cloudinary compatibility */}
+      {/* PDF Viewer Modal - Removed - Now using new tab approach for better file compatibility */}
     </MainLayout>
   );
 }
