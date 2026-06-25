@@ -26,10 +26,12 @@ const uploadToR2 = async (file, folder = 'syllabus') => {
 
     await r2Client.send(command);
 
-    // Return the key instead of full URL (will use backend proxy for access)
+    // Use R2_PUBLIC_URL for public access (no authentication required)
+    const fileUrl = `${process.env.R2_PUBLIC_URL}/${fileName}`;
+
     return {
       fileName: file.originalname,
-      fileUrl: `/api/syllabus/file/${encodeURIComponent(fileName)}`, // Backend proxy route
+      fileUrl: fileUrl,
       fileType: file.mimetype,
       key: fileName,
     };
