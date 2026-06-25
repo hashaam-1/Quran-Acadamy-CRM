@@ -3,34 +3,38 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import { useAuthStore } from "@/lib/auth-store";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Leads from "./pages/Leads";
-import Students from "./pages/Students";
-import Teachers from "./pages/Teachers";
-import TeamManagement from "./pages/TeamManagement";
-import Schedule from "./pages/Schedule";
-import Attendance from "./pages/Attendance";
-import Progress from "./pages/Progress";
-import Invoices from "./pages/Invoices";
-import Monitoring from "./pages/Monitoring";
-import Syllabus from "./pages/Syllabus";
-import Messages from "./pages/Messages";
-import Settings from "./pages/Settings";
-import StudentProfile from "./pages/StudentProfile";
-import StudentZoom from "./pages/StudentZoom";
-import ZoomMeetingClean from "./components/zoom/ZoomMeetingClean";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import NotFound from "./pages/NotFound";
-import { useEffect } from "react";
+
+const Auth = lazy(() => import("./pages/Auth"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Leads = lazy(() => import("./pages/Leads"));
+const Students = lazy(() => import("./pages/Students"));
+const Teachers = lazy(() => import("./pages/Teachers"));
+const TeamManagement = lazy(() => import("./pages/TeamManagement"));
+const Schedule = lazy(() => import("./pages/Schedule"));
+const Attendance = lazy(() => import("./pages/Attendance"));
+const Progress = lazy(() => import("./pages/Progress"));
+const Invoices = lazy(() => import("./pages/Invoices"));
+const Monitoring = lazy(() => import("./pages/Monitoring"));
+const Syllabus = lazy(() => import("./pages/Syllabus"));
+const Messages = lazy(() => import("./pages/Messages"));
+const Settings = lazy(() => import("./pages/Settings"));
+const StudentProfile = lazy(() => import("./pages/StudentProfile"));
+const StudentZoom = lazy(() => import("./pages/StudentZoom"));
+const ZoomMeetingClean = lazy(() => import("./components/zoom/ZoomMeetingClean"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
 function AppRoutes() {
+  const { isLoading } = useAuthStore();
+  if (isLoading) return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
   return (
-    <Routes>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+      <Routes>
       <Route path="/auth" element={<Auth />} />
       <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
@@ -50,7 +54,8 @@ function AppRoutes() {
       <Route path="/zoom-join/:meetingNumber?" element={<ProtectedRoute><ZoomMeetingClean /></ProtectedRoute>} />
       <Route path="/payment/success" element={<PaymentSuccess />} />
       <Route path="*" element={<NotFound />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }
 

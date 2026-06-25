@@ -231,9 +231,13 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      version: 4,
-      storage: createJSONStorage(() => sessionStorage),
+      version: 5,
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ token: state.token }),
+      onRehydrateStorage: () => (state) => {
+        if (!state?.token) return { currentUser: null, isAuthenticated: false, isLoading: false, token: undefined };
+        return { currentUser: null, isAuthenticated: false, isLoading: true, token: state.token };
+      },
     }
   )
 );
