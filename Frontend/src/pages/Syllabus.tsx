@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Plus, Edit, Trash2, ChevronRight, CheckCircle2, Lock, PlayCircle, Download, ExternalLink, Eye } from "lucide-react";
+import { BookOpen, Plus, Edit, Trash2, ChevronRight, CheckCircle2, Lock, PlayCircle, ExternalLink, Eye } from "lucide-react";
 import { useSyllabi, useCreateSyllabus, useUpdateSyllabus, useDeleteSyllabus } from "@/hooks/useSyllabus";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
@@ -596,15 +596,6 @@ export default function Syllabus() {
                                   >
                                     <ExternalLink className="h-4 w-4" />
                                   </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleFileDownload(attachment)}
-                                    className="h-8 w-8 p-0"
-                                    title="Download file"
-                                  >
-                                    <Download className="h-4 w-4" />
-                                  </Button>
                                 </div>
                               </div>
                             ))}
@@ -715,15 +706,6 @@ export default function Syllabus() {
                                     title="Open in new tab"
                                   >
                                     <ExternalLink className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleFileDownload(attachment)}
-                                    className="h-8 w-8 p-0"
-                                    title="Download file"
-                                  >
-                                    <Download className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </div>
@@ -836,15 +818,6 @@ export default function Syllabus() {
                                   >
                                     <ExternalLink className="h-4 w-4" />
                                   </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleFileDownload(attachment)}
-                                    className="h-8 w-8 p-0"
-                                    title="Download file"
-                                  >
-                                    <Download className="h-4 w-4" />
-                                  </Button>
                                 </div>
                               </div>
                             ))}
@@ -955,15 +928,6 @@ export default function Syllabus() {
                                     title="Open in new tab"
                                   >
                                     <ExternalLink className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleFileDownload(attachment)}
-                                    className="h-8 w-8 p-0"
-                                    title="Download file"
-                                  >
-                                    <Download className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </div>
