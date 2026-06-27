@@ -8,11 +8,11 @@ async function updateSyllabusUrlsToFullBackend() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connected to MongoDB');
 
-    // Get backend URL from environment
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    // Use production backend URL directly
+    const backendUrl = 'https://quran-acadamy-crm-backend-production.up.railway.app';
     console.log(`🔧 Using backend URL: ${backendUrl}`);
 
-    // Find all syllabi with relative proxy URLs
+    // Find all syllabi
     const syllabi = await Syllabus.find({});
     console.log(`📋 Found ${syllabi.length} syllabi`);
 
@@ -23,13 +23,26 @@ async function updateSyllabusUrlsToFullBackend() {
         let hasUpdates = false;
         
         for (const attachment of syllabus.attachments) {
-          if (attachment.fileUrl && attachment.fileUrl.startsWith('/api/syllabus/file/')) {
-            // Extract the key from the relative URL
+          if (attachment.fileUrl) {
             const oldUrl = attachment.fileUrl;
-            const keyMatch = oldUrl.match(/\/api\/syllabus\/file\/(.+)$/);
+            let key = null;
             
-            if (keyMatch) {
-              const key = keyMatch[1];
+            // Check if it's a relative URL
+            if (oldUrl.startsWith('/api/syllabus/file/')) {
+              const keyMatch = oldUrl.match(/\/api\/syllabus\/file\/(.+)$/);
+              if (keyMatch) key = keyMatch[1];
+            }
+            // Check if it's localhost URL
+            else if (oldUrl.includes('localhost:5000/api/syllabus/file/')) {
+              const keyMatch = oldUrl.match(/localhost:5000\/api\/syllabus\/file\/(.+)$/);
+              if (keyMatch) key = keyMatch[1];
+            }
+            // Check if it's already production URL (no change needed)
+            else if (oldUrl.includes(backendUrl)) {
+              continue;
+            }
+            
+            if (key) {
               // Construct new full backend URL
               const newUrl = `${backendUrl}/api/syllabus/file/${key}`;
               
