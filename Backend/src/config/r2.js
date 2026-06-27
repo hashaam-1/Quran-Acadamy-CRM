@@ -26,8 +26,9 @@ const uploadToR2 = async (file, folder = 'syllabus') => {
 
     await r2Client.send(command);
 
-    // Use backend proxy URL for consistent inline viewing with proper headers
-    const fileUrl = `/api/syllabus/file/${fileName}`;
+    // Use full backend proxy URL for consistent inline viewing with proper headers
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+    const fileUrl = `${backendUrl}/api/syllabus/file/${fileName}`;
 
     return {
       fileName: file.originalname,
