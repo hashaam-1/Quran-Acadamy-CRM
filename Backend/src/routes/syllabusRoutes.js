@@ -32,8 +32,10 @@ router.get('/', getSyllabi);
 // Get syllabus statistics
 router.get('/stats', getSyllabusStats);
 
+// Get single syllabus by ID
+router.get('/:id', getSyllabusById);
+
 // Serve file from R2 with proper headers for inline viewing
-// MUST be before /:id route to avoid route conflicts
 router.get('/file/:key(*)', async (req, res) => {
   try {
     const key = req.params.key;
@@ -63,9 +65,6 @@ router.get('/file/:key(*)', async (req, res) => {
     res.status(500).json({ message: 'Failed to serve file', error: error.message });
   }
 });
-
-// Get single syllabus by ID
-router.get('/:id', getSyllabusById);
 
 // Debug endpoint to check if file exists
 router.get('/debug/file/:filename', (req, res) => {

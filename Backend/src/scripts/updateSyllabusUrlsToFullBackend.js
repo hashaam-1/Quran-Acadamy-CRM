@@ -8,8 +8,8 @@ async function updateSyllabusUrlsToFullBackend() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connected to MongoDB');
 
-    // Use production backend URL
-    const backendUrl = 'https://quran-acadamy-crm-backend-production.up.railway.app';
+    // Get backend URL from environment
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
     console.log(`🔧 Using backend URL: ${backendUrl}`);
 
     // Find all syllabi with relative proxy URLs
