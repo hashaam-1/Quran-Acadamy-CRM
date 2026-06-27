@@ -1,5 +1,7 @@
 const express = require('express');
 const { upload } = require('../middleware/upload');
+const { r2Client } = require('../config/r2');
+const { GetObjectCommand } = require('@aws-sdk/client-s3');
 const {
   getSyllabi,
   getSyllabusById,
@@ -32,6 +34,37 @@ router.get('/stats', getSyllabusStats);
 
 // Get single syllabus by ID
 router.get('/:id', getSyllabusById);
+
+// Serve file from R2 with proper headers for inline viewing
+router.get('/file/:key(*)', async (req, res) => {
+  try {
+    const key = req.params.key;
+    const bucketName = process.env.R2_BUCKET_NAME;
+    
+    console.log('📄 Serving file from R2:', { key, bucketName });
+    
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+    });
+    
+    const response = await r2Client.send(command);
+    
+    // Set appropriate headers for inline viewing
+    const contentType = response.ContentType || 'application/octet-stream';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `inline; filename="${key.split('/').pop()}"`);
+    
+    // Cache headers for better performance
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    
+    // Stream the file to the client
+    response.Body.pipe(res);
+  } catch (error) {
+    console.error('❌ Error serving file from R2:', error);
+    res.status(500).json({ message: 'Failed to serve file', error: error.message });
+  }
+});
 
 // Debug endpoint to check if file exists
 router.get('/debug/file/:filename', (req, res) => {
