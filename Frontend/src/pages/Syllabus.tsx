@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Plus, Edit, Trash2, ChevronRight, CheckCircle2, Lock, PlayCircle } from "lucide-react";
+import { BookOpen, Plus, Edit, Trash2, ChevronRight, CheckCircle2, Lock, PlayCircle, Download, ExternalLink, Eye } from "lucide-react";
 import { useSyllabi, useCreateSyllabus, useUpdateSyllabus, useDeleteSyllabus } from "@/hooks/useSyllabus";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
@@ -281,6 +281,27 @@ export default function Syllabus() {
       alert('Unable to open file - file path not found');
     }
   };
+
+  const handleFileOpenSameTab = (attachment: any) => {
+    // Use centralized helper for URL resolution
+    const fileUrl = getFileUrl(attachment);
+    console.log('🔍 FILE URL:', fileUrl);
+    console.log('🔍 FILE TYPE:', attachment?.fileType);
+    
+    // Open files in same tab
+    if (fileUrl) {
+      console.log('🚀 OPENING FILE IN SAME TAB:', fileUrl);
+      try {
+        window.location.href = fileUrl;
+      } catch (error) {
+        console.error('❌ ERROR OPENING FILE:', error);
+        alert('Error opening file - please try again or use download instead');
+      }
+    } else {
+      console.error('❌ NO VALID FILE URL FOUND in attachment:', attachment);
+      alert('Unable to open file - file path not found');
+    }
+  };
     
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -477,7 +498,7 @@ export default function Syllabus() {
             <p className="text-muted-foreground">{permissions.description}</p>
           </div>
           {permissions.canCreate && (
-            <Button className="gap-2" onClick={() => { setEditingSyllabus(null); setFormData({ title: '', course: 'Qaida', level: 'Beginner', description: '', duration: '', objectives: '', prerequisites: '', materials: '', assessmentCriteria: '', status: 'active' }); setIsDialogOpen(true); }}>
+            <Button className="gap-2" onClick={() => { setEditingSyllabus(null); setFormData({ title: '', course: selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1) as 'Qaida' | 'Nazra' | 'Hifz' | 'Tajweed', level: 'Beginner', description: '', duration: '', objectives: '', prerequisites: '', materials: '', assessmentCriteria: '', status: 'active' }); setIsDialogOpen(true); }}>
               <Plus className="h-4 w-4" />
               Add Syllabus
             </Button>
@@ -560,11 +581,20 @@ export default function Syllabus() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
+                                    onClick={() => handleFileOpenSameTab(attachment)}
+                                    className="h-8 w-8 p-0"
+                                    title="Open in same tab"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => handleFileOpen(attachment)}
                                     className="h-8 w-8 p-0"
                                     title="Open in new tab"
                                   >
-                                    <PlayCircle className="h-4 w-4" />
+                                    <ExternalLink className="h-4 w-4" />
                                   </Button>
                                   <Button
                                     variant="ghost"
@@ -573,7 +603,7 @@ export default function Syllabus() {
                                     className="h-8 w-8 p-0"
                                     title="Download file"
                                   >
-                                    <ChevronRight className="h-4 w-4 rotate-270" />
+                                    <Download className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </div>
@@ -671,11 +701,20 @@ export default function Syllabus() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
+                                    onClick={() => handleFileOpenSameTab(attachment)}
+                                    className="h-8 w-8 p-0"
+                                    title="Open in same tab"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => handleFileOpen(attachment)}
                                     className="h-8 w-8 p-0"
                                     title="Open in new tab"
                                   >
-                                    <PlayCircle className="h-4 w-4" />
+                                    <ExternalLink className="h-4 w-4" />
                                   </Button>
                                   <Button
                                     variant="ghost"
@@ -684,7 +723,7 @@ export default function Syllabus() {
                                     className="h-8 w-8 p-0"
                                     title="Download file"
                                   >
-                                    <ChevronRight className="h-4 w-4 rotate-270" />
+                                    <Download className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </div>
@@ -782,11 +821,20 @@ export default function Syllabus() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
+                                    onClick={() => handleFileOpenSameTab(attachment)}
+                                    className="h-8 w-8 p-0"
+                                    title="Open in same tab"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => handleFileOpen(attachment)}
                                     className="h-8 w-8 p-0"
                                     title="Open in new tab"
                                   >
-                                    <PlayCircle className="h-4 w-4" />
+                                    <ExternalLink className="h-4 w-4" />
                                   </Button>
                                   <Button
                                     variant="ghost"
@@ -795,7 +843,7 @@ export default function Syllabus() {
                                     className="h-8 w-8 p-0"
                                     title="Download file"
                                   >
-                                    <ChevronRight className="h-4 w-4 rotate-270" />
+                                    <Download className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </div>
@@ -893,11 +941,20 @@ export default function Syllabus() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
+                                    onClick={() => handleFileOpenSameTab(attachment)}
+                                    className="h-8 w-8 p-0"
+                                    title="Open in same tab"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => handleFileOpen(attachment)}
                                     className="h-8 w-8 p-0"
                                     title="Open in new tab"
                                   >
-                                    <PlayCircle className="h-4 w-4" />
+                                    <ExternalLink className="h-4 w-4" />
                                   </Button>
                                   <Button
                                     variant="ghost"
@@ -906,7 +963,7 @@ export default function Syllabus() {
                                     className="h-8 w-8 p-0"
                                     title="Download file"
                                   >
-                                    <ChevronRight className="h-4 w-4 rotate-270" />
+                                    <Download className="h-4 w-4" />
                                   </Button>
                                 </div>
                               </div>
