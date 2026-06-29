@@ -65,7 +65,7 @@ export function InvoiceForm({ open, onOpenChange, onSubmit, initialData, mode }:
   const handleStudentChange = (studentId: string) => {
     const student = students.find(s => s.id === studentId);
     if (student) {
-      setFormData({ ...formData, studentId, studentName: student.name, amount: student.feeAmount || 100 });
+      setFormData({ ...formData, studentId, studentName: student.name, amountPKR: student.feeAmount || 10000, amount: student.feeAmount || 10000 });
     }
   };
 

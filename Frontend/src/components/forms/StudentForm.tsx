@@ -161,7 +161,7 @@ export function StudentForm({ open, onOpenChange, onSubmit, initialData, mode }:
               <Input id="schedule" value={formData.schedule} onChange={(e) => setFormData({ ...formData, schedule: e.target.value })} placeholder="e.g., Mon, Wed, Fri - 4:00 PM" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="feeAmount">Monthly Fee ($)</Label>
+              <Label htmlFor="feeAmount">Monthly Fee (PKR)</Label>
               <Input id="feeAmount" type="number" value={formData.feeAmount} onChange={(e) => setFormData({ ...formData, feeAmount: parseInt(e.target.value) })} />
             </div>
           </div>

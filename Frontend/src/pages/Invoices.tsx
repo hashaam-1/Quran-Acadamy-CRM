@@ -371,7 +371,7 @@ export default function Invoices() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Revenue</p>
-                <p className="text-2xl font-bold text-success">${totalRevenue.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-success">Rs. {totalRevenue.toLocaleString()}</p>
               </div>
               <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
                 <DollarSign className="h-5 w-5 text-success" />
@@ -384,7 +384,7 @@ export default function Invoices() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold text-warning">${pendingAmount.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-warning">Rs. {pendingAmount.toLocaleString()}</p>
               </div>
               <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
                 <Clock className="h-5 w-5 text-warning" />
@@ -478,10 +478,10 @@ export default function Invoices() {
                         </div>
                       </TableCell>
                       <TableCell><Badge variant="outline">{invoice.month}</Badge></TableCell>
-                      <TableCell className="font-medium">${invoice.amount}</TableCell>
+                      <TableCell className="font-medium">{invoice.currency || 'PKR'} {invoice.amount.toLocaleString()}</TableCell>
                       <TableCell>
                         <span className={cn("font-medium", invoice.paidAmount === invoice.amount && "text-success", invoice.paidAmount === 0 && "text-muted-foreground", invoice.paidAmount > 0 && invoice.paidAmount < invoice.amount && "text-info")}>
-                          ${invoice.paidAmount}
+                          {invoice.currency || 'PKR'} {invoice.paidAmount.toLocaleString()}
                         </span>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{new Date(invoice.dueDate).toLocaleDateString()}</TableCell>
