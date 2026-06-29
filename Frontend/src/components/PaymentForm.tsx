@@ -65,14 +65,15 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
         });
 
         (window as any).Checkout.showPaymentPage().on('error', (error: any) => {
-          console.error('MPGS Checkout Error:', error);
-          // Don't show alert - errors during 3DS flow are normal
-          // Only log for debugging
+          // Only log if it's a critical error, not normal 3DS flow events
+          if (error && error.cause !== 'CANCELLED' && error.cause !== 'TIMEOUT') {
+            console.warn('MPGS Checkout event:', error);
+          }
         }).on('cancel', () => {
-          console.log('Payment Cancelled');
+          console.log('Payment Cancelled by user');
           setLoading(false);
         }).on('complete', (response: any) => {
-          console.log('Payment Complete:', response);
+          console.log('Payment completed successfully');
           window.location.href = '/payment-success';
         });
       } else {
