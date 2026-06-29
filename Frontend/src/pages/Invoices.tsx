@@ -204,8 +204,12 @@ export default function Invoices() {
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
       const invoiceId = (invoice as any)._id || invoice.id;
+      const fullUrl = `${API_BASE_URL}/payments/create-session`;
 
-      const response = await fetch(`${API_BASE_URL}/payments/create-session`, {
+      console.log('Payment session request URL:', fullUrl);
+      console.log('Request body:', { invoiceId, amount: invoice.amount, currency: invoice.currency || 'PKR' });
+
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -215,7 +219,20 @@ export default function Invoices() {
         })
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        setLoading(false);
+        toast.error('Server error: Invalid response format');
+        return;
+      }
+
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (data.success) {
         localStorage.setItem('paymentSession', JSON.stringify({
