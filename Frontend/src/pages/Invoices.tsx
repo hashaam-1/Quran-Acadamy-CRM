@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { PaymentForm } from "@/components/PaymentForm";
 import {
   Search,
   DollarSign,
@@ -99,9 +98,19 @@ export default function Invoices() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [current, setCurrent] = useState<Invoice | null>(null);
   const [formData, setFormData] = useState(emptyInvoice);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://test-mcbpk.mtf.gateway.mastercard.com/static/checkout/checkout.min.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const filtered = invoices.filter((inv) => {
     const matchesSearch = inv.studentName.toLowerCase().includes(searchQuery.toLowerCase());
@@ -184,10 +193,67 @@ export default function Invoices() {
 
   const handleMarkPaid = (invoice: Invoice) => {
     const invoiceId = (invoice as any)._id || invoice.id;
-    updateInvoiceMutation.mutate({ 
-      id: invoiceId, 
-      data: { status: 'paid', paidAmount: invoice.amount } 
+    updateInvoiceMutation.mutate({
+      id: invoiceId,
+      data: { status: 'paid', paidAmount: invoice.amount }
     });
+  };
+
+  const handlePay = async (invoice: Invoice) => {
+    setLoading(true);
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
+      const invoiceId = (invoice as any)._id || invoice.id;
+
+      const response = await fetch(`${API_BASE_URL}/payments/create-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invoiceId,
+          amount: invoice.amount,
+          currency: invoice.currency || 'PKR'
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem('paymentSession', JSON.stringify({
+          orderId: data.orderId,
+          invoiceId: data.invoiceId,
+          successIndicator: data.successIndicator
+        }));
+
+        (window as any).Checkout.configure({
+          session: { id: data.sessionId },
+          interaction: {
+            merchant: {
+              name: 'Quran Academy'
+            }
+          }
+        });
+
+        (window as any).Checkout.showPaymentPage().on('error', (error: any) => {
+          if (error && error.cause !== 'CANCELLED' && error.cause !== 'TIMEOUT') {
+            console.warn('MPGS Checkout event:', error);
+          }
+        }).on('cancel', () => {
+          console.log('Payment Cancelled by user');
+          setLoading(false);
+        }).on('complete', (response: any) => {
+          console.log('Payment completed successfully');
+          window.location.href = '/payment-success';
+        });
+      } else {
+        console.error('Session creation failed:', data.message);
+        setLoading(false);
+        toast.error('Failed to create payment session');
+      }
+    } catch (error) {
+      console.error('Payment session error:', error);
+      setLoading(false);
+      toast.error('Payment session error');
+    }
   };
 
   const handleDownload = async (invoice: Invoice) => {
@@ -498,7 +564,7 @@ export default function Invoices() {
                                 </Button>
                               )}
                               {currentUser?.role === 'student' && (
-                                <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" onClick={() => { setCurrent(invoice); setIsPaymentOpen(true); }} title="Pay Now">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" onClick={() => handlePay(invoice)} disabled={loading} title="Pay Now">
                                   <CreditCard className="h-4 w-4" />
                                 </Button>
                               )}
@@ -624,28 +690,6 @@ export default function Invoices() {
           <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Payment Dialog */}
-      <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Secure Payment</DialogTitle>
-            <DialogDescription>
-              Enter your card details to complete the payment for invoice #{current?.invoiceNo}
-            </DialogDescription>
-          </DialogHeader>
-          <PaymentForm
-            invoiceId={current?._id || current?.id || ''}
-            amount={current?.amount || 0}
-            currency={current?.currency || 'USD'}
-            onSuccess={() => {
-              setIsPaymentOpen(false);
-              window.location.reload();
-            }}
-            onCancel={() => setIsPaymentOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
     </MainLayout>
   );
 }
