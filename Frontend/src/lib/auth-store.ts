@@ -231,12 +231,12 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      version: 5,
+      version: 6,
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ token: state.token }),
+      partialize: (state) => ({ token: state.token, currentUser: state.currentUser, isAuthenticated: state.isAuthenticated }),
       onRehydrateStorage: () => (state) => {
         if (!state?.token) return { currentUser: null, isAuthenticated: false, isLoading: false, token: undefined };
-        return { currentUser: null, isAuthenticated: false, isLoading: true, token: state.token };
+        return { currentUser: state.currentUser || null, isAuthenticated: state.isAuthenticated || false, isLoading: false, token: state.token };
       },
     }
   )

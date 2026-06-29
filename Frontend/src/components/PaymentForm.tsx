@@ -65,15 +65,14 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
         });
 
         (window as any).Checkout.showPaymentPage().on('error', (error: any) => {
-          console.error('FULL MPGS ERROR:', error);
-          const errorMessage = error?.error?.explanation || error?.explanation || error?.cause || error?.message || 'Payment failed';
-          alert('Payment error: ' + errorMessage);
-          setLoading(false);
+          console.error('MPGS Checkout Error:', error);
+          // Don't show alert - errors during 3DS flow are normal
+          // Only log for debugging
         }).on('cancel', () => {
           console.log('Payment Cancelled');
           setLoading(false);
         }).on('complete', (response: any) => {
-          console.log('Payment Success:', response);
+          console.log('Payment Complete:', response);
           window.location.href = '/payment-success';
         });
       } else {
