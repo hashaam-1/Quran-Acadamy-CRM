@@ -109,16 +109,16 @@ export default function StudentZoomJoiner({
       // Use different endpoint based on user role
       let endpoint;
       if (currentUser?.role === 'student') {
-        endpoint = `https://quran-academy-crm-backend-production.up.railway.app/api/schedules/student/${currentUser?.id}`;
+        endpoint = `https://quran-acadamy-crm-backend-production.up.railway.app/api/schedules/student/${currentUser?.id}`;
         console.log('Fetching schedules for student:', currentUser?.name);
       } else if (currentUser?.role === 'teacher') {
-        endpoint = `https://quran-academy-crm-backend-production.up.railway.app/api/schedules/teacher/${currentUser?.id}`;
+        endpoint = `https://quran-acadamy-crm-backend-production.up.railway.app/api/schedules/teacher/${currentUser?.id}`;
         console.log('Fetching schedules for teacher:', currentUser?.name);
       } else if (currentUser?.role === 'admin') {
-        endpoint = `https://quran-academy-crm-backend-production.up.railway.app/api/schedules`;
+        endpoint = `https://quran-acadamy-crm-backend-production.up.railway.app/api/schedules`;
         console.log('Fetching schedules for admin:', currentUser?.name);
       } else {
-        endpoint = `https://quran-academy-crm-backend-production.up.railway.app/api/schedules`;
+        endpoint = `https://quran-acadamy-crm-backend-production.up.railway.app/api/schedules`;
         console.log('Fetching schedules for user:', currentUser?.role);
       }
 
@@ -149,13 +149,13 @@ export default function StudentZoomJoiner({
       // Use role-specific endpoint for available meetings
       let endpoint;
       if (currentUser?.role === 'student') {
-        endpoint = 'https://quran-academy-crm-backend-production.up.railway.app/api/meetings/student/available';
+        endpoint = 'https://quran-acadamy-crm-backend-production.up.railway.app/api/meetings/student/available';
       } else if (currentUser?.role === 'teacher') {
-        endpoint = 'https://quran-academy-crm-backend-production.up.railway.app/api/meetings/teacher/available';
+        endpoint = 'https://quran-acadamy-crm-backend-production.up.railway.app/api/meetings/teacher/available';
       } else if (currentUser?.role === 'admin') {
-        endpoint = 'https://quran-academy-crm-backend-production.up.railway.app/api/meetings/available';
+        endpoint = 'https://quran-acadamy-crm-backend-production.up.railway.app/api/meetings/available';
       } else {
-        endpoint = 'https://quran-academy-crm-backend-production.up.railway.app/api/meetings/available';
+        endpoint = 'https://quran-acadamy-crm-backend-production.up.railway.app/api/meetings/available';
       }
 
       const response = await fetch(endpoint);
@@ -208,7 +208,7 @@ export default function StudentZoomJoiner({
     try {
       // If joining a specific meeting, use meeting endpoint
       if (meetingId && meetingId !== "undefined" && meetingId.trim() !== "") {
-        const response = await fetch(`https://quran-academy-crm-backend-production.up.railway.app/api/meetings/join/${meetingId}`, {
+        const response = await fetch(`https://quran-acadamy-crm-backend-production.up.railway.app/api/meetings/join/${meetingId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -246,7 +246,7 @@ export default function StudentZoomJoiner({
 
         console.log('Student joining class with payload:', payload);
 
-        const response = await fetch('https://quran-academy-crm-backend-production.up.railway.app/api/meetings/start-class', {
+        const response = await fetch('https://quran-acadamy-crm-backend-production.up.railway.app/api/meetings/start-class', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -315,7 +315,7 @@ export default function StudentZoomJoiner({
 
     setIsLoading(true);
     try {
-      const response = await fetch(`https://quran-academy-crm-backend-production.up.railway.app/api/schedules/${editingSchedule._id}`, {
+      const response = await fetch(`https://quran-acadamy-crm-backend-production.up.railway.app/api/schedules/${editingSchedule._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

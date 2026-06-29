@@ -32,6 +32,7 @@ app.use((req, res, next) => {
 app.use(cors({
   origin: [
     'https://quran-academy-crm-frontend-production.up.railway.app',
+    'https://quran-academy-crm-frontend-production.up.railway.app',
     'http://localhost:5173',
     'http://localhost:3000'
   ],
@@ -40,10 +41,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type','Authorization','cache-control','X-Requested-With','Accept','pragma','expires']
 }));
 app.options('*', cors());
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginEmbedderPolicy: false
-}));
+app.use(helmet());
 app.use(compression());
 app.use(morgan("dev"));
 

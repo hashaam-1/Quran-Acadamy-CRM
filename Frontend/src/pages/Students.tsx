@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-academy-crm-backend-production.up.railway.app/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
 
 import {
   Select,

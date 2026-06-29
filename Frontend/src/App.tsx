@@ -76,7 +76,7 @@ function AppRoutes() {
       <Route path="/profile" element={<ProtectedRoute><StudentProfile /></ProtectedRoute>} />
       <Route path="/zoom-student" element={<ProtectedRoute><StudentZoom /></ProtectedRoute>} />
       <Route path="/zoom-join/:meetingNumber?" element={<ProtectedRoute><ZoomMeetingClean /></ProtectedRoute>} />
-      <Route path="/payment/success" element={<PaymentSuccess />} />
+      <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

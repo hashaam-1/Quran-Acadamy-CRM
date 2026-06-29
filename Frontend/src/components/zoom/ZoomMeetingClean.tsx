@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 // Import Zoom Meeting SDK from npm package
 import { ZoomMtg } from '@zoom/meetingsdk';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-academy-crm-backend-production.up.railway.app/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
 
 interface MeetingConfig {
   meetingNumber: string;
@@ -192,7 +192,7 @@ export default function ZoomMeetingClean() {
       }
       
       // Join the meeting to get signature and password in one call
-      const joinUrl = `https://quran-acadamy-crm-production.up.railway.app/api/meetings/join/${meetingNumber}`;
+      const joinUrl = `https://quran-acadamy-crm-backend-production.up.railway.app/api/meetings/join/${meetingNumber}`;
       
       const joinResponse = await fetch(joinUrl, {
         method: 'POST',
@@ -228,7 +228,7 @@ export default function ZoomMeetingClean() {
         
         // Try to get meeting details separately to get real password
         try {
-          const detailsResponse = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/details/${meetingNumber}`, {
+          const detailsResponse = await fetch(`https://quran-acadamy-crm-backend-production.up.railway.app/api/meetings/details/${meetingNumber}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
             }

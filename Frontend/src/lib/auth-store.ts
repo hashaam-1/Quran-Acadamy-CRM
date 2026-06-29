@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-const API_BASE_URL = 'https://quran-academy-crm-backend-production.up.railway.app/api';
+const API_BASE_URL = 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
 
 export type UserRole = 'admin' | 'sales_team' | 'team_leader' | 'teacher' | 'student';
 

@@ -31,7 +31,7 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
   const handlePay = async () => {
     setLoading(true);
     try {
-      const API_BASE_URL = "https://quran-academy-crm-backend-production.up.railway.app/api";
+      const API_BASE_URL = "https://quran-acadamy-crm-backend-production.up.railway.app/api";
       console.log("🔥 PAYMENT REQUEST SENDING:", {
         url: `${API_BASE_URL}/payments/create-session`,
         body: { invoiceId, amount, currency }
@@ -74,12 +74,15 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
           setLoading(false);
         }).on('complete', (response: any) => {
           console.log('Payment Success:', response);
-          window.location.href = '/payment/success';
+          window.location.href = '/payment-success';
         });
+      } else {
+        alert(data.message || 'Failed to create payment session');
+        setLoading(false);
       }
     } catch (error) {
-      alert('Failed to create payment session');
-    } finally {
+      console.error('Payment session error:', error);
+      alert('Failed to create payment session. Please try again.');
       setLoading(false);
     }
   };

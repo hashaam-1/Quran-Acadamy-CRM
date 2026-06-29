@@ -307,7 +307,7 @@ export default function Monitoring() {
       if (!meetingToJoin && liveClass.scheduleId) {
         toast.loading('Creating meeting for observation...');
         
-        const createResponse = await fetch('https://quran-academy-crm-backend-production.up.railway.app/api/meetings/start-class', {
+        const createResponse = await fetch('https://quran-acadamy-crm-backend-production.up.railway.app/api/meetings/start-class', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -340,7 +340,7 @@ export default function Monitoring() {
       }
 
       // Join the meeting as observer
-      const joinResponse = await fetch(`https://quran-academy-crm-backend-production.up.railway.app/api/meetings/join/${meetingToJoin}`, {
+      const joinResponse = await fetch(`https://quran-acadamy-crm-backend-production.up.railway.app/api/meetings/join/${meetingToJoin}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
