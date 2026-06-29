@@ -25,7 +25,7 @@ exports.updateRates = async (req, res) => {
     const rates = response.data.rates;
     
     // Filter for supported currencies
-    const supportedCurrencies = ['USD', 'GBP', 'CAD', 'AUD', 'PKR', 'AED', 'EUR'];
+    const supportedCurrencies = ['USD', 'GBP', 'CAD', 'AUD', 'PKR', 'AED', 'EUR', 'SAR'];
     const filteredRates = {};
     
     supportedCurrencies.forEach(currency => {

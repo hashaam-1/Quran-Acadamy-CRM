@@ -2,6 +2,7 @@ const Student = require('../models/Student.js');
 const bcrypt = require('bcryptjs');
 const { sendEmail, emailTemplates } = require('../config/email.js');
 const { generatePassword } = require('../utils/passwordGenerator.js');
+const { getCurrencyFromCountry } = require('../utils/currencyMapping.js');
 
 // Student login
 exports.studentLogin = async (req, res) => {
@@ -98,9 +99,9 @@ exports.getStudentById = async (req, res) => {
 // Create student
 exports.createStudent = async (req, res) => {
   try {
-    const { name, email, password, age, country, timezone, course, teacher, teacherId, schedule } = req.body;
+    const { name, email, password, age, country, timezone, course, teacher, teacherId, schedule, currency } = req.body;
     
-    console.log('Creating student with data:', { name, email, passwordProvided: !!password, providedPassword: password });
+    console.log('Creating student with data:', { name, email, passwordProvided: !!password, providedPassword: password, country });
     
     // Use email as userId for login
     const userId = email;
@@ -113,6 +114,10 @@ exports.createStudent = async (req, res) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(autoPassword, 10);
     
+    // Auto-detect currency from country if not provided
+    const studentCurrency = currency || getCurrencyFromCountry(country);
+    console.log('Auto-detected currency:', studentCurrency, 'for country:', country);
+    
     const student = new Student({
       name,
       email,
@@ -121,6 +126,7 @@ exports.createStudent = async (req, res) => {
       userId,
       age,
       country,
+      currency: studentCurrency,
       timezone,
       course,
       teacher,

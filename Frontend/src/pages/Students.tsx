@@ -57,19 +57,20 @@ const courseColors = {
 };
 
 const emptyStudent: Omit<Student, "id"> = {
-  name: "", 
-  age: 6, 
-  country: "", 
-  timezone: "GMT+0", 
-  course: "Qaida", 
-  teacher: "", 
+  name: "",
+  age: 6,
+  country: "",
+  currency: "USD",
+  timezone: "GMT+0",
+  course: "Qaida",
+  teacher: "",
   teacherId: "",
   email: "",
   password: "",
   userId: "",
-  schedule: "", 
-  progress: 0, 
-  status: "active", 
+  schedule: "",
+  progress: 0,
+  status: "active",
   joinedAt: new Date().toISOString().split('T')[0],
 };
 
@@ -440,7 +441,7 @@ export default function Students() {
                   <div className="space-y-2"><Label>Name</Label><Input value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} /></div>
                   <div className="space-y-2"><Label>Age</Label><Input type="number" value={formData.age} onChange={(e) => setFormData(prev => ({ ...prev, age: parseInt(e.target.value) }))} /></div>
                 </div>
-                <div className="grid grid-cols-2 gap-4"><div className="space-y-2"><Label>Country</Label><Input value={formData.country} onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))} /></div><div className="space-y-2"><Label>Currency</Label><Select value={formData.currency || 'USD'} onValueChange={(v) => setFormData(prev => ({ ...prev, currency: v }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD ($)</SelectItem><SelectItem value="GBP">GBP (£)</SelectItem><SelectItem value="CAD">CAD (C$)</SelectItem><SelectItem value="AUD">AUD (A$)</SelectItem><SelectItem value="PKR">PKR (Rs)</SelectItem></SelectContent></Select></div></div>
+                <div className="grid grid-cols-2 gap-4"><div className="space-y-2"><Label>Country</Label><Input value={formData.country} onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))} /></div><div className="space-y-2"><Label>Currency</Label><Select value={formData.currency || 'USD'} onValueChange={(v) => setFormData(prev => ({ ...prev, currency: v }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD ($)</SelectItem><SelectItem value="GBP">GBP (£)</SelectItem><SelectItem value="EUR">EUR (€)</SelectItem><SelectItem value="CAD">CAD (C$)</SelectItem><SelectItem value="AUD">AUD (A$)</SelectItem><SelectItem value="PKR">PKR (₨)</SelectItem><SelectItem value="AED">AED (د.إ)</SelectItem><SelectItem value="SAR">SAR (﷼)</SelectItem></SelectContent></Select></div></div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Teacher <span className="text-destructive">*</span></Label>
@@ -548,7 +549,7 @@ export default function Students() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto"><DialogHeader><DialogTitle>Edit Student</DialogTitle></DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4"><div className="space-y-2"><Label>Name</Label><Input value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} /></div><div className="space-y-2"><Label>Age</Label><Input type="number" value={formData.age} onChange={(e) => setFormData(prev => ({ ...prev, age: parseInt(e.target.value) }))} /></div></div>
-            <div className="grid grid-cols-2 gap-4"><div className="space-y-2"><Label>Country</Label><Input value={formData.country} onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))} /></div><div className="space-y-2"><Label>Currency</Label><Select value={formData.currency || 'USD'} onValueChange={(v) => setFormData(prev => ({ ...prev, currency: v }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD ($)</SelectItem><SelectItem value="GBP">GBP (£)</SelectItem><SelectItem value="CAD">CAD (C$)</SelectItem><SelectItem value="AUD">AUD (A$)</SelectItem><SelectItem value="PKR">PKR (Rs)</SelectItem></SelectContent></Select></div></div>
+            <div className="grid grid-cols-2 gap-4"><div className="space-y-2"><Label>Country</Label><Input value={formData.country} onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))} /></div><div className="space-y-2"><Label>Currency</Label><Select value={formData.currency || 'USD'} onValueChange={(v) => setFormData(prev => ({ ...prev, currency: v }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD ($)</SelectItem><SelectItem value="GBP">GBP (£)</SelectItem><SelectItem value="EUR">EUR (€)</SelectItem><SelectItem value="CAD">CAD (C$)</SelectItem><SelectItem value="AUD">AUD (A$)</SelectItem><SelectItem value="PKR">PKR (₨)</SelectItem><SelectItem value="AED">AED (د.إ)</SelectItem><SelectItem value="SAR">SAR (﷼)</SelectItem></SelectContent></Select></div></div>
             <div className="grid grid-cols-2 gap-4"><div className="space-y-2"><Label>Status</Label><Select value={formData.status} onValueChange={(v: Student["status"]) => setFormData(prev => ({ ...prev, status: v }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem><SelectItem value="on_hold">On Hold</SelectItem></SelectContent></Select></div><div className="space-y-2"><Label>Progress</Label><Input type="number" value={formData.progress} onChange={(e) => setFormData(prev => ({ ...prev, progress: parseInt(e.target.value) }))} /></div></div>
           </div>
           <DialogFooter><Button onClick={handleEdit}>Save Changes</Button></DialogFooter>
