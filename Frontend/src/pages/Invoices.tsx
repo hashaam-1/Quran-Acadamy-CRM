@@ -202,7 +202,7 @@ export default function Invoices() {
   const handlePay = async (invoice: Invoice) => {
     setLoading(true);
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
       const invoiceId = (invoice as any)._id || invoice.id;
       const fullUrl = `${API_BASE_URL}/payments/create-session`;
 
