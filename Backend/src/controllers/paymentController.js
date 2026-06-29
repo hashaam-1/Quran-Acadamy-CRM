@@ -1,6 +1,7 @@
 const axios = require('axios');
 const Invoice = require('../models/Invoice');
 const Student = require('../models/Student');
+const ExchangeRate = require('../models/ExchangeRate');
 
 const MPGS_CONFIG = {
   merchantId: process.env.MPGS_MERCHANT_ID,
@@ -8,6 +9,9 @@ const MPGS_CONFIG = {
   apiPassword: process.env.MPGS_API_PASSWORD,
   gatewayUrl: process.env.MPGS_GATEWAY_URL
 };
+
+// MPGS supported currencies (test environment - Pakistan MCB gateway supports PKR)
+const MPGS_SUPPORTED_CURRENCIES = ['USD', 'EUR', 'GBP', 'AUD', 'CAD', 'SGD', 'HKD', 'JPY', 'CNY', 'INR', 'AED', 'SAR', 'PKR'];
 
 exports.createPaymentSession = async (req, res) => {
   try {
@@ -27,9 +31,37 @@ exports.createPaymentSession = async (req, res) => {
     }
 
     const student = await Student.findById(invoice.studentId);
-    const paymentCurrency = currency || invoice.currency || student?.currency || 'PKR';
-    const paymentAmount = Number(amount || invoice.amount);
+    let paymentCurrency = currency || invoice.currency || student?.currency || 'PKR';
+    let paymentAmount = Number(amount || invoice.amount);
     const orderId = `ORD-${Math.floor(Date.now() / 1000)}`;
+
+    // Convert unsupported currencies to USD
+    if (!MPGS_SUPPORTED_CURRENCIES.includes(paymentCurrency)) {
+      console.log(`🔥 Currency ${paymentCurrency} not supported by MPGS, converting to USD`);
+
+      try {
+        const exchangeRate = await ExchangeRate.findOne({ from: paymentCurrency, to: 'USD' });
+        if (exchangeRate && exchangeRate.rate) {
+          paymentAmount = paymentAmount * exchangeRate.rate;
+          paymentCurrency = 'USD';
+          console.log(`🔥 Converted ${paymentCurrency} to USD: ${paymentAmount}`);
+        } else {
+          console.log(`🔥 No exchange rate found for ${paymentCurrency}, using USD with default rate`);
+          paymentCurrency = 'USD';
+        }
+      } catch (error) {
+        console.error('🔥 Error fetching exchange rate:', error);
+        paymentCurrency = 'USD';
+      }
+    }
+
+    // For Pakistan MCB test gateway, try PKR first if original was PKR
+    const originalCurrency = currency || invoice.currency || student?.currency || 'PKR';
+    if (originalCurrency === 'PKR' && MPGS_SUPPORTED_CURRENCIES.includes('PKR')) {
+      paymentCurrency = 'PKR';
+      paymentAmount = Number(amount || invoice.amount);
+      console.log(`🔥 Using PKR for Pakistan gateway`);
+    }
 
     const sessionRequest = {
       apiOperation: 'CREATE_CHECKOUT_SESSION',
@@ -48,6 +80,10 @@ exports.createPaymentSession = async (req, res) => {
       }
     };
 
+    console.log('🔥 MPGS Session Request:', JSON.stringify(sessionRequest, null, 2));
+    console.log('🔥 Currency:', paymentCurrency);
+    console.log('🔥 Amount:', paymentAmount);
+
     const auth = Buffer.from(`${MPGS_CONFIG.merchantUsername}:${MPGS_CONFIG.apiPassword}`).toString('base64');
 
     const response = await axios.post(
@@ -56,10 +92,24 @@ exports.createPaymentSession = async (req, res) => {
       { headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' } }
     );
 
+    console.log('🔥 MPGS Response Status:', response.status);
+    console.log('🔥 MPGS Response Data:', JSON.stringify(response.data, null, 2));
+
     // Check if response is HTML (error page)
     if (typeof response.data === 'string' && response.data.includes('<!doctype')) {
       console.error('MPGS returned HTML error page instead of JSON');
       return res.status(500).json({ message: 'MPGS API returned error page. Check credentials and endpoint.' });
+    }
+
+    // Check for MPGS errors in response
+    if (response.data.error) {
+      console.error('🔥 MPGS Error:', response.data.error);
+      return res.status(400).json({
+        success: false,
+        message: 'MPGS API error',
+        error: response.data.error,
+        explanation: response.data.explanation
+      });
     }
 
     res.json({
