@@ -32,7 +32,7 @@ app.use((req, res, next) => {
 app.use(cors({
   origin: [
     'https://quran-academy-crm-frontend-production.up.railway.app',
-    'https://quran-acadamy-crm-frontend-production.up.railway.app',
+    'https://quran-academy-crm-frontend-production.up.railway.app',
     'http://localhost:5173',
     'http://localhost:3000'
   ],

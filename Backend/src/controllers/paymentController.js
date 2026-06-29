@@ -61,7 +61,7 @@ exports.createPaymentSession = async (req, res) => {
         merchant: {
           name: 'Quran Academy'
         },
-        returnUrl: `${process.env.FRONTEND_URL}/payment-success`
+        returnUrl: `${process.env.FRONTEND_URL}/payment/success`
       }
     };
 

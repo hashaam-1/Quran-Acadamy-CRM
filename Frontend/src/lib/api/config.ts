@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
+const API_BASE_URL = 'https://quran-academy-crm-backend-production.up.railway.app/api';
 
 
 export const api = axios.create({

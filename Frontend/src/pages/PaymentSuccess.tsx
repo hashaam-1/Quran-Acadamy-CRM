@@ -25,7 +25,7 @@ export default function PaymentSuccess() {
       }
 
       try {
-        const API_BASE_URL = "https://quran-acadamy-crm-backend-production.up.railway.app/api";
+        const API_BASE_URL = "https://quran-academy-crm-backend-production.up.railway.app/api";
         const response = await fetch(`${API_BASE_URL}/payments/verify`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

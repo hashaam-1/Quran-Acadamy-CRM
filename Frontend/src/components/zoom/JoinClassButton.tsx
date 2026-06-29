@@ -10,7 +10,7 @@ import { useAuthStore } from '@/lib/auth-store';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-acadamy-crm-backend-production.up.railway.app/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://quran-academy-crm-backend-production.up.railway.app/api';
 
 interface JoinClassButtonProps {
   meetingNumber?: string;

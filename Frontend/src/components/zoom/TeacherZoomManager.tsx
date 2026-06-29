@@ -75,7 +75,7 @@ export default function TeacherZoomManager({
 
   const fetchTeacherMeetings = async () => {
     try {
-      const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/teacher/${currentUser?.id}`);
+      const response = await fetch(`https://quran-academy-crm-backend-production.up.railway.app/api/meetings/teacher/${currentUser?.id}`);
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -127,7 +127,7 @@ export default function TeacherZoomManager({
 
       console.log('Teacher starting class with payload:', payload);
 
-      const response = await fetch('https://quran-acadamy-crm-production.up.railway.app/api/meetings/start-class', {
+      const response = await fetch('https://quran-academy-crm-backend-production.up.railway.app/api/meetings/start-class', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ export default function TeacherZoomManager({
   const handleEndClass = async (meetingId: string) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/${meetingId}/end`, {
+      const response = await fetch(`https://quran-academy-crm-backend-production.up.railway.app/api/meetings/${meetingId}/end`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -217,7 +217,7 @@ export default function TeacherZoomManager({
 
     setIsLoading(true);
     try {
-      const response = await fetch(`https://quran-acadamy-crm-production.up.railway.app/api/meetings/${editingMeeting._id}`, {
+      const response = await fetch(`https://quran-academy-crm-backend-production.up.railway.app/api/meetings/${editingMeeting._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
