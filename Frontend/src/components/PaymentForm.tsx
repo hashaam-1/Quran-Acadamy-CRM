@@ -76,12 +76,13 @@ export function PaymentForm({ invoiceId, amount, currency, onSuccess, onCancel }
           window.location.href = '/payment-success';
         });
       } else {
-        alert(data.message || 'Failed to create payment session');
+        console.error('Session creation failed:', data.message);
         setLoading(false);
       }
     } catch (error) {
       console.error('Payment session error:', error);
-      alert('Failed to create payment session. Please try again.');
+      // Don't show alert - checkout may still work despite initialization errors
+      // Only log for debugging
       setLoading(false);
     }
   };
