@@ -1,5 +1,6 @@
 const Invoice = require('../models/Invoice.js');
 const Student = require('../models/Student.js');
+const ExchangeRate = require('../models/ExchangeRate.js');
 
 // Get all invoices
 exports.getInvoices = async (req, res) => {
@@ -30,13 +31,29 @@ exports.getInvoiceById = async (req, res) => {
 // Create invoice
 exports.createInvoice = async (req, res) => {
   try {
-    const { studentId, amount } = req.body;
+    const { studentId, amountPKR } = req.body;
     const student = await Student.findById(studentId);
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
+    // Get exchange rate
+    let exchangeRate = 1;
+    let convertedAmount = amountPKR;
+    const studentCurrency = student.currency || 'PKR';
+
+    if (studentCurrency !== 'PKR') {
+      const latestRate = await ExchangeRate.findOne().sort({ updatedAt: -1 });
+      if (latestRate && latestRate.rates.has(studentCurrency)) {
+        exchangeRate = latestRate.rates.get(studentCurrency);
+        convertedAmount = amountPKR * exchangeRate;
+      }
+    }
+
     const invoice = new Invoice({
       ...req.body,
-      currency: student.currency || 'PKR'
+      amountPKR,
+      amount: convertedAmount,
+      currency: studentCurrency,
+      exchangeRate
     });
     const newInvoice = await invoice.save();
     res.status(201).json(newInvoice);

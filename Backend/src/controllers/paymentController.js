@@ -42,7 +42,7 @@ exports.createPaymentSession = async (req, res) => {
 
     console.log('🔍 Invoice found:', invoice);
     const student = await Student.findById(invoice.studentId);
-    const paymentCurrency = currency || student?.currency || 'USD';
+    const paymentCurrency = currency || invoice.currency || student?.currency || 'PKR';
     const paymentAmount = Number(amount || invoice.amount);
     // MPGS-compliant order ID (only alphanumeric, dash, underscore)
     const orderId = `ORD-${Math.floor(Date.now() / 1000)}`;

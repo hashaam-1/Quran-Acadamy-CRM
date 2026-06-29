@@ -105,6 +105,7 @@ loadRoute("settingRoutes.js", "/api/settings");
 loadRoute("syllabusRoutes.js", "/api/syllabus");
 loadRoute("homeworkRoutes.js", "/api/homework");
 loadRoute("paymentRoutes.js", "/api/payments");
+loadRoute("exchangeRateRoutes.js", "/api/exchange-rates");
 // loadRoute("meetingRoutes.js", "/api/meetings"); // COMMENTED OUT ZOOM MEETING FUNCTIONALITY
 
 /* =========================

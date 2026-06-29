@@ -75,17 +75,12 @@ const statusConfig = {
   partial: { label: "Partial", variant: "info" as const, icon: DollarSign },
 };
 
-const months = [
-  'January 2024', 'February 2024', 'March 2024', 'April 2024',
-  'May 2024', 'June 2024', 'July 2024', 'August 2024',
-  'September 2024', 'October 2024', 'November 2024', 'December 2024',
-];
-
 const emptyInvoice: Omit<Invoice, 'id'> = {
   studentName: '',
   studentId: '',
-  amount: 100,
-  month: 'January 2024',
+  amountPKR: 10000,
+  amount: 10000,
+  month: new Date().toISOString().slice(0, 7), // YYYY-MM format
   status: 'unpaid',
   dueDate: new Date().toISOString().split('T')[0],
   paidAmount: 0,
@@ -256,6 +251,12 @@ export default function Invoices() {
           <!-- Financial Details -->
           <div style="margin-bottom: 30px;">
             <h3 style="color: #667eea; margin-bottom: 20px; font-size: 18px; font-weight: 600;">Payment Details</h3>
+            ${invoice.amountPKR && invoice.amountPKR !== invoice.amount ? `
+            <p style="font-size: 12px; color: #666; margin-bottom: 15px;">
+              <strong>Original Fee:</strong> Rs. ${(invoice.amountPKR || 0).toLocaleString()} | 
+              <strong>You Pay:</strong> ${invoice.currency || 'PKR'} ${(invoice.amount || 0).toFixed(2)}
+            </p>
+            ` : ''}
             <table style="width: 100%; border-collapse: collapse;">
               <thead>
                 <tr style="background: #f1f5f9;">
@@ -266,25 +267,25 @@ export default function Invoices() {
               <tbody>
                 <tr>
                   <td style="padding: 15px; border-bottom: 1px solid #e2e8f0;">Tuition Fee - ${invoice.month}</td>
-                  <td style="padding: 15px; text-align: right; border-bottom: 1px solid #e2e8f0; font-weight: 500;">Rs. ${invoice.amount.toFixed(2)}</td>
+                  <td style="padding: 15px; text-align: right; border-bottom: 1px solid #e2e8f0; font-weight: 500;">${invoice.currency || 'PKR'} ${(invoice.amount || 0).toFixed(2)}</td>
                 </tr>
                 ${invoice.discount ? `
                 <tr>
                   <td style="padding: 15px; border-bottom: 1px solid #e2e8f0; color: #10b981;">Discount</td>
-                  <td style="padding: 15px; text-align: right; border-bottom: 1px solid #e2e8f0; color: #10b981; font-weight: 500;">-Rs. ${invoice.discount.toFixed(2)}</td>
+                  <td style="padding: 15px; text-align: right; border-bottom: 1px solid #e2e8f0; color: #10b981; font-weight: 500;">-${invoice.currency || 'PKR'} ${(invoice.discount || 0).toFixed(2)}</td>
                 </tr>
                 ` : ''}
                 <tr style="background: #f8fafc; font-weight: 600;">
                   <td style="padding: 20px 15px; border-bottom: 2px solid #667eea;">Total Amount</td>
-                  <td style="padding: 20px 15px; text-align: right; border-bottom: 2px solid #667eea; color: #667eea; font-size: 18px;">Rs. ${(invoice.amount - (invoice.discount || 0)).toFixed(2)}</td>
+                  <td style="padding: 20px 15px; text-align: right; border-bottom: 2px solid #667eea; color: #667eea; font-size: 18px;">${invoice.currency || 'PKR'} ${((invoice.amount || 0) - (invoice.discount || 0)).toFixed(2)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 15px; color: #666;">Paid Amount</td>
-                  <td style="padding: 15px; text-align: right; color: #10b981; font-weight: 500;">Rs. ${invoice.paidAmount.toFixed(2)}</td>
+                  <td style="padding: 15px; text-align: right; color: #10b981; font-weight: 500;">${invoice.currency || 'PKR'} ${(invoice.paidAmount || 0).toFixed(2)}</td>
                 </tr>
                 <tr style="background: #fef2f2;">
                   <td style="padding: 20px 15px; border-bottom: 2px solid #ef4444; font-weight: 600; color: #374151;">Balance Due</td>
-                  <td style="padding: 20px 15px; text-align: right; border-bottom: 2px solid #ef4444; color: #ef4444; font-size: 18px; font-weight: 700;">Rs. ${Math.max(0, (invoice.amount - invoice.paidAmount - (invoice.discount || 0))).toFixed(2)}</td>
+                  <td style="padding: 20px 15px; text-align: right; border-bottom: 2px solid #ef4444; color: #ef4444; font-size: 18px; font-weight: 700;">${invoice.currency || 'PKR'} ${Math.max(0, (invoice.amount || 0) - (invoice.paidAmount || 0) - (invoice.discount || 0)).toFixed(2)}</td>
                 </tr>
               </tbody>
             </table>
@@ -541,26 +542,23 @@ export default function Invoices() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Amount ($) <span className="text-destructive">*</span></Label>
+                <Label>Amount (PKR) <span className="text-destructive">*</span></Label>
                 <Input 
                   type="number" 
                   min="0" 
                   step="0.01"
-                  value={formData.amount} 
-                  onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))} 
-                  placeholder="100.00"
+                  value={formData.amountPKR || formData.amount} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, amountPKR: parseFloat(e.target.value) || 0, amount: parseFloat(e.target.value) || 0 }))} 
+                  placeholder="10000.00"
                 />
               </div>
               <div className="space-y-2">
                 <Label>Month <span className="text-destructive">*</span></Label>
-                <Select value={formData.month} onValueChange={(v) => setFormData(prev => ({ ...prev, month: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {months.map((month) => (
-                      <SelectItem key={month} value={month}>{month}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input 
+                  type="month" 
+                  value={formData.month} 
+                  onChange={(e) => setFormData(prev => ({ ...prev, month: e.target.value }))} 
+                />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

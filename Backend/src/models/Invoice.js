@@ -10,10 +10,25 @@ const invoiceSchema = new mongoose.Schema({
     ref: 'Student',
     required: true
   },
+  amountPKR: {
+    type: Number,
+    required: true,
+    min: 0
+  },
   amount: {
     type: Number,
     required: true,
     min: 0
+  },
+  currency: {
+    type: String,
+    required: true,
+    enum: ['USD', 'GBP', 'CAD', 'AUD', 'PKR', 'AED', 'EUR'],
+    default: 'PKR'
+  },
+  exchangeRate: {
+    type: Number,
+    default: 1
   },
   month: {
     type: String,
