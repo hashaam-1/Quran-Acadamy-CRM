@@ -257,7 +257,7 @@ export default function Dashboard() {
           />
           <StatCard
             title="Revenue (MTD)"
-            value={`$${totalRevenue.toLocaleString()}`}
+            value={`Rs. ${totalRevenue.toLocaleString()}`}
             icon={DollarSign}
             iconColor="success"
             className="stagger-5"
@@ -268,7 +268,7 @@ export default function Dashboard() {
           />
           <StatCard
             title="Pending Fees"
-            value={`$${pendingFees.toLocaleString()}`}
+            value={`Rs. ${pendingFees.toLocaleString()}`}
             icon={DollarSign}
             iconColor="warning"
             className="stagger-5"
@@ -337,7 +337,7 @@ export default function Dashboard() {
           />
           <StatCard
             title="Revenue Collected"
-            value={`$${totalRevenue.toLocaleString()}`}
+            value={`Rs. ${totalRevenue.toLocaleString()}`}
             icon={DollarSign}
             iconColor="success"
             className="stagger-3"
@@ -493,13 +493,13 @@ export default function Dashboard() {
           />
           <StatCard
             title="Monthly Salary"
-            value={`$${salary.toLocaleString()}`}
+            value={`Rs. ${salary.toLocaleString()}`}
             icon={DollarSign}
             iconColor="success"
             className="stagger-4"
             details={[
-              { label: "base", value: `$${(salary - bonuses)}`, color: "success" },
-              { label: "bonus", value: `$${bonuses}`, color: "accent" },
+              { label: "base", value: `Rs. ${(salary - bonuses)}`, color: "success" },
+              { label: "bonus", value: `Rs. ${bonuses}`, color: "accent" },
             ]}
           />
         </div>
@@ -594,7 +594,7 @@ export default function Dashboard() {
         />
         <StatCard
           title="Fee Status"
-          value={totalPending > 0 ? `$${totalPending.toLocaleString()}` : 'Paid'}
+          value={totalPending > 0 ? `Rs. ${totalPending.toLocaleString()}` : 'Paid'}
           subtitle={totalPending > 0 ? 'Pending payment' : 'All clear'}
           icon={DollarSign}
           iconColor={totalPending > 0 ? "warning" : "success"}

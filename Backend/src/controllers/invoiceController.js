@@ -36,7 +36,7 @@ exports.createInvoice = async (req, res) => {
 
     const invoice = new Invoice({
       ...req.body,
-      currency: student.currency || 'USD'
+      currency: student.currency || 'PKR'
     });
     const newInvoice = await invoice.save();
     res.status(201).json(newInvoice);

@@ -266,25 +266,25 @@ export default function Invoices() {
               <tbody>
                 <tr>
                   <td style="padding: 15px; border-bottom: 1px solid #e2e8f0;">Tuition Fee - ${invoice.month}</td>
-                  <td style="padding: 15px; text-align: right; border-bottom: 1px solid #e2e8f0; font-weight: 500;">$${invoice.amount.toFixed(2)}</td>
+                  <td style="padding: 15px; text-align: right; border-bottom: 1px solid #e2e8f0; font-weight: 500;">Rs. ${invoice.amount.toFixed(2)}</td>
                 </tr>
                 ${invoice.discount ? `
                 <tr>
                   <td style="padding: 15px; border-bottom: 1px solid #e2e8f0; color: #10b981;">Discount</td>
-                  <td style="padding: 15px; text-align: right; border-bottom: 1px solid #e2e8f0; color: #10b981; font-weight: 500;">-$${invoice.discount.toFixed(2)}</td>
+                  <td style="padding: 15px; text-align: right; border-bottom: 1px solid #e2e8f0; color: #10b981; font-weight: 500;">-Rs. ${invoice.discount.toFixed(2)}</td>
                 </tr>
                 ` : ''}
                 <tr style="background: #f8fafc; font-weight: 600;">
                   <td style="padding: 20px 15px; border-bottom: 2px solid #667eea;">Total Amount</td>
-                  <td style="padding: 20px 15px; text-align: right; border-bottom: 2px solid #667eea; color: #667eea; font-size: 18px;">$${(invoice.amount - (invoice.discount || 0)).toFixed(2)}</td>
+                  <td style="padding: 20px 15px; text-align: right; border-bottom: 2px solid #667eea; color: #667eea; font-size: 18px;">Rs. ${(invoice.amount - (invoice.discount || 0)).toFixed(2)}</td>
                 </tr>
                 <tr>
                   <td style="padding: 15px; color: #666;">Paid Amount</td>
-                  <td style="padding: 15px; text-align: right; color: #10b981; font-weight: 500;">$${invoice.paidAmount.toFixed(2)}</td>
+                  <td style="padding: 15px; text-align: right; color: #10b981; font-weight: 500;">Rs. ${invoice.paidAmount.toFixed(2)}</td>
                 </tr>
                 <tr style="background: #fef2f2;">
                   <td style="padding: 20px 15px; border-bottom: 2px solid #ef4444; font-weight: 600; color: #374151;">Balance Due</td>
-                  <td style="padding: 20px 15px; text-align: right; border-bottom: 2px solid #ef4444; color: #ef4444; font-size: 18px; font-weight: 700;">$${Math.max(0, (invoice.amount - invoice.paidAmount - (invoice.discount || 0))).toFixed(2)}</td>
+                  <td style="padding: 20px 15px; text-align: right; border-bottom: 2px solid #ef4444; color: #ef4444; font-size: 18px; font-weight: 700;">Rs. ${Math.max(0, (invoice.amount - invoice.paidAmount - (invoice.discount || 0))).toFixed(2)}</td>
                 </tr>
               </tbody>
             </table>
