@@ -375,8 +375,11 @@ export default function Dashboard() {
 
   // Team Leader Dashboard
   if (role === 'team_leader') {
-    const avgPerformance = 92;
-    
+    // Calculate average performance from teachers
+    const avgPerformance = activeTeachers > 0
+      ? Math.round(filteredData.teachers.reduce((sum, t) => sum + (t.performance || 0), 0) / activeTeachers)
+      : 0;
+
     return (
       <MainLayout title="Team Leader Dashboard" subtitle={`Welcome back, ${currentUser?.name || 'Team Lead'}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -451,9 +454,12 @@ export default function Dashboard() {
     const onLeaveAssigned = filteredData.students.filter(s => s.status === 'on_hold').length;
     const absentAssigned = filteredData.students.filter(s => s.status === 'inactive').length;
     const trialStudents = filteredData.students.filter(s => s.course === 'Qaida').length;
-    const salary = 3000;
-    const bonuses = 350;
-    
+
+    // Get teacher's salary from their data
+    const teacherData = teachersData.find(t => t.id === currentUser?.id || t.name === currentUser?.name);
+    const salary = teacherData?.salary || 0;
+    const bonuses = teacherData?.bonuses || 0;
+
     return (
       <MainLayout title="Teacher Dashboard" subtitle={`Welcome back, ${currentUser?.name || 'Teacher'}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

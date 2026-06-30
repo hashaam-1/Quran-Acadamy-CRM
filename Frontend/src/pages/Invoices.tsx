@@ -77,13 +77,13 @@ const statusConfig = {
 const emptyInvoice: Omit<Invoice, 'id'> = {
   studentName: '',
   studentId: '',
-  amountPKR: 10000,
-  amount: 10000,
+  amount: 0,
   month: new Date().toISOString().slice(0, 7), // YYYY-MM format
   status: 'unpaid',
   dueDate: new Date().toISOString().split('T')[0],
   paidAmount: 0,
   discount: 0,
+  currency: 'PKR',
 };
 
 export default function Invoices() {
@@ -162,7 +162,8 @@ export default function Invoices() {
         ...prev,
         studentName,
         studentId: studentId,
-        amount: student.feeAmount || 100,
+        amount: student.feeAmount || student.fee || 0,
+        currency: student.currency || 'PKR',
       }));
     }
   };
