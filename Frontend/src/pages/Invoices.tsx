@@ -241,34 +241,36 @@ export default function Invoices() {
           successIndicator: data.successIndicator
         }));
 
+        console.log('🔥 Opening MPGS checkout with session:', data.sessionId);
+
         (window as any).Checkout.configure({
           session: { id: data.sessionId },
           interaction: {
             merchant: {
               name: 'Quran Academy'
             }
+          },
+          callbacks: {
+            error: (error: any) => {
+              console.error('🔥 MPGS Checkout Error:', error);
+              console.error('🔥 Error cause:', error?.cause);
+              console.error('🔥 Error message:', error?.message);
+              setLoading(false);
+              toast.error(`Payment error: ${error?.message || 'Merchant configuration error. Please contact support.'}`);
+            },
+            cancel: () => {
+              console.log('Payment Cancelled by user');
+              setLoading(false);
+              toast.info('Payment cancelled');
+            },
+            complete: (response: any) => {
+              console.log('🔥 Payment completed successfully:', response);
+              window.location.href = '/payment-success';
+            }
           }
         });
 
-        console.log('🔥 Opening MPGS checkout with session:', data.sessionId);
-
-        (window as any).Checkout.showPaymentPage()
-          .on('error', (error: any) => {
-            console.error('🔥 MPGS Checkout Error:', error);
-            console.error('🔥 Error cause:', error?.cause);
-            console.error('🔥 Error message:', error?.message);
-            setLoading(false);
-            toast.error(`Payment error: ${error?.message || 'Merchant configuration error. Please contact support.'}`);
-          })
-          .on('cancel', () => {
-            console.log('Payment Cancelled by user');
-            setLoading(false);
-            toast.info('Payment cancelled');
-          })
-          .on('complete', (response: any) => {
-            console.log('🔥 Payment completed successfully:', response);
-            window.location.href = '/payment-success';
-          });
+        (window as any).Checkout.showPaymentPage();
       } else {
         console.error('Session creation failed:', data.message);
         setLoading(false);
