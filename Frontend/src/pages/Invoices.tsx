@@ -275,9 +275,14 @@ export default function Invoices() {
         toast.error('Failed to create payment session');
       }
     } catch (error) {
-      console.error('Payment session error:', error);
+      console.error('🔥 Payment session error:', error);
+      console.error('🔥 Error details:', {
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name
+      });
       setLoading(false);
-      toast.error('Payment session error');
+      toast.error(`Payment session error: ${error?.message || 'Unknown error'}`);
     }
   };
 
