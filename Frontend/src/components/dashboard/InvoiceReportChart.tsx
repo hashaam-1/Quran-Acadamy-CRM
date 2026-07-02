@@ -10,22 +10,38 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Receipt } from "lucide-react";
+import { useConvertToPKR } from "@/hooks/useExchangeRates";
 
 interface InvoiceReportChartProps {
   invoices: any[];
 }
 
 export function InvoiceReportChart({ invoices }: InvoiceReportChartProps) {
+  const convertToPKR = useConvertToPKR();
 
   // Calculate invoice statistics
   const totalInvoices = invoices.length;
   const paidInvoices = invoices.filter(i => i.status === 'paid').length;
   const unpaidInvoices = invoices.filter(i => i.status === 'unpaid' || i.status === 'overdue').length;
   const partialInvoices = invoices.filter(i => i.status === 'partial').length;
-  
-  const totalRecovery = invoices.reduce((sum, i) => sum + i.paidAmount, 0);
-  const estimatedRecovery = invoices.reduce((sum, i) => sum + (i.estimatedAmount || i.amount), 0);
-  const pendingRecovery = estimatedRecovery - totalRecovery;
+
+  const totalRecovery = invoices.reduce((sum, i) => {
+    const paidInPKR = convertToPKR(i.paidAmount, i.currency || 'PKR');
+    return sum + paidInPKR;
+  }, 0);
+
+  const estimatedRecovery = invoices.reduce((sum, i) => {
+    const amountInPKR = convertToPKR(i.estimatedAmount || i.amount, i.currency || 'PKR');
+    return sum + amountInPKR;
+  }, 0);
+
+  const pendingRecovery = invoices
+    .filter(i => i.status !== 'paid')
+    .reduce((sum, i) => {
+      const amountInPKR = convertToPKR(i.amount, i.currency || 'PKR');
+      const paidInPKR = convertToPKR(i.paidAmount, i.currency || 'PKR');
+      return sum + (amountInPKR - paidInPKR);
+    }, 0);
 
   const data = [
     {

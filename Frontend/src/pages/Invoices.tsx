@@ -64,6 +64,7 @@ import { useInvoices, useCreateInvoice, useUpdateInvoice, useDeleteInvoice } fro
 import { useStudents } from "@/hooks/useStudents";
 import { useAuthStore } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
+import { useConvertToPKR } from "@/hooks/useExchangeRates";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -90,6 +91,7 @@ export default function Invoices() {
   const { data: invoices = [], isLoading: invoicesLoading } = useInvoices();
   const { data: students = [], isLoading: studentsLoading } = useStudents();
   const { currentUser } = useAuthStore();
+  const convertToPKR = useConvertToPKR();
   const createInvoiceMutation = useCreateInvoice();
   const updateInvoiceMutation = useUpdateInvoice();
   const deleteInvoiceMutation = useDeleteInvoice();
@@ -136,8 +138,19 @@ export default function Invoices() {
     return result;
   });
 
-  const totalRevenue = invoices.reduce((acc, inv) => acc + inv.paidAmount, 0);
-  const pendingAmount = invoices.reduce((acc, inv) => acc + (inv.amount - inv.paidAmount), 0);
+  const totalRevenue = invoices.reduce((acc, inv) => {
+    const paidInPKR = convertToPKR(inv.paidAmount, inv.currency || 'PKR');
+    return acc + paidInPKR;
+  }, 0);
+
+  const pendingAmount = invoices
+    .filter(inv => inv.status !== 'paid')
+    .reduce((acc, inv) => {
+      const amountInPKR = convertToPKR(inv.amount, inv.currency || 'PKR');
+      const paidInPKR = convertToPKR(inv.paidAmount, inv.currency || 'PKR');
+      return acc + (amountInPKR - paidInPKR);
+    }, 0);
+
   const overdueCount = invoices.filter(inv => inv.status === "overdue").length;
 
   const handleAdd = () => {

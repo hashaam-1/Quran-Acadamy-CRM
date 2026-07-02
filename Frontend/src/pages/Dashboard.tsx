@@ -29,6 +29,7 @@ import { useInvoices } from "@/hooks/useInvoices";
 import { useSchedules } from "@/hooks/useSchedules";
 import { useProgressByStudent } from "@/hooks/useProgress";
 import { useHomeworkByStudent } from "@/hooks/useHomework";
+import { useConvertToPKR } from "@/hooks/useExchangeRates";
 import {
   GraduationCap,
   UserCog,
@@ -47,7 +48,8 @@ import {
 
 export default function Dashboard() {
   const { currentUser, isLoading: isAuthLoading } = useAuthStore();
-  
+  const convertToPKR = useConvertToPKR();
+
   // Show loading state while auth is rehydrating to prevent role fallback
   if (isAuthLoading) {
     return (
@@ -177,8 +179,19 @@ export default function Dashboard() {
   const completedClasses = filteredData.schedules.filter(s => s.status === 'completed').length;
   const scheduledClasses = filteredData.schedules.filter(s => s.status === 'scheduled').length;
   
-  const totalRevenue = filteredData.invoices.reduce((sum, i) => sum + i.paidAmount, 0);
-  const pendingFees = filteredData.invoices.reduce((sum, i) => sum + (i.amount - i.paidAmount), 0);
+  const totalRevenue = filteredData.invoices.reduce((sum, i) => {
+    const paidInPKR = convertToPKR(i.paidAmount, i.currency || 'PKR');
+    return sum + paidInPKR;
+  }, 0);
+
+  const pendingFees = filteredData.invoices
+    .filter(i => i.status !== 'paid')
+    .reduce((sum, i) => {
+      const amountInPKR = convertToPKR(i.amount, i.currency || 'PKR');
+      const paidInPKR = convertToPKR(i.paidAmount, i.currency || 'PKR');
+      return sum + (amountInPKR - paidInPKR);
+    }, 0);
+
   const paidInvoices = filteredData.invoices.filter(i => i.status === 'paid').length;
   const unpaidInvoices = filteredData.invoices.filter(i => i.status !== 'paid').length;
 
@@ -308,6 +321,10 @@ export default function Dashboard() {
     const assignedLeads = leads.length;
     const convertedToday = leads.filter(l => l.status === 'enrolled').length;
     const pendingFollowups = leads.filter(l => l.status === 'follow_up').length;
+
+    // Sales team sees no invoices, so revenue should be 0
+    const salesRevenue = 0;
+    const salesPending = 0;
     
     return (
       <MainLayout title="Sales Dashboard" subtitle={`Welcome back, ${currentUser?.name || 'Sales'}`}>
@@ -337,13 +354,13 @@ export default function Dashboard() {
           />
           <StatCard
             title="Revenue Collected"
-            value={`Rs. ${totalRevenue.toLocaleString()}`}
+            value={`Rs. ${salesRevenue.toLocaleString()}`}
             icon={DollarSign}
             iconColor="success"
             className="stagger-3"
             details={[
-              { label: "paid", value: paidInvoices, color: "success" },
-              { label: "pending", value: unpaidInvoices, color: "warning" },
+              { label: "paid", value: 0, color: "success" },
+              { label: "pending", value: 0, color: "warning" },
             ]}
           />
           <StatCard
@@ -554,7 +571,13 @@ export default function Dashboard() {
   const studentInvoices = filteredData.invoices;
   const studentPaidInvoices = studentInvoices.filter(i => i.status === 'paid').length;
   const studentUnpaidInvoices = studentInvoices.filter(i => i.status !== 'paid').length;
-  const totalPending = studentInvoices.reduce((sum, i) => sum + (i.amount - i.paidAmount), 0);
+  const totalPending = studentInvoices
+    .filter(i => i.status !== 'paid')
+    .reduce((sum, i) => {
+      const amountInPKR = convertToPKR(i.amount, i.currency || 'PKR');
+      const paidInPKR = convertToPKR(i.paidAmount, i.currency || 'PKR');
+      return sum + (amountInPKR - paidInPKR);
+    }, 0);
   
   return (
     <MainLayout title="Student Dashboard" subtitle={`Welcome back, ${currentUser?.name || 'Student'}`}>
