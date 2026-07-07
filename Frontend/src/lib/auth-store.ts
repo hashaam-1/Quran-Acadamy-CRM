@@ -234,6 +234,20 @@ export const useAuthStore = create<AuthStore>()(
       version: 7,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ token: state.token, currentUser: state.currentUser, isAuthenticated: state.isAuthenticated }),
+      migrate: (persistedState: any, version: number) => {
+        // Handle migration from version 6 to 7
+        if (version === 6) {
+          console.log('🔄 Migrating from version 6 to 7');
+          // Clear old state to force fresh rehydration with token verification
+          return {
+            currentUser: null,
+            isAuthenticated: false,
+            isLoading: false,
+            token: undefined,
+          };
+        }
+        return persistedState as any;
+      },
       onRehydrateStorage: () => async (state) => {
         console.log('🔄 Rehydrating auth state from localStorage');
 
