@@ -6,6 +6,11 @@ const Schedule = require('../models/Schedule');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+// In-memory store for failed login attempts (in production, use Redis or database)
+const failedAttempts = new Map();
+const LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
+const MAX_ATTEMPTS = 5;
+
 // Helper function to check if teacher is late
 const isTeacherLate = (scheduledTime, actualTime) => {
   try {
@@ -29,13 +34,13 @@ const isTeacherLate = (scheduledTime, actualTime) => {
 const generateToken = (user) => {
   const JWT_SECRET = process.env.JWT_SECRET || 'quran-academy-secret-key-2024';
   return jwt.sign(
-    { 
+    {
       id: user._id || user.id,
       email: user.email,
-      role: user.role 
+      role: user.role
     },
     JWT_SECRET,
-    { expiresIn: '7d' } // Token expires in 7 days
+    { expiresIn: '1d' } // Token expires in 1 day (reduced from 7d for security)
   );
 };
 
@@ -43,19 +48,36 @@ const generateToken = (user) => {
 const unifiedLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     // ✅ FIXED: Normalize email to lowercase and trim
     const normalizedEmail = email.toLowerCase().trim();
-    
+
     console.log('🔐 Unified login attempt:', normalizedEmail);
     console.log('🔐 Password provided:', password ? 'YES' : 'NO');
     console.log('🔐 Request body:', JSON.stringify(req.body));
-    
+
     if (!email || !password) {
       return res.status(400).json({
         success: false,
         message: 'Email and password are required'
       });
+    }
+
+    // Check if account is locked
+    const attemptData = failedAttempts.get(normalizedEmail);
+    if (attemptData && attemptData.count >= MAX_ATTEMPTS) {
+      const timePassed = Date.now() - attemptData.lastAttempt;
+      if (timePassed < LOCKOUT_TIME) {
+        const remainingTime = Math.ceil((LOCKOUT_TIME - timePassed) / 60000);
+        console.log('🔐 Account locked for:', normalizedEmail);
+        return res.status(429).json({
+          success: false,
+          message: `Account locked due to too many failed attempts. Try again in ${remainingTime} minutes.`
+        });
+      } else {
+        // Lockout period expired, reset attempts
+        failedAttempts.delete(normalizedEmail);
+      }
     }
     
     // ✅ FIXED: Try admin first (special case)
@@ -69,9 +91,12 @@ const unifiedLogin = async (req, res) => {
         role: 'admin',
         createdAt: '2023-01-01'
       };
-      
+
       const token = generateToken(adminUser);
-      
+
+      // Clear failed attempts on successful login
+      failedAttempts.delete(normalizedEmail);
+
       console.log('✅ Admin login successful');
       return res.json({
         success: true,
@@ -127,9 +152,12 @@ const unifiedLogin = async (req, res) => {
           createdAt: student.createdAt,
           studentId: student._id
         };
-        
+
         const token = generateToken(user);
-        
+
+        // Clear failed attempts on successful login
+        failedAttempts.delete(normalizedEmail);
+
         console.log('✅ Student login successful');
         return res.json({
           success: true,
@@ -137,6 +165,14 @@ const unifiedLogin = async (req, res) => {
           token: token,
           message: 'Student login successful'
         });
+      } else {
+        // Track failed attempt
+        const currentAttempts = failedAttempts.get(normalizedEmail) || { count: 0, lastAttempt: 0 };
+        failedAttempts.set(normalizedEmail, {
+          count: currentAttempts.count + 1,
+          lastAttempt: Date.now()
+        });
+        console.log('🔐 Failed login attempt for student:', normalizedEmail, 'Attempts:', currentAttempts.count + 1);
       }
     }
     
@@ -266,6 +302,9 @@ const unifiedLogin = async (req, res) => {
 
         const token = generateToken(user);
 
+        // Clear failed attempts on successful login
+        failedAttempts.delete(normalizedEmail);
+
         console.log('✅ Teacher login successful');
         return res.json({
           success: true,
@@ -273,6 +312,14 @@ const unifiedLogin = async (req, res) => {
           token: token,
           message: 'Teacher login successful'
         });
+      } else {
+        // Track failed attempt
+        const currentAttempts = failedAttempts.get(normalizedEmail) || { count: 0, lastAttempt: 0 };
+        failedAttempts.set(normalizedEmail, {
+          count: currentAttempts.count + 1,
+          lastAttempt: Date.now()
+        });
+        console.log('🔐 Failed login attempt for teacher:', normalizedEmail, 'Attempts:', currentAttempts.count + 1);
       }
     }
     
@@ -322,9 +369,12 @@ const unifiedLogin = async (req, res) => {
           role: teamMember.role, // sales_team or team_leader
           createdAt: teamMember.createdAt
         };
-        
+
         const token = generateToken(user);
-        
+
+        // Clear failed attempts on successful login
+        failedAttempts.delete(normalizedEmail);
+
         console.log('✅ Team member login successful');
         return res.json({
           success: true,
@@ -332,6 +382,14 @@ const unifiedLogin = async (req, res) => {
           token: token,
           message: 'Team member login successful'
         });
+      } else {
+        // Track failed attempt
+        const currentAttempts = failedAttempts.get(normalizedEmail) || { count: 0, lastAttempt: 0 };
+        failedAttempts.set(normalizedEmail, {
+          count: currentAttempts.count + 1,
+          lastAttempt: Date.now()
+        });
+        console.log('🔐 Failed login attempt for team member:', normalizedEmail, 'Attempts:', currentAttempts.count + 1);
       }
     }
     

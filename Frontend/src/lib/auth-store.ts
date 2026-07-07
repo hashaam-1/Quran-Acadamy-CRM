@@ -231,12 +231,59 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      version: 6,
+      version: 7,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ token: state.token, currentUser: state.currentUser, isAuthenticated: state.isAuthenticated }),
-      onRehydrateStorage: () => (state) => {
-        if (!state?.token) return { currentUser: null, isAuthenticated: false, isLoading: false, token: undefined };
-        return { currentUser: state.currentUser || null, isAuthenticated: state.isAuthenticated || false, isLoading: false, token: state.token };
+      onRehydrateStorage: () => async (state) => {
+        console.log('🔄 Rehydrating auth state from localStorage');
+
+        // If no token, clear everything
+        if (!state?.token) {
+          console.log('❌ No token found, clearing auth state');
+          return { currentUser: null, isAuthenticated: false, isLoading: false, token: undefined };
+        }
+
+        // Verify token with backend on rehydration
+        try {
+          console.log('🔍 Verifying token with backend...');
+          const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${state.token}`
+            }
+          });
+
+          if (!response.ok) {
+            console.log('❌ Token verification failed, clearing auth state');
+            return { currentUser: null, isAuthenticated: false, isLoading: false, token: undefined };
+          }
+
+          const data = await response.json();
+
+          if (!data.success || !data.user) {
+            console.log('❌ Invalid token response, clearing auth state');
+            return { currentUser: null, isAuthenticated: false, isLoading: false, token: undefined };
+          }
+
+          // Token is valid, restore user state
+          const user = {
+            id: data.user._id || data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            phone: data.user.phone || '',
+            role: data.user.role,
+            createdAt: data.user.createdAt,
+            ...(data.user.studentId && { studentId: data.user.studentId }),
+            ...(data.user.teacherId && { teacherId: data.user.teacherId }),
+          };
+
+          console.log('✅ Token verified successfully, restoring user:', { role: user.role, email: user.email });
+          return { currentUser: user, isAuthenticated: true, isLoading: false, token: state.token };
+        } catch (error) {
+          console.error('❌ Token verification error:', error);
+          return { currentUser: null, isAuthenticated: false, isLoading: false, token: undefined };
+        }
       },
     }
   )
