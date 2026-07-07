@@ -25,7 +25,10 @@ export function useConvertToPKR() {
   const convert = (amount: number, fromCurrency: string): number => {
     if (!amount || fromCurrency === 'PKR') return amount;
 
-    const rate = exchangeRates?.find(
+    // Safety check: ensure exchangeRates is an array
+    const ratesArray = Array.isArray(exchangeRates) ? exchangeRates : [];
+
+    const rate = ratesArray.find(
       (r: ExchangeRate) => r.from === fromCurrency && r.to === 'PKR'
     );
 
