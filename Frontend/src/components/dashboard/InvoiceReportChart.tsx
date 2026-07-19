@@ -43,6 +43,16 @@ export function InvoiceReportChart({ invoices }: InvoiceReportChartProps) {
       return sum + (amountInPKR - paidInPKR);
     }, 0);
 
+  // Format numbers with commas for better readability
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toFixed(0);
+  };
+
   const data = [
     {
       name: "Invoice Count",
@@ -90,21 +100,21 @@ export function InvoiceReportChart({ invoices }: InvoiceReportChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <div className="text-center p-3 rounded-lg bg-muted/50">
-            <p className="text-2xl font-bold text-foreground">{totalInvoices}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div className="text-center p-2 rounded-lg bg-muted/50 min-h-[70px] flex flex-col justify-center">
+            <p className="text-xl font-bold text-foreground truncate">{totalInvoices}</p>
             <p className="text-xs text-muted-foreground">Total Invoices</p>
           </div>
-          <div className="text-center p-3 rounded-lg bg-success/10">
-            <p className="text-2xl font-bold text-success">${totalRecovery}</p>
+          <div className="text-center p-2 rounded-lg bg-success/10 min-h-[70px] flex flex-col justify-center">
+            <p className="text-xl font-bold text-success truncate">Rs {formatNumber(totalRecovery)}</p>
             <p className="text-xs text-muted-foreground">Recovery</p>
           </div>
-          <div className="text-center p-3 rounded-lg bg-accent/10">
-            <p className="text-2xl font-bold text-accent">${estimatedRecovery}</p>
+          <div className="text-center p-2 rounded-lg bg-accent/10 min-h-[70px] flex flex-col justify-center">
+            <p className="text-xl font-bold text-accent truncate">Rs {formatNumber(estimatedRecovery)}</p>
             <p className="text-xs text-muted-foreground">Estimated</p>
           </div>
-          <div className="text-center p-3 rounded-lg bg-warning/10">
-            <p className="text-2xl font-bold text-warning">${pendingRecovery}</p>
+          <div className="text-center p-2 rounded-lg bg-warning/10 min-h-[70px] flex flex-col justify-center">
+            <p className="text-xl font-bold text-warning truncate">Rs {formatNumber(pendingRecovery)}</p>
             <p className="text-xs text-muted-foreground">Pending</p>
           </div>
         </div>
