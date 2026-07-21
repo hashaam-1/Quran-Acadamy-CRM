@@ -207,14 +207,35 @@ export default function Dashboard() {
 
   // Calculate completed classes (scheduled time + duration has passed)
   const completedClasses = filteredData.schedules.filter(s => {
-    if (s.status === 'completed') return true; // Already marked as completed
-    if (!s.day || s.day.toLowerCase() !== currentDayName.toLowerCase()) return false; // Not today
+    if (s.status === 'completed') {
+      console.log('✅ Class marked as completed in DB:', s.studentName, s.time);
+      return true; // Already marked as completed
+    }
+    if (!s.day) {
+      console.log('⚠️ Class has no day field:', s);
+      return false;
+    }
+    if (s.day.toLowerCase() !== currentDayName.toLowerCase()) {
+      return false; // Not today
+    }
 
     const scheduledMinutes = parseTimeToMinutes(s.time);
     const duration = s.duration || 45; // Default 45 minutes if not specified
     const endTime = scheduledMinutes + duration;
 
-    return currentMinutes >= endTime;
+    const isCompleted = currentMinutes >= endTime;
+    console.log('📊 Class time check:', {
+      studentName: s.studentName,
+      day: s.day,
+      time: s.time,
+      scheduledMinutes,
+      duration,
+      endTime,
+      currentMinutes,
+      isCompleted
+    });
+
+    return isCompleted;
   }).length;
 
   // Calculate scheduled classes for today (not yet completed)
