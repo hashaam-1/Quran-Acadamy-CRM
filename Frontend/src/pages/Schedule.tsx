@@ -235,7 +235,7 @@ export default function Schedule() {
   const completedToday = schedules.filter(s => s.day === currentDay && s.status === 'completed').length;
 
   return (
-    <MainLayout title="Class Schedule" subtitle="Weekly timetable view">
+    <MainLayout title="Class Schedule" subtitle="Week timetable view">
       {/* Week Navigation Controls */}
       {/* <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
         <div className="flex items-center justify-between">
