@@ -179,10 +179,12 @@ export default function Dashboard() {
   const completedClasses = filteredData.schedules.filter(s => s.status === 'completed').length;
   const scheduledClasses = filteredData.schedules.filter(s => s.status === 'scheduled').length;
   
-  const totalRevenue = filteredData.invoices.reduce((sum, i) => {
-    const paidInPKR = convertToPKR(i.paidAmount, i.currency || 'PKR');
-    return sum + paidInPKR;
-  }, 0);
+  const totalRevenue = filteredData.invoices
+    .filter(i => i.status === 'paid')
+    .reduce((sum, i) => {
+      const amountInPKR = convertToPKR(i.amount, i.currency || 'PKR');
+      return sum + amountInPKR;
+    }, 0);
 
   const pendingFees = filteredData.invoices
     .filter(i => i.status !== 'paid')
