@@ -30,6 +30,8 @@ import { useSchedules } from "@/hooks/useSchedules";
 import { useProgressByStudent } from "@/hooks/useProgress";
 import { useHomeworkByStudent } from "@/hooks/useHomework";
 import { useConvertToPKR } from "@/hooks/useExchangeRates";
+import { API_BASE_URL } from "@/lib/api/config";
+import { useEffect, useCallback } from "react";
 import {
   GraduationCap,
   UserCog,
@@ -47,7 +49,7 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
-  const { currentUser, isLoading: isAuthLoading } = useAuthStore();
+  const { currentUser, isLoading: isAuthLoading, token } = useAuthStore();
   const convertToPKR = useConvertToPKR();
 
   // Calculate current week start and end dates
@@ -198,6 +200,46 @@ export default function Dashboard() {
     if (period === 'AM' && hours === 12) hours = 0;
     return hours * 60 + minutes;
   };
+
+  // Auto-complete classes that have finished
+  const autoCompleteClasses = useCallback(async () => {
+    const schedulesToComplete = filteredData.schedules.filter(s => {
+      if (s.status !== 'scheduled') return false;
+      if (!s.day || s.day.toLowerCase() !== currentDayName.toLowerCase()) return false;
+
+      const scheduledMinutes = parseTimeToMinutes(s.time);
+      const duration = s.duration || 45;
+      const endTime = scheduledMinutes + duration;
+
+      return currentMinutes >= endTime;
+    });
+
+    if (schedulesToComplete.length > 0) {
+      console.log(`🔄 Auto-completing ${schedulesToComplete.length} classes...`);
+      for (const schedule of schedulesToComplete) {
+        try {
+          await fetch(`${API_BASE_URL}/schedules/${schedule.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token || ''}`
+            },
+            body: JSON.stringify({ status: 'completed' })
+          });
+          console.log(`✅ Auto-completed class: ${schedule.studentName} at ${schedule.time}`);
+        } catch (error) {
+          console.error(`❌ Failed to auto-complete class: ${schedule.studentName}`, error);
+        }
+      }
+    }
+  }, [filteredData.schedules, currentDayName, currentMinutes, token]);
+
+  // Call auto-complete when schedules are loaded
+  useEffect(() => {
+    if (!schedulesLoading && filteredData.schedules.length > 0) {
+      autoCompleteClasses();
+    }
+  }, [schedulesLoading, filteredData.schedules, autoCompleteClasses]);
 
   // Calculate today's classes (scheduled for current day, case-insensitive)
   const todaysClasses = filteredData.schedules.filter(s => {
