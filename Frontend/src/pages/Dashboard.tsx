@@ -175,8 +175,35 @@ export default function Dashboard() {
   const activeTeachers = filteredData.teachers.filter(t => t.status !== 'on_leave').length;
   const onLeaveTeachers = filteredData.teachers.filter(t => t.status === 'on_leave').length;
   
-  const todaysClasses = filteredData.schedules.filter(s => s.day === 'Monday').length;
-  const completedClasses = filteredData.schedules.filter(s => s.status === 'completed').length;
+  // Helper function to parse time string (e.g., "3:00 PM") to minutes
+  const parseTimeToMinutes = (timeStr: string) => {
+    const [time, period] = timeStr.split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  };
+
+  // Get current day and time
+  const now = new Date();
+  const currentDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  // Calculate today's classes (scheduled for current day)
+  const todaysClasses = filteredData.schedules.filter(s => s.day === currentDay).length;
+
+  // Calculate completed classes (scheduled time + duration has passed)
+  const completedClasses = filteredData.schedules.filter(s => {
+    if (s.status === 'completed') return true; // Already marked as completed
+    if (s.day !== currentDay) return false; // Not today
+
+    const scheduledMinutes = parseTimeToMinutes(s.time);
+    const duration = s.duration || 45; // Default 45 minutes if not specified
+    const endTime = scheduledMinutes + duration;
+
+    return currentMinutes >= endTime;
+  }).length;
+
   const scheduledClasses = filteredData.schedules.filter(s => s.status === 'scheduled').length;
   
   const totalRevenue = filteredData.invoices
