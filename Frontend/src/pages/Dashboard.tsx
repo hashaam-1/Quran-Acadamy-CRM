@@ -189,13 +189,16 @@ export default function Dashboard() {
   const currentDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  // Calculate today's classes (scheduled for current day)
-  const todaysClasses = filteredData.schedules.filter(s => s.day === currentDay).length;
+  // Calculate today's classes (scheduled for current day, case-insensitive)
+  const todaysClasses = filteredData.schedules.filter(s => {
+    if (!s.day) return false;
+    return s.day.toLowerCase() === currentDay.toLowerCase() && s.status === 'scheduled';
+  }).length;
 
   // Calculate completed classes (scheduled time + duration has passed)
   const completedClasses = filteredData.schedules.filter(s => {
     if (s.status === 'completed') return true; // Already marked as completed
-    if (s.day !== currentDay) return false; // Not today
+    if (!s.day || s.day.toLowerCase() !== currentDay.toLowerCase()) return false; // Not today
 
     const scheduledMinutes = parseTimeToMinutes(s.time);
     const duration = s.duration || 45; // Default 45 minutes if not specified
@@ -204,6 +207,7 @@ export default function Dashboard() {
     return currentMinutes >= endTime;
   }).length;
 
+  // Calculate scheduled classes (all scheduled classes, not just today)
   const scheduledClasses = filteredData.schedules.filter(s => s.status === 'scheduled').length;
   
   const totalRevenue = filteredData.invoices
