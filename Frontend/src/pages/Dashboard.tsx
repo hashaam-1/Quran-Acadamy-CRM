@@ -207,8 +207,18 @@ export default function Dashboard() {
     return currentMinutes >= endTime;
   }).length;
 
-  // Calculate scheduled classes (all scheduled classes, not just today)
-  const scheduledClasses = filteredData.schedules.filter(s => s.status === 'scheduled').length;
+  // Calculate scheduled classes for today (not yet completed)
+  const scheduledClasses = filteredData.schedules.filter(s => {
+    if (!s.day || s.day.toLowerCase() !== currentDay.toLowerCase()) return false; // Not today
+    if (s.status !== 'scheduled') return false; // Not scheduled
+
+    const scheduledMinutes = parseTimeToMinutes(s.time);
+    const duration = s.duration || 45;
+    const endTime = scheduledMinutes + duration;
+
+    // Only count if class hasn't finished yet
+    return currentMinutes < endTime;
+  }).length;
   
   const totalRevenue = filteredData.invoices
     .filter(i => i.status === 'paid')
