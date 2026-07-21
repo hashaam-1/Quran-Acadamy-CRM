@@ -50,6 +50,21 @@ export default function Dashboard() {
   const { currentUser, isLoading: isAuthLoading } = useAuthStore();
   const convertToPKR = useConvertToPKR();
 
+  // Calculate current week start and end dates
+  const now = new Date();
+  const currentDayIndex = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const currentDayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][currentDayIndex];
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - currentDayIndex + (currentDayIndex === 0 ? -6 : 1)); // Start from Monday
+  weekStart.setHours(0, 0, 0, 0);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  const weekStartStr = weekStart.toISOString().split('T')[0];
+  const weekEndStr = weekEnd.toISOString().split('T')[0];
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
   // Show loading state while auth is rehydrating to prevent role fallback
   if (isAuthLoading) {
     return (
@@ -64,7 +79,7 @@ export default function Dashboard() {
   const { data: studentsData = [], isLoading: studentsLoading } = useStudents();
   const { data: teachersData = [], isLoading: teachersLoading } = useTeachers();
   const { data: invoicesData = [], isLoading: invoicesLoading } = useInvoices();
-  const { data: schedulesData = [], isLoading: schedulesLoading } = useSchedules();
+  const { data: schedulesData = [], isLoading: schedulesLoading } = useSchedules(weekStartStr, weekEndStr);
   
   // Ensure all data is an array (safety check for API errors)
   const leads = Array.isArray(leadsData) ? leadsData : [];
@@ -184,21 +199,16 @@ export default function Dashboard() {
     return hours * 60 + minutes;
   };
 
-  // Get current day and time
-  const now = new Date();
-  const currentDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
   // Calculate today's classes (scheduled for current day, case-insensitive)
   const todaysClasses = filteredData.schedules.filter(s => {
     if (!s.day) return false;
-    return s.day.toLowerCase() === currentDay.toLowerCase() && s.status === 'scheduled';
+    return s.day.toLowerCase() === currentDayName.toLowerCase() && s.status === 'scheduled';
   }).length;
 
   // Calculate completed classes (scheduled time + duration has passed)
   const completedClasses = filteredData.schedules.filter(s => {
     if (s.status === 'completed') return true; // Already marked as completed
-    if (!s.day || s.day.toLowerCase() !== currentDay.toLowerCase()) return false; // Not today
+    if (!s.day || s.day.toLowerCase() !== currentDayName.toLowerCase()) return false; // Not today
 
     const scheduledMinutes = parseTimeToMinutes(s.time);
     const duration = s.duration || 45; // Default 45 minutes if not specified
@@ -209,7 +219,7 @@ export default function Dashboard() {
 
   // Calculate scheduled classes for today (not yet completed)
   const scheduledClasses = filteredData.schedules.filter(s => {
-    if (!s.day || s.day.toLowerCase() !== currentDay.toLowerCase()) return false; // Not today
+    if (!s.day || s.day.toLowerCase() !== currentDayName.toLowerCase()) return false; // Not today
     if (s.status !== 'scheduled') return false; // Not scheduled
 
     const scheduledMinutes = parseTimeToMinutes(s.time);
